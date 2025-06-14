@@ -22,14 +22,14 @@ export function DashboardHeader({ title, subtitle, onSignOut }: DashboardHeaderP
     <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
             {title}
           </h1>
-          <Badge variant="secondary" className="hidden sm:inline-flex bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800">
+          <Badge variant="secondary" className="hidden sm:inline-flex">
             Pro User
           </Badge>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 text-base lg:text-lg font-medium">
+        <p className="text-muted-foreground text-base lg:text-lg">
           {subtitle}
         </p>
       </div>
@@ -38,7 +38,7 @@ export function DashboardHeader({ title, subtitle, onSignOut }: DashboardHeaderP
         {/* Notification Button */}
         <Button variant="outline" size="icon" className="relative hidden sm:flex">
           <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs bg-red-500 hover:bg-red-500">
+          <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
             3
           </Badge>
         </Button>
@@ -53,19 +53,19 @@ export function DashboardHeader({ title, subtitle, onSignOut }: DashboardHeaderP
               <User className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-            <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem className="cursor-pointer">
               <Settings className="h-4 w-4 mr-2" />
               <span>Pengaturan</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+            <DropdownMenuItem className="cursor-pointer">
               <User className="h-4 w-4 mr-2" />
               <span>Profil</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
+            <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={onSignOut} 
-              className="cursor-pointer text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:bg-red-50 dark:focus:bg-red-900/20"
+              className="cursor-pointer text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />
               <span>Keluar</span>

@@ -126,36 +126,36 @@ export function UserDashboard() {
 
       {/* Stats Cards - Mobile Responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+        <Card className="bg-card border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
-            <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.totalProducts}</div>
-            <p className="text-xs text-blue-600 dark:text-blue-400">Semua produk Anda</p>
+            <div className="text-2xl font-bold">{stats.totalProducts}</div>
+            <p className="text-xs text-muted-foreground">Semua produk Anda</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+        <Card className="bg-card border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Produk Aktif</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-700 dark:text-green-300">{stats.activeProducts}</div>
-            <p className="text-xs text-green-600 dark:text-green-400">Siap dipasarkan</p>
+            <div className="text-2xl font-bold">{stats.activeProducts}</div>
+            <p className="text-xs text-muted-foreground">Siap dipasarkan</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800 sm:col-span-2 lg:col-span-1">
+        <Card className="bg-card border sm:col-span-2 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">AI Generations</CardTitle>
-            <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <Bot className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{stats.aiGenerations}</div>
-            <p className="text-xs text-purple-600 dark:text-purple-400">Total bantuan AI</p>
+            <div className="text-2xl font-bold">{stats.aiGenerations}</div>
+            <p className="text-xs text-muted-foreground">Total bantuan AI</p>
           </CardContent>
         </Card>
       </div>
