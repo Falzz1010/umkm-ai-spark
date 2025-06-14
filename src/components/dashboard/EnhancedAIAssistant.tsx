@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Bot, Sparkles, DollarSign, Megaphone, Calendar, Campaign, Share2, AlertTriangle } from 'lucide-react';
+import { Bot, Sparkles, DollarSign, Megaphone, Calendar, Share2, AlertTriangle, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Product } from '@/types/database';
@@ -54,7 +54,7 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
     { 
       value: 'campaign', 
       label: 'Campaign Generator', 
-      icon: Campaign, 
+      icon: Zap, 
       description: 'Buat strategi kampanye lengkap',
       color: 'bg-purple-500'
     },
@@ -124,12 +124,12 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
       if (data.success) {
         setResult(data.generatedText);
         
-        // Log AI usage
+        // Log AI usage with proper type conversion
         await supabase.from('ai_generations').insert({
           user_id: user?.id,
           product_id: selectedProduct || null,
           generation_type: selectedType,
-          input_data: { prompt: input, productData: selectedProductData },
+          input_data: JSON.parse(JSON.stringify({ prompt: input, productData: selectedProductData })),
           generated_content: data.generatedText
         });
 
