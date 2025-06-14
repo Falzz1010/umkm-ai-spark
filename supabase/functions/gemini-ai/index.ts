@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -67,11 +68,10 @@ serve(async (req) => {
       }
     };
 
-    // --- FIX: Pakai endpoint & model yang benar, stable!
-    // Gemini-1.0-Pro, endpoint /v1
-    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${apiKey}`;
+    // Use the correct Gemini 2.0 Flash model with v1beta endpoint
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-    console.log('Calling Gemini API (v1, gemini-1.0-pro)...');
+    console.log('Calling Gemini API (v1beta, gemini-2.0-flash)...');
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -132,3 +132,4 @@ serve(async (req) => {
     });
   }
 });
+
