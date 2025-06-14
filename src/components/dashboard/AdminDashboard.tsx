@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Users, Package, TrendingUp, Bot } from 'lucide-react';
+import { Users, Package, TrendingUp, Bot, BarChart3 } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
+import { AnalyticsCharts } from './AnalyticsCharts';
 import { Product, Profile, AIGeneration } from '@/types/database';
 
 interface ProductWithProfile extends Product {
@@ -30,25 +31,31 @@ export function AdminDashboard() {
   const [products, setProducts] = useState<ProductWithProfile[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
   const [aiGenerations, setAIGenerations] = useState<AIGenerationWithDetails[]>([]);
+  const [analyticsData, setAnalyticsData] = useState({
+    dailyStats: [],
+    categoryStats: [],
+    aiTypeStats: []
+  });
 
   useEffect(() => {
     fetchStats();
     fetchProducts();
     fetchUsers();
     fetchAIGenerations();
+    fetchAnalyticsData();
   }, []);
 
   const fetchStats = async () => {
     try {
       const [usersResult, productsResult, aiResult] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact' }),
-        supabase.from('products').select('*', { count: 'exact' }),
-        supabase.from('ai_generations').select('*', { count: 'exact' })
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('products').select('*', { count: 'exact', head: true }),
+        supabase.from('ai_generations').select('*', { count: 'exact', head: true })
       ]);
 
       const activeProductsResult = await supabase
         .from('products')
-        .select('*', { count: 'exact' })
+        .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
 
       setStats({
@@ -64,7 +71,6 @@ export function AdminDashboard() {
 
   const fetchProducts = async () => {
     try {
-      // First get products
       const { data: productsData } = await supabase
         .from('products')
         .select('*')
@@ -72,7 +78,6 @@ export function AdminDashboard() {
         .limit(10);
 
       if (productsData) {
-        // Then get profiles for each product's user_id
         const productsWithProfiles = await Promise.all(
           productsData.map(async (product) => {
             const { data: profileData } = await supabase
@@ -111,7 +116,6 @@ export function AdminDashboard() {
 
   const fetchAIGenerations = async () => {
     try {
-      // First get AI generations
       const { data: aiData } = await supabase
         .from('ai_generations')
         .select('*')
@@ -119,7 +123,6 @@ export function AdminDashboard() {
         .limit(10);
 
       if (aiData) {
-        // Then get profiles and products for each generation
         const aiWithDetails = await Promise.all(
           aiData.map(async (ai) => {
             const [profileResult, productResult] = await Promise.all([
@@ -152,6 +155,86 @@ export function AdminDashboard() {
     }
   };
 
+  const fetchAnalyticsData = async () => {
+    try {
+      // Get last 7 days data
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        return date.toISOString().split('T')[0];
+      }).reverse();
+
+      const dailyStats = await Promise.all(
+        last7Days.map(async (date) => {
+          const [usersResult, productsResult, aiResult] = await Promise.all([
+            supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', date).lt('created_at', date + 'T23:59:59'),
+            supabase.from('products').select('*', { count: 'exact', head: true }).gte('created_at', date).lt('created_at', date + 'T23:59:59'),
+            supabase.from('ai_generations').select('*', { count: 'exact', head: true }).gte('created_at', date).lt('created_at', date + 'T23:59:59')
+          ]);
+
+          return {
+            date: new Date(date).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }),
+            users: usersResult.count || 0,
+            products: productsResult.count || 0,
+            aiUsage: aiResult.count || 0
+          };
+        })
+      );
+
+      // Get category stats
+      const { data: categoryData } = await supabase
+        .from('products')
+        .select('category')
+        .not('category', 'is', null);
+
+      const categoryStats = categoryData?.reduce((acc: any[], product) => {
+        const existing = acc.find(item => item.category === product.category);
+        if (existing) {
+          existing.count++;
+        } else {
+          acc.push({ category: product.category, count: 1 });
+        }
+        return acc;
+      }, []) || [];
+
+      // Get AI type stats
+      const { data: aiTypeData } = await supabase
+        .from('ai_generations')
+        .select('generation_type');
+
+      const typeColors = {
+        description: '#3b82f6',
+        promotion: '#10b981',
+        pricing: '#f59e0b',
+        campaign: '#8b5cf6',
+        schedule: '#f97316',
+        custom: '#ec4899'
+      };
+
+      const aiTypeStats = aiTypeData?.reduce((acc: any[], ai) => {
+        const existing = acc.find(item => item.type === ai.generation_type);
+        if (existing) {
+          existing.count++;
+        } else {
+          acc.push({ 
+            type: ai.generation_type, 
+            count: 1,
+            color: typeColors[ai.generation_type as keyof typeof typeColors] || '#6b7280'
+          });
+        }
+        return acc;
+      }, []) || [];
+
+      setAnalyticsData({
+        dailyStats,
+        categoryStats,
+        aiTypeStats
+      });
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+    }
+  };
+
   const deleteProduct = async (productId: string) => {
     try {
       await supabase.from('products').delete().eq('id', productId);
@@ -163,63 +246,79 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-6 max-w-7xl mx-auto">
       <DashboardHeader 
         title="Dashboard Admin"
         subtitle="Kelola pengguna dan monitor aktivitas platform"
         onSignOut={signOut}
       />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
+      {/* Stats Cards - Mobile Responsive */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Pengguna</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <div className="text-2xl font-bold text-blue-700">{stats.totalUsers}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <Package className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
+            <div className="text-2xl font-bold text-green-700">{stats.totalProducts}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Produk Aktif</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeProducts}</div>
+            <div className="text-2xl font-bold text-yellow-700">{stats.activeProducts}</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">AI Generations</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
+            <Bot className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAIGenerations}</div>
+            <div className="text-2xl font-bold text-purple-700">{stats.totalAIGenerations}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Data Tables */}
-      <Tabs defaultValue="products" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="products">Produk</TabsTrigger>
-          <TabsTrigger value="users">Pengguna</TabsTrigger>
-          <TabsTrigger value="ai">AI Generations</TabsTrigger>
+      <Tabs defaultValue="analytics" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+          <TabsTrigger value="analytics" className="text-xs lg:text-sm">
+            <BarChart3 className="h-4 w-4 mr-1 lg:mr-2" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="products" className="text-xs lg:text-sm">Produk</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs lg:text-sm">Pengguna</TabsTrigger>
+          <TabsTrigger value="ai" className="text-xs lg:text-sm">AI</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics & Insights</CardTitle>
+              <CardDescription>Visualisasi data dan tren aktivitas platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnalyticsCharts data={analyticsData} />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="products">
           <Card>
@@ -230,10 +329,10 @@ export function AdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {products.map((product) => (
-                  <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
+                  <div key={product.id} className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg space-y-2 lg:space-y-0">
+                    <div className="flex-1">
                       <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-gray-600">{product.category || 'Kategori tidak diset'}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{product.category || 'Kategori tidak diset'}</p>
                       <p className="text-sm text-gray-500">
                         Harga: Rp {product.price?.toLocaleString() || 'Belum diset'}
                       </p>
@@ -269,10 +368,10 @@ export function AdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={user.id} className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg space-y-2 lg:space-y-0">
                     <div>
                       <h3 className="font-medium">{user.full_name}</h3>
-                      <p className="text-sm text-gray-600">{user.business_name || 'Belum diset'}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{user.business_name || 'Belum diset'}</p>
                       <p className="text-sm text-gray-500">{user.phone || 'Belum diset'}</p>
                     </div>
                     <Badge variant="outline">
@@ -295,13 +394,13 @@ export function AdminDashboard() {
               <div className="space-y-4">
                 {aiGenerations.map((generation) => (
                   <div key={generation.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-2 space-y-1 lg:space-y-0">
                       <Badge>{generation.generation_type}</Badge>
                       <span className="text-sm text-gray-500">
                         {new Date(generation.created_at).toLocaleDateString('id-ID')}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 line-clamp-2">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
                       {generation.generated_content}
                     </p>
                     <div className="mt-2 text-xs text-gray-500">

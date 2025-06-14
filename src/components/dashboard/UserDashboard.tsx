@@ -4,15 +4,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Bot, TrendingUp, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Package, Bot, TrendingUp, Plus, Download, FileText } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
 import { ProductList } from './ProductList';
-import { AIAssistant } from './AIAssistant';
+import { EnhancedAIAssistant } from './EnhancedAIAssistant';
 import { AddProductDialog } from './AddProductDialog';
 import { Product } from '@/types/database';
+import { exportToExcel, generateProductReport } from '@/lib/exportUtils';
+import { useToast } from '@/hooks/use-toast';
 
 export function UserDashboard() {
   const { user, profile, signOut } = useAuth();
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -48,9 +52,9 @@ export function UserDashboard() {
 
     try {
       const [productsResult, activeProductsResult, aiResult] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('products').select('*', { count: 'exact' }).eq('user_id', user.id).eq('is_active', true),
-        supabase.from('ai_generations').select('*', { count: 'exact' }).eq('user_id', user.id)
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_active', true),
+        supabase.from('ai_generations').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
       ]);
 
       setStats({
@@ -68,65 +72,132 @@ export function UserDashboard() {
     fetchStats();
   };
 
+  const handleExportExcel = () => {
+    if (products.length === 0) {
+      toast({
+        title: "Tidak ada data",
+        description: "Belum ada produk untuk diekspor.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    exportToExcel(products, `produk_${profile?.full_name?.replace(/\s+/g, '_').toLowerCase()}`);
+    toast({
+      title: "Export Berhasil",
+      description: "Data produk berhasil diekspor ke Excel!"
+    });
+  };
+
+  const handleExportReport = () => {
+    if (products.length === 0) {
+      toast({
+        title: "Tidak ada data",
+        description: "Belum ada produk untuk dibuat laporan.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const report = generateProductReport(products);
+    const blob = new Blob([report], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `laporan_produk_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Laporan Berhasil Dibuat",
+      description: "Laporan produk berhasil diunduh!"
+    });
+  };
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-6 max-w-7xl mx-auto">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
         onSignOut={signOut}
       />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
+      {/* Stats Cards - Mobile Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
+            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.totalProducts}</div>
+            <p className="text-xs text-blue-600 dark:text-blue-400">Semua produk Anda</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Produk Aktif</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeProducts}</div>
+            <div className="text-2xl font-bold text-green-700 dark:text-green-300">{stats.activeProducts}</div>
+            <p className="text-xs text-green-600 dark:text-green-400">Siap dipasarkan</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800 sm:col-span-2 lg:col-span-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">AI Generations</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
+            <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.aiGenerations}</div>
+            <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{stats.aiGenerations}</div>
+            <p className="text-xs text-purple-600 dark:text-purple-400">Total bantuan AI</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content */}
       <Tabs defaultValue="products" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="products">Produk Saya</TabsTrigger>
-          <TabsTrigger value="ai">AI Assistant</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
+          <TabsTrigger value="products" className="text-sm">Produk Saya</TabsTrigger>
+          <TabsTrigger value="ai" className="text-sm">AI Assistant</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
               <div>
                 <CardTitle>Produk Saya</CardTitle>
                 <CardDescription>Kelola produk bisnis Anda</CardDescription>
               </div>
-              <AddProductDialog onProductAdded={refreshData}>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Produk
-              </AddProductDialog>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleExportExcel}
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Excel
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleExportReport}
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Download Laporan
+                </Button>
+                <AddProductDialog onProductAdded={refreshData}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah Produk
+                </AddProductDialog>
+              </div>
             </CardHeader>
             <CardContent>
               <ProductList products={products} onRefresh={refreshData} />
@@ -135,7 +206,7 @@ export function UserDashboard() {
         </TabsContent>
 
         <TabsContent value="ai">
-          <AIAssistant products={products} onGenerationComplete={refreshData} />
+          <EnhancedAIAssistant products={products} onGenerationComplete={refreshData} />
         </TabsContent>
       </Tabs>
     </div>
