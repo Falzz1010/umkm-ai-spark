@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-interface UserAnalyticsData {
-  dailyStats: Array<{ date: string; products: number; aiUsage: number }>;
+interface AnalyticsData {
+  dailyStats: Array<{ date: string; users: number; products: number; aiUsage: number }>;
   categoryStats: Array<{ category: string; count: number }>;
   aiTypeStats: Array<{ type: string; count: number; color: string }>;
 }
 
 export function useUserAnalytics() {
   const { user } = useAuth();
-  const [analyticsData, setAnalyticsData] = useState<UserAnalyticsData>({
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     dailyStats: [],
     categoryStats: [],
     aiTypeStats: []
@@ -47,6 +47,7 @@ export function useUserAnalytics() {
 
           return {
             date: new Date(date).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }),
+            users: 0, // For user dashboard, we don't track new users per day, so set to 0
             products: productsResult.count || 0,
             aiUsage: aiResult.count || 0
           };
