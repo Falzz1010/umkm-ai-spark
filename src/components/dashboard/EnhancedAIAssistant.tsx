@@ -64,6 +64,7 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
     try {
       const selectedProductData = products.find(p => p.id === selectedProduct);
       
+      console.log('Sending request to Gemini AI...');
       const { data, error } = await supabase.functions.invoke('gemini-ai', {
         body: {
           prompt: input || `Generate ${selectedType} untuk produk ini`,
@@ -72,9 +73,14 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
         }
       });
 
-      if (error) throw error;
+      console.log('Gemini AI response:', data);
 
-      if (data.success) {
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (data?.success) {
         setResult(data.generatedText);
         
         // Log AI usage with proper type conversion
@@ -94,13 +100,13 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
           description: "Konten telah berhasil di-generate!"
         });
       } else {
-        throw new Error(data.error || 'Unknown error');
+        throw new Error(data?.error || 'Unknown error from AI service');
       }
     } catch (error) {
       console.error('Error generating content:', error);
       toast({
         title: "Error",
-        description: "Gagal menggenerate konten. Silakan coba lagi.",
+        description: error.message || "Gagal menggenerate konten. Silakan coba lagi.",
         variant: "destructive"
       });
     } finally {
@@ -112,13 +118,13 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
     <div className="space-y-6">
       <AIUsageCard aiUsageCount={aiUsageCount} dailyLimit={dailyLimit} />
 
-      <Card className="border-blue-200 dark:border-blue-800">
+      <Card className="border-blue-200 dark:border-blue-700 bg-white dark:bg-gray-900">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-blue-500" />
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <Bot className="h-5 w-5 text-blue-500 dark:text-blue-400" />
             AI Assistant UMKM - Powered by Gemini
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-600 dark:text-gray-400">
             Dapatkan bantuan AI untuk mengembangkan konten dan strategi bisnis Anda
           </CardDescription>
         </CardHeader>

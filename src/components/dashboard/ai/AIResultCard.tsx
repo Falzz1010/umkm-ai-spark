@@ -36,30 +36,30 @@ export function AIResultCard({ result, selectedType, onClear }: AIResultCardProp
   if (!result) return null;
 
   return (
-    <Card className="border-green-200 dark:border-green-800">
+    <Card className="border-green-200 dark:border-green-700 bg-white dark:bg-gray-900">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-green-500" />
+        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <Sparkles className="h-5 w-5 text-green-500 dark:text-green-400" />
           Hasil AI Generation
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-green-200 dark:border-green-700">
             {generationTypes.find(t => t.value === selectedType)?.label}
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mb-4">
-          <pre className="whitespace-pre-wrap text-sm leading-relaxed">{result}</pre>
+        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-4 border border-gray-200 dark:border-gray-700">
+          <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900 dark:text-gray-100">{result}</pre>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={copyToClipboard} className="flex-1 sm:flex-none">
+          <Button variant="outline" onClick={copyToClipboard} className="flex-1 sm:flex-none border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
             <span className="mr-2">📋</span>
             Copy
           </Button>
-          <Button variant="outline" onClick={shareToWhatsApp} className="flex-1 sm:flex-none bg-green-50 hover:bg-green-100 text-green-700 border-green-200">
+          <Button variant="outline" onClick={shareToWhatsApp} className="flex-1 sm:flex-none bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:hover:bg-green-900 dark:text-green-300 dark:border-green-700">
             <Share2 className="h-4 w-4 mr-2" />
             Share ke WhatsApp
           </Button>
-          <Button variant="outline" onClick={onClear} className="flex-1 sm:flex-none">
+          <Button variant="outline" onClick={onClear} className="flex-1 sm:flex-none border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
             Clear
           </Button>
         </div>

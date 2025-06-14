@@ -37,14 +37,14 @@ export function AIGenerationForm({
     <div className="space-y-4">
       {(selectedType !== 'custom') && (
         <div>
-          <label className="block text-sm font-medium mb-2">Pilih Produk</label>
+          <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Pilih Produk</label>
           <Select value={selectedProduct} onValueChange={onProductChange}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <SelectValue placeholder="Pilih produk..." />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               {products.map((product) => (
-                <SelectItem key={product.id} value={product.id}>
+                <SelectItem key={product.id} value={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   {product.name} - {product.category}
                 </SelectItem>
               ))}
@@ -54,7 +54,7 @@ export function AIGenerationForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-2">
+        <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
           {selectedType === 'custom' ? 'Prompt Kustom' : 'Instruksi Tambahan (Opsional)'}
         </label>
         <Textarea
@@ -66,14 +66,14 @@ export function AIGenerationForm({
               : "Contoh: Tonjolkan keunggulan kualitas dan bahan organik..."
           }
           rows={3}
-          className="resize-none"
+          className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
         />
       </div>
 
       <Button 
         onClick={onGenerate}
         disabled={loading || !canGenerate}
-        className="w-full h-11"
+        className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
         size="lg"
       >
         {loading ? (

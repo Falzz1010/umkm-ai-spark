@@ -67,10 +67,10 @@ export function AITypeSelector({ selectedType, onTypeSelect }: AITypeSelectorPro
       {generationTypes.map((type) => (
         <Card 
           key={type.value} 
-          className={`cursor-pointer transition-all hover:shadow-md ${
+          className={`cursor-pointer transition-all hover:shadow-md border ${
             selectedType === type.value 
-              ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' 
-              : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700' 
+              : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
           }`}
           onClick={() => onTypeSelect(type.value)}
         >
@@ -78,7 +78,7 @@ export function AITypeSelector({ selectedType, onTypeSelect }: AITypeSelectorPro
             <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${type.color} flex items-center justify-center`}>
               <type.icon className="h-6 w-6 text-white" />
             </div>
-            <h3 className="font-medium text-sm mb-1">{type.label}</h3>
+            <h3 className="font-medium text-sm mb-1 text-gray-900 dark:text-gray-100">{type.label}</h3>
             <p className="text-xs text-gray-600 dark:text-gray-400">{type.description}</p>
           </CardContent>
         </Card>
