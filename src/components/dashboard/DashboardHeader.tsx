@@ -10,14 +10,16 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardHeaderProps {
   title: string;
   subtitle: string;
-  onSignOut: () => void;
 }
 
-export function DashboardHeader({ title, subtitle, onSignOut }: DashboardHeaderProps) {
+export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
+  const { signOut } = useAuth();
+
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
       <div className="space-y-2">
@@ -64,7 +66,7 @@ export function DashboardHeader({ title, subtitle, onSignOut }: DashboardHeaderP
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
-              onClick={onSignOut} 
+              onClick={signOut} 
               className="cursor-pointer text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4 mr-2" />

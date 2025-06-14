@@ -127,8 +127,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setProfile(null);
       setUserRole(null);
+      // Redirect to landing page instead of auth page
+      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
+      // Even if there's an error, redirect to landing page
+      window.location.href = '/';
     }
   };
 
