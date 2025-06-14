@@ -37,7 +37,7 @@ export interface AIGeneration {
   id: string;
   user_id: string;
   product_id?: string;
-  generation_type: 'description' | 'promotion' | 'pricing' | 'tip';
+  generation_type: string; // Changed from union type to string to match database
   input_data: Record<string, any>;
   generated_content: string;
   created_at: string;

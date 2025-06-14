@@ -10,6 +10,15 @@ import { Users, Package, TrendingUp, Bot } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
 import { Product, Profile, AIGeneration } from '@/types/database';
 
+interface ProductWithProfile extends Product {
+  profiles?: { full_name: string } | null;
+}
+
+interface AIGenerationWithDetails extends AIGeneration {
+  profiles?: { full_name: string } | null;
+  products?: { name: string } | null;
+}
+
 export function AdminDashboard() {
   const { signOut } = useAuth();
   const [stats, setStats] = useState({
@@ -18,9 +27,9 @@ export function AdminDashboard() {
     totalAIGenerations: 0,
     activeProducts: 0
   });
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithProfile[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
-  const [aiGenerations, setAIGenerations] = useState<AIGeneration[]>([]);
+  const [aiGenerations, setAIGenerations] = useState<AIGenerationWithDetails[]>([]);
 
   useEffect(() => {
     fetchStats();
@@ -55,16 +64,32 @@ export function AdminDashboard() {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await supabase
+      // First get products
+      const { data: productsData } = await supabase
         .from('products')
-        .select(`
-          *,
-          profiles(full_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
-      setProducts(data || []);
+      if (productsData) {
+        // Then get profiles for each product's user_id
+        const productsWithProfiles = await Promise.all(
+          productsData.map(async (product) => {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', product.user_id)
+              .single();
+
+            return {
+              ...product,
+              profiles: profileData
+            };
+          })
+        );
+
+        setProducts(productsWithProfiles);
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -86,17 +111,42 @@ export function AdminDashboard() {
 
   const fetchAIGenerations = async () => {
     try {
-      const { data } = await supabase
+      // First get AI generations
+      const { data: aiData } = await supabase
         .from('ai_generations')
-        .select(`
-          *,
-          profiles(full_name),
-          products(name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
-      setAIGenerations(data || []);
+      if (aiData) {
+        // Then get profiles and products for each generation
+        const aiWithDetails = await Promise.all(
+          aiData.map(async (ai) => {
+            const [profileResult, productResult] = await Promise.all([
+              supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', ai.user_id)
+                .single(),
+              ai.product_id
+                ? supabase
+                    .from('products')
+                    .select('name')
+                    .eq('id', ai.product_id)
+                    .single()
+                : Promise.resolve({ data: null })
+            ]);
+
+            return {
+              ...ai,
+              profiles: profileResult.data,
+              products: productResult.data
+            };
+          })
+        );
+
+        setAIGenerations(aiWithDetails);
+      }
     } catch (error) {
       console.error('Error fetching AI generations:', error);
     }
@@ -183,9 +233,12 @@ export function AdminDashboard() {
                   <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h3 className="font-medium">{product.name}</h3>
-                      <p className="text-sm text-gray-600">{product.category}</p>
+                      <p className="text-sm text-gray-600">{product.category || 'Kategori tidak diset'}</p>
                       <p className="text-sm text-gray-500">
                         Harga: Rp {product.price?.toLocaleString() || 'Belum diset'}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Oleh: {product.profiles?.full_name || 'Unknown User'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -251,6 +304,12 @@ export function AdminDashboard() {
                     <p className="text-sm text-gray-700 line-clamp-2">
                       {generation.generated_content}
                     </p>
+                    <div className="mt-2 text-xs text-gray-500">
+                      Oleh: {generation.profiles?.full_name || 'Unknown User'}
+                      {generation.products && (
+                        <span> • Produk: {generation.products.name}</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
