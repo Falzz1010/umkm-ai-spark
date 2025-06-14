@@ -67,9 +67,11 @@ serve(async (req) => {
       }
     };
 
-    console.log('Calling Gemini API...');
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-    
+    // --- FIX: Pakai endpoint & model yang benar, stable!
+    // Gemini-1.0-Pro, endpoint /v1
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${apiKey}`;
+
+    console.log('Calling Gemini API (v1, gemini-1.0-pro)...');
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
