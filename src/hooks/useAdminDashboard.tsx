@@ -12,6 +12,12 @@ interface AIGenerationWithDetails extends AIGeneration {
   products?: { name: string } | null;
 }
 
+interface AnalyticsData {
+  dailyStats: Array<{ date: string; users: number; products: number; aiUsage: number }>;
+  categoryStats: Array<{ category: string; count: number }>;
+  aiTypeStats: Array<{ type: string; count: number; color: string }>;
+}
+
 export function useAdminDashboard() {
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -22,7 +28,7 @@ export function useAdminDashboard() {
   const [products, setProducts] = useState<ProductWithProfile[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
   const [aiGenerations, setAIGenerations] = useState<AIGenerationWithDetails[]>([]);
-  const [analyticsData, setAnalyticsData] = useState({
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     dailyStats: [],
     categoryStats: [],
     aiTypeStats: []
@@ -149,10 +155,20 @@ export function useAdminDashboard() {
 
       const dailyStats = await Promise.all(
         last7Days.map(async (date) => {
+          const nextDay = new Date(date);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const nextDayStr = nextDay.toISOString().split('T')[0];
+
           const [usersResult, productsResult, aiResult] = await Promise.all([
-            supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', date).lt('created_at', date + 'T23:59:59'),
-            supabase.from('products').select('*', { count: 'exact', head: true }).gte('created_at', date).lt('created_at', date + 'T23:59:59'),
-            supabase.from('ai_generations').select('*', { count: 'exact', head: true }).gte('created_at', date).lt('created_at', date + 'T23:59:59')
+            supabase.from('profiles').select('*', { count: 'exact', head: true })
+              .gte('created_at', `${date}T00:00:00`)
+              .lt('created_at', `${nextDayStr}T00:00:00`),
+            supabase.from('products').select('*', { count: 'exact', head: true })
+              .gte('created_at', `${date}T00:00:00`)
+              .lt('created_at', `${nextDayStr}T00:00:00`),
+            supabase.from('ai_generations').select('*', { count: 'exact', head: true })
+              .gte('created_at', `${date}T00:00:00`)
+              .lt('created_at', `${nextDayStr}T00:00:00`)
           ]);
 
           return {
@@ -164,13 +180,15 @@ export function useAdminDashboard() {
         })
       );
 
-      // Get category stats
+      // Get category stats from real data
       const { data: categoryData } = await supabase
         .from('products')
         .select('category')
         .not('category', 'is', null);
 
-      const categoryStats = categoryData?.reduce((acc: any[], product) => {
+      const categoryStats = categoryData?.reduce((acc: { category: string; count: number }[], product) => {
+        if (!product.category) return acc;
+        
         const existing = acc.find(item => item.category === product.category);
         if (existing) {
           existing.count++;
@@ -180,21 +198,22 @@ export function useAdminDashboard() {
         return acc;
       }, []) || [];
 
-      // Get AI type stats
+      // Get AI type stats from real data
       const { data: aiTypeData } = await supabase
         .from('ai_generations')
         .select('generation_type');
 
-      const typeColors = {
+      const typeColors: { [key: string]: string } = {
         description: '#3b82f6',
         promotion: '#10b981',
         pricing: '#f59e0b',
         campaign: '#8b5cf6',
         schedule: '#f97316',
-        custom: '#ec4899'
+        custom: '#ec4899',
+        tip: '#06b6d4'
       };
 
-      const aiTypeStats = aiTypeData?.reduce((acc: any[], ai) => {
+      const aiTypeStats = aiTypeData?.reduce((acc: { type: string; count: number; color: string }[], ai) => {
         const existing = acc.find(item => item.type === ai.generation_type);
         if (existing) {
           existing.count++;
@@ -202,7 +221,7 @@ export function useAdminDashboard() {
           acc.push({ 
             type: ai.generation_type, 
             count: 1,
-            color: typeColors[ai.generation_type as keyof typeof typeColors] || '#6b7280'
+            color: typeColors[ai.generation_type] || '#6b7280'
           });
         }
         return acc;
@@ -223,6 +242,7 @@ export function useAdminDashboard() {
       await supabase.from('products').delete().eq('id', productId);
       fetchProducts();
       fetchStats();
+      fetchAnalyticsData(); // Refresh analytics after deletion
     } catch (error) {
       console.error('Error deleting product:', error);
     }

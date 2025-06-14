@@ -14,10 +14,12 @@ import { AnalyticsCharts } from './AnalyticsCharts';
 import { Product } from '@/types/database';
 import { exportToExcel, generateProductReport } from '@/lib/exportUtils';
 import { useToast } from '@/hooks/use-toast';
+import { useUserAnalytics } from '@/hooks/useUserAnalytics';
 
 export function UserDashboard() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { analyticsData, refreshAnalytics } = useUserAnalytics();
   const [products, setProducts] = useState<Product[]>([]);
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -71,6 +73,7 @@ export function UserDashboard() {
   const refreshData = () => {
     fetchProducts();
     fetchStats();
+    refreshAnalytics();
   };
 
   const handleExportExcel = () => {
@@ -115,32 +118,6 @@ export function UserDashboard() {
       title: "Laporan Berhasil Dibuat",
       description: "Laporan produk berhasil diunduh!"
     });
-  };
-
-  // Sample analytics data for charts
-  const analyticsData = {
-    dailyStats: [
-      { date: '14 Jun', users: 12, products: 8, aiUsage: 24 },
-      { date: '13 Jun', users: 15, products: 12, aiUsage: 32 },
-      { date: '12 Jun', users: 8, products: 5, aiUsage: 18 },
-      { date: '11 Jun', users: 20, products: 15, aiUsage: 45 },
-      { date: '10 Jun', users: 18, products: 10, aiUsage: 38 },
-      { date: '09 Jun', users: 22, products: 18, aiUsage: 52 },
-      { date: '08 Jun', users: 16, products: 14, aiUsage: 28 }
-    ],
-    categoryStats: [
-      { category: 'Makanan', count: 25 },
-      { category: 'Fashion', count: 18 },
-      { category: 'Elektronik', count: 12 },
-      { category: 'Kerajinan', count: 15 },
-      { category: 'Kosmetik', count: 8 }
-    ],
-    aiTypeStats: [
-      { type: 'Deskripsi Produk', count: 45, color: '#3b82f6' },
-      { type: 'Caption Promosi', count: 32, color: '#10b981' },
-      { type: 'Saran Bisnis', count: 28, color: '#f59e0b' },
-      { type: 'SEO Content', count: 15, color: '#ef4444' }
-    ]
   };
 
   return (
