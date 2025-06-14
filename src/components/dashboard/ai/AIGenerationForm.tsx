@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,14 +36,14 @@ export function AIGenerationForm({
     <div className="space-y-4">
       {(selectedType !== 'custom') && (
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Pilih Produk</label>
+          <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-blue-200">Pilih Produk</label>
           <Select value={selectedProduct} onValueChange={onProductChange}>
-            <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700">
               <SelectValue placeholder="Pilih produk..." />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700">
               {products.map((product) => (
-                <SelectItem key={product.id} value={product.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <SelectItem key={product.id} value={product.id} className="hover:bg-gray-50 dark:hover:bg-blue-900">
                   {product.name} - {product.category}
                 </SelectItem>
               ))}
@@ -54,7 +53,7 @@ export function AIGenerationForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+        <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-blue-200">
           {selectedType === 'custom' ? 'Prompt Kustom' : 'Instruksi Tambahan (Opsional)'}
         </label>
         <Textarea
@@ -66,7 +65,7 @@ export function AIGenerationForm({
               : "Contoh: Tonjolkan keunggulan kualitas dan bahan organik..."
           }
           rows={3}
-          className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
+          className="resize-none bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700 text-gray-900 dark:text-blue-100"
         />
       </div>
 

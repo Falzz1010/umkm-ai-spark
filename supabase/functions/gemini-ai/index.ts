@@ -16,7 +16,6 @@ serve(async (req) => {
     const apiKey = Deno.env.get('GEMINI_API_KEY');
 
     if (!apiKey) {
-      console.error('GEMINI_API_KEY not configured');
       return new Response(JSON.stringify({ 
         success: false,
         error: 'GEMINI_API_KEY not configured' 
@@ -27,7 +26,6 @@ serve(async (req) => {
     }
 
     let systemPrompt = '';
-    
     switch (type) {
       case 'description':
         systemPrompt = `Anda adalah AI assistant untuk UMKM Indonesia. Buatkan deskripsi produk yang menarik dan profesional untuk produk: ${productData?.name || 'produk'}. Kategori: ${productData?.category || 'umum'}. Harga modal: Rp ${productData?.cost || 0}. Fokus pada manfaat, kualitas, dan nilai jual. Maksimal 150 kata.`;
@@ -48,11 +46,10 @@ serve(async (req) => {
         systemPrompt = `Anda adalah AI assistant untuk UMKM Indonesia. Bantu dengan pertanyaan: ${prompt}`;
     }
 
-    const requestBody = {
+    const geminiBody = {
       contents: [{
-        parts: [{
-          text: `${systemPrompt}\n\nPertanyaan: ${prompt || 'Tolong berikan saran untuk produk ini'}`
-        }]
+        role: "user",
+        parts: [{ text: `${systemPrompt}\n\nPertanyaan: ${prompt || 'Tolong berikan saran untuk produk ini'}` }]
       }],
       generationConfig: {
         temperature: 0.7,
@@ -62,24 +59,26 @@ serve(async (req) => {
       }
     };
 
-    console.log('Making request to Gemini API...');
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    // Ganti endpoint/model ke versi stable/support terbaru
+    // Daftar Model Gemini: https://ai.google.dev/models/gemini
+    // Yang tersedia: "gemini-1.0-pro", endpoint "v1"
+    const modelId = 'gemini-1.0-pro'; // gunakan v1 model
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent?key=${apiKey}`;
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(geminiBody),
     });
 
-    console.log('Gemini API response status:', response.status);
     const data = await response.json();
-    console.log('Gemini API response data:', data);
-    
+
     if (!response.ok) {
-      console.error('Gemini API error:', data);
       return new Response(JSON.stringify({ 
         success: false,
-        error: `Gemini API error: ${data.error?.message || 'Unknown error'}` 
+        error: `Gemini API error: ${data.error?.message || 'Unknown error'}`
       }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -87,9 +86,8 @@ serve(async (req) => {
     }
 
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+
     if (!generatedText) {
-      console.error('No text generated from Gemini API');
       return new Response(JSON.stringify({ 
         success: false,
         error: 'Tidak ada respons dari AI. Silakan coba lagi.' 
@@ -108,7 +106,6 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in gemini-ai function:', error);
     return new Response(JSON.stringify({ 
       success: false,
       error: `Server error: ${error.message}` 
