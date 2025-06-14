@@ -1,10 +1,9 @@
-
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Check, X, Clock } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotificationsCtx } from '@/hooks/NotificationsContext';
 
 interface NotificationsDrawerProps {
   open: boolean;
@@ -43,7 +42,7 @@ export function NotificationsDrawer({ open, onOpenChange }: NotificationsDrawerP
     markAllAsRead,
     markAsRead,
     deleteNotification
-  } = useNotifications();
+  } = useNotificationsCtx();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

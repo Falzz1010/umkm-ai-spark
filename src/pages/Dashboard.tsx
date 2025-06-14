@@ -1,10 +1,10 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
 import { UserDashboard } from '@/components/dashboard/UserDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { NotificationsProvider } from '@/hooks/NotificationsContext';
 
 export default function Dashboard() {
   const { user, userRole, loading } = useAuth();
@@ -43,8 +43,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-200">
-      {userRole === 'admin' ? <AdminDashboard /> : <UserDashboard />}
-    </div>
+    <NotificationsProvider>
+      <div className="min-h-screen bg-background transition-colors duration-200">
+        {userRole === 'admin' ? <AdminDashboard /> : <UserDashboard />}
+      </div>
+    </NotificationsProvider>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
@@ -16,7 +15,7 @@ import { SettingsDialog } from './SettingsDialog';
 import { ProfileDialog } from './ProfileDialog';
 import { NotificationsDrawer } from './NotificationsDrawer';
 import { DateTime } from './DateTime';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotificationsCtx } from '@/hooks/NotificationsContext';
 
 interface DashboardHeaderProps {
   title: string;
@@ -29,7 +28,8 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const { notifications, loading } = useNotifications();
+  // Use the notifications context (single provider)
+  const { notifications, loading } = useNotificationsCtx();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
