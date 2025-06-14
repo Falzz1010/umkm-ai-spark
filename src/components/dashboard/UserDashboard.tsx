@@ -10,12 +10,13 @@ import { DashboardHeader } from './DashboardHeader';
 import { ProductList } from './ProductList';
 import { EnhancedAIAssistant } from './EnhancedAIAssistant';
 import { AddProductDialog } from './AddProductDialog';
+import { AnalyticsCharts } from './AnalyticsCharts';
 import { Product } from '@/types/database';
 import { exportToExcel, generateProductReport } from '@/lib/exportUtils';
 import { useToast } from '@/hooks/use-toast';
 
 export function UserDashboard() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [stats, setStats] = useState({
@@ -116,12 +117,37 @@ export function UserDashboard() {
     });
   };
 
+  // Sample analytics data for charts
+  const analyticsData = {
+    dailyStats: [
+      { date: '14 Jun', users: 12, products: 8, aiUsage: 24 },
+      { date: '13 Jun', users: 15, products: 12, aiUsage: 32 },
+      { date: '12 Jun', users: 8, products: 5, aiUsage: 18 },
+      { date: '11 Jun', users: 20, products: 15, aiUsage: 45 },
+      { date: '10 Jun', users: 18, products: 10, aiUsage: 38 },
+      { date: '09 Jun', users: 22, products: 18, aiUsage: 52 },
+      { date: '08 Jun', users: 16, products: 14, aiUsage: 28 }
+    ],
+    categoryStats: [
+      { category: 'Makanan', count: 25 },
+      { category: 'Fashion', count: 18 },
+      { category: 'Elektronik', count: 12 },
+      { category: 'Kerajinan', count: 15 },
+      { category: 'Kosmetik', count: 8 }
+    ],
+    aiTypeStats: [
+      { type: 'Deskripsi Produk', count: 45, color: '#3b82f6' },
+      { type: 'Caption Promosi', count: 32, color: '#10b981' },
+      { type: 'Saran Bisnis', count: 28, color: '#f59e0b' },
+      { type: 'SEO Content', count: 15, color: '#ef4444' }
+    ]
+  };
+
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
-        onSignOut={signOut}
       />
 
       {/* Stats Cards - Mobile Responsive */}
@@ -162,8 +188,9 @@ export function UserDashboard() {
 
       {/* Main Content */}
       <Tabs defaultValue="products" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
           <TabsTrigger value="products" className="text-sm">Produk Saya</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-sm">Analytics</TabsTrigger>
           <TabsTrigger value="ai" className="text-sm">AI Assistant</TabsTrigger>
         </TabsList>
 
@@ -203,6 +230,22 @@ export function UserDashboard() {
               <ProductList products={products} onRefresh={refreshData} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dashboard Analytics</CardTitle>
+                <CardDescription>
+                  Analisis performa bisnis dan aktivitas penggunaan platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AnalyticsCharts data={analyticsData} />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="ai">
