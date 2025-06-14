@@ -8,7 +8,6 @@ interface GenerationType {
   label: string;
   icon: LucideIcon;
   description: string;
-  gradient: string;
   features: string[];
 }
 
@@ -23,7 +22,6 @@ const generationTypes: GenerationType[] = [
     label: 'Deskripsi Produk', 
     icon: Sparkles, 
     description: 'Generate deskripsi yang menarik dan persuasif',
-    gradient: 'from-blue-500 to-cyan-500',
     features: ['SEO Optimized', 'Conversion Focused', 'Emotional Appeal']
   },
   { 
@@ -31,7 +29,6 @@ const generationTypes: GenerationType[] = [
     label: 'Caption Promosi', 
     icon: Megaphone, 
     description: 'Buat caption viral untuk social media',
-    gradient: 'from-green-500 to-emerald-500',
     features: ['Viral Content', 'Hashtag Strategy', 'CTA Optimization']
   },
   { 
@@ -39,7 +36,6 @@ const generationTypes: GenerationType[] = [
     label: 'Strategi Harga', 
     icon: DollarSign, 
     description: 'Analisis harga kompetitif dan profitable',
-    gradient: 'from-yellow-500 to-orange-500',
     features: ['Market Analysis', 'Profit Optimization', 'Competitive Edge']
   },
   { 
@@ -47,7 +43,6 @@ const generationTypes: GenerationType[] = [
     label: 'Campaign 360°', 
     icon: Target, 
     description: 'Strategi kampanye marketing holistik',
-    gradient: 'from-purple-500 to-pink-500',
     features: ['Multi-Platform', 'ROI Focused', 'Brand Building']
   },
   { 
@@ -55,7 +50,6 @@ const generationTypes: GenerationType[] = [
     label: 'Content Calendar', 
     icon: Calendar, 
     description: 'Jadwal konten strategis 30 hari',
-    gradient: 'from-orange-500 to-red-500',
     features: ['Content Planning', 'Engagement Timing', 'Trend Analysis']
   },
   { 
@@ -63,7 +57,6 @@ const generationTypes: GenerationType[] = [
     label: 'Business Intelligence', 
     icon: TrendingUp, 
     description: 'Analisis performa dan insight bisnis',
-    gradient: 'from-indigo-500 to-purple-600',
     features: ['Performance Metrics', 'Growth Insights', 'Data-Driven']
   },
   { 
@@ -71,7 +64,6 @@ const generationTypes: GenerationType[] = [
     label: 'Brand Identity', 
     icon: Brain, 
     description: 'Bangun identitas brand yang kuat',
-    gradient: 'from-pink-500 to-rose-500',
     features: ['Brand Voice', 'Visual Identity', 'Market Position']
   },
   { 
@@ -79,7 +71,6 @@ const generationTypes: GenerationType[] = [
     label: 'AI Consultant', 
     icon: Bot, 
     description: 'Konsultasi bisnis dengan AI expert',
-    gradient: 'from-gray-600 to-gray-800',
     features: ['Custom Solutions', 'Expert Advice', 'Flexible Approach']
   }
 ];
@@ -92,35 +83,35 @@ export function AITypeSelector({ selectedType, onTypeSelect }: AITypeSelectorPro
         return (
           <Card 
             key={type.value} 
-            className={`group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-0 overflow-hidden ${
+            className={`cursor-pointer transition-all duration-200 border ${
               isSelected 
-                ? 'ring-2 ring-blue-500 shadow-2xl transform scale-105' 
-                : 'hover:shadow-lg'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 dark:border-blue-400' 
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
             onClick={() => onTypeSelect(type.value)}
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${type.gradient} opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
-            
-            <CardContent className="relative p-6 h-full flex flex-col">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${type.gradient} shadow-lg group-hover:shadow-xl transition-all duration-300`}>
-                  <type.icon className="h-6 w-6 text-white" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-lg ${
+                  isSelected 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                }`}>
+                  <type.icon className="h-4 w-4" />
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {type.label}
-                  </h3>
-                </div>
+                <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                  {type.label}
+                </h3>
               </div>
               
-              <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 flex-1">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
                 {type.description}
               </p>
               
               <div className="space-y-1">
                 {type.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${type.gradient}`} />
+                    <div className="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500" />
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       {feature}
                     </span>
@@ -129,9 +120,9 @@ export function AITypeSelector({ selectedType, onTypeSelect }: AITypeSelectorPro
               </div>
               
               {isSelected && (
-                <div className="mt-4 py-2 px-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">
-                    ✨ Terpilih
+                <div className="mt-3 py-1 px-2 bg-blue-100 dark:bg-blue-900 rounded text-center">
+                  <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                    Terpilih
                   </span>
                 </div>
               )}
