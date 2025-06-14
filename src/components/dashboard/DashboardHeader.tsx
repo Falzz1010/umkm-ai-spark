@@ -16,6 +16,7 @@ import { SettingsDialog } from './SettingsDialog';
 import { ProfileDialog } from './ProfileDialog';
 import { NotificationsDrawer } from './NotificationsDrawer';
 import { DateTime } from './DateTime';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface DashboardHeaderProps {
   title: string;
@@ -27,6 +28,9 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  const { notifications, loading } = useNotifications();
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <>
@@ -59,9 +63,11 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
             onClick={() => setNotificationsOpen(true)}
           >
             <Bell className="h-4 w-4" />
-            <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs">
-              3
-            </Badge>
+            {unreadCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs" variant="destructive">
+                {unreadCount}
+              </Badge>
+            )}
           </Button>
 
           {/* Theme Toggle */}
