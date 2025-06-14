@@ -36,14 +36,15 @@ export function useNotifications() {
     setLoading(false);
   }, [user]);
 
-  // Realtime subscribe
   useEffect(() => {
     if (!user) return;
 
     fetchNotifications();
 
+    // UNIQUE channel name per user session to avoid double subscribe
+    const channelName = `public:notifications:user:${user.id}`;
     const channel = supabase
-      .channel("public:notifications")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -52,14 +53,15 @@ export function useNotifications() {
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
-          // Semua event (INSERT, UPDATE, DELETE) update list
+        () => {
+          // Update notifications on any change
           fetchNotifications();
         }
       )
       .subscribe();
 
     return () => {
+      // Clean up channel when the component unmounts or user changes
       supabase.removeChannel(channel);
     };
   }, [user, fetchNotifications]);
