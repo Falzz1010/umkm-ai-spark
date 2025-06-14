@@ -1,4 +1,3 @@
-
 export type UserRole = 'admin' | 'user';
 
 export interface Profile {
@@ -38,7 +37,7 @@ export interface AIGeneration {
   user_id: string;
   product_id?: string;
   generation_type: string; // Changed from union type to string to match database
-  input_data: Record<string, any>;
+  input_data: any;
   generated_content: string;
   created_at: string;
 }
