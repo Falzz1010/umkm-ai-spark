@@ -1,85 +1,51 @@
 
-import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Check, X, Clock } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface NotificationsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
+function getNotificationIcon(type: string) {
+  switch (type) {
+    case 'success':
+      return <Check className="h-4 w-4 text-green-500" />;
+    case 'warning':
+      return <Clock className="h-4 w-4 text-yellow-500" />;
+    case 'error':
+      return <X className="h-4 w-4 text-red-500" />;
+    default:
+      return <Bell className="h-4 w-4 text-blue-500" />;
+  }
+}
+
+function formatDate(dateIso: string) {
+  const date = new Date(dateIso);
+  return date.toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
 }
 
 export function NotificationsDrawer({ open, onOpenChange }: NotificationsDrawerProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      title: 'Produk Baru Ditambahkan',
-      message: 'Anda telah berhasil menambahkan produk "Kopi Arabica Premium"',
-      time: '2 menit yang lalu',
-      read: false,
-      type: 'success'
-    },
-    {
-      id: '2',
-      title: 'AI Generation Selesai',
-      message: 'Deskripsi produk untuk "Teh Hijau Organik" telah dibuat',
-      time: '1 jam yang lalu',
-      read: false,
-      type: 'info'
-    },
-    {
-      id: '3',
-      title: 'Stok Rendah',
-      message: 'Produk "Gula Aren" memiliki stok tersisa 5 unit',
-      time: '3 jam yang lalu',
-      read: true,
-      type: 'warning'
-    }
-  ]);
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, read: true }))
-    );
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
-  };
+  const {
+    notifications,
+    loading,
+    markAllAsRead,
+    markAsRead,
+    deleteNotification
+  } = useNotifications();
 
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'success':
-        return <Check className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'error':
-        return <X className="h-4 w-4 text-red-500" />;
-      default:
-        return <Bell className="h-4 w-4 text-blue-500" />;
-    }
-  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -102,10 +68,11 @@ export function NotificationsDrawer({ open, onOpenChange }: NotificationsDrawerP
             )}
           </div>
         </SheetHeader>
-
         <ScrollArea className="h-full mt-6">
           <div className="space-y-4">
-            {notifications.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Memuat...</div>
+            ) : notifications.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>Tidak ada notifikasi</p>
@@ -138,7 +105,7 @@ export function NotificationsDrawer({ open, onOpenChange }: NotificationsDrawerP
                       </p>
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-muted-foreground">
-                          {notification.time}
+                          {formatDate(notification.created_at)}
                         </span>
                         <div className="flex gap-1">
                           {!notification.read && (
