@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -250,7 +249,6 @@ export function AdminDashboard() {
       <DashboardHeader 
         title="Dashboard Admin"
         subtitle="Kelola pengguna dan monitor aktivitas platform"
-        onSignOut={signOut}
       />
 
       {/* Stats Cards - Mobile Responsive */}
