@@ -37,7 +37,8 @@ export function ProductFinanceCards({ omzet, laba }: { omzet: number; laba: numb
           <p className="text-xs text-muted-foreground">
             Penjualan potensial ('price × stock')
           </p>
-          <MiniTrendChart data={omzetTrend} color="#16a34a" />
+          {/* Mini chart realtime & animasi */}
+          <MiniTrendChart data={omzetTrend} color="#16a34a" animate={true}/>
         </CardContent>
       </Card>
       <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900 border border-yellow-100 dark:border-yellow-950">
@@ -52,7 +53,7 @@ export function ProductFinanceCards({ omzet, laba }: { omzet: number; laba: numb
           <p className="text-xs text-muted-foreground">
             Perkiraan ('(price - cost) × stock')
           </p>
-          <MiniTrendChart data={labaTrend} color="#eab308" />
+          <MiniTrendChart data={labaTrend} color="#eab308" animate={true}/>
         </CardContent>
       </Card>
     </div>

@@ -48,7 +48,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalProducts}</div>
           <p className="text-xs text-muted-foreground">Semua produk Anda</p>
-          <MiniTrendChart data={totalProductsTrend} color="#2563eb" />
+          <MiniTrendChart data={totalProductsTrend} color="#2563eb" animate={true}/>
         </CardContent>
       </Card>
       <Card className="bg-card border">
@@ -59,7 +59,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{stats.activeProducts}</div>
           <p className="text-xs text-muted-foreground">Siap dipasarkan</p>
-          <MiniTrendChart data={activeProductsTrend} color="#22c55e" />
+          <MiniTrendChart data={activeProductsTrend} color="#22c55e" animate={true}/>
         </CardContent>
       </Card>
       <Card className="bg-card border sm:col-span-2 lg:col-span-1">
@@ -70,7 +70,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{stats.aiGenerations}</div>
           <p className="text-xs text-muted-foreground">Total bantuan AI</p>
-          <MiniTrendChart data={aiGenerationsTrend} color="#f59e42" />
+          <MiniTrendChart data={aiGenerationsTrend} color="#f59e42" animate={true}/>
         </CardContent>
       </Card>
     </div>
