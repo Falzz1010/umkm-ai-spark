@@ -1,4 +1,3 @@
-
 // Move this alongside other imports at the top
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,7 +25,7 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
-// FIX: Move useIsMobile import to the top, here:
+import { WhatsAppBroadcastTab } from './WhatsAppBroadcastTab';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
@@ -224,12 +223,12 @@ export function UserDashboard() {
         <DashboardStatsCards stats={stats} />
       </div>
 
-      {/* Tabs utama responsif, selalu tampil 4 kolom tab di semua ukuran layar */}
+      {/* Tabs utama responsif, selalu tampil 5 kolom tab di semua ukuran layar */}
       <Tabs defaultValue="products" className="space-y-3">
         <TabsList
           className="
             w-full
-            grid grid-cols-4 gap-1
+            grid grid-cols-5 gap-1
             overflow-x-auto
             !mb-1
             "
@@ -239,6 +238,7 @@ export function UserDashboard() {
           <TabsTrigger value="analytics" className="text-xs xs:text-sm py-2 px-1 leading-tight">Analytics</TabsTrigger>
           <TabsTrigger value="ai" className="text-xs xs:text-sm py-2 px-1 leading-tight">AI Assistant</TabsTrigger>
           <TabsTrigger value="sales" className="text-xs xs:text-sm py-2 px-1 leading-tight">Penjualan</TabsTrigger>
+          <TabsTrigger value="whatsapp" className="text-xs xs:text-sm py-2 px-1 leading-tight">WA Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="products">
           {/* Tab Produk: stack dan scrollable jika penuh */}
@@ -277,9 +277,13 @@ export function UserDashboard() {
             <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
           </div>
         </TabsContent>
+        <TabsContent value="whatsapp">
+          <div className="mt-2">
+            <WhatsAppBroadcastTab />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
 // File ini sudah terlalu panjang (>270 baris). Setelah dirapikan, sebaiknya difragment ke beberapa komponen modular agar maintainable.
-
