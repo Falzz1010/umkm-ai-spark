@@ -1,17 +1,23 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Profile } from '@/types/database';
+import { EditUserDialog } from "./EditUserDialog";
+import { Pencil } from "lucide-react";
+import { useState } from "react";
 
 interface AdminUsersTabProps {
   users: Profile[];
 }
 
 export function AdminUsersTab({ users }: AdminUsersTabProps) {
+  const [editId, setEditId] = useState<string | null>(null);
+
+  const userToEdit = editId ? users.find(u => u.id === editId) : null;
+
   return (
-    <Card className="bg-card/90 shadow-md border-0 rounded-xl">
+    <Card className="bg-card/80 shadow-md border-0 rounded-xl">
       <CardHeader>
-        <CardTitle>Pengguna Terbaru</CardTitle>
+        <CardTitle className="text-lg">Pengguna Terbaru</CardTitle>
         <CardDescription>Daftar pengguna yang baru mendaftar</CardDescription>
       </CardHeader>
       <CardContent>
@@ -28,13 +34,33 @@ export function AdminUsersTab({ users }: AdminUsersTabProps) {
                 <h3 className="font-semibold group-hover:text-primary transition">{user.full_name}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{user.business_name || 'Belum diset'}</p>
                 <p className="text-sm text-gray-500">{user.phone || 'Belum diset'}</p>
+                <span className="text-xs text-muted-foreground">{user.id}</span>
               </div>
-              <Badge variant="outline">
-                {new Date(user.created_at).toLocaleDateString('id-ID')}
-              </Badge>
+              <div className="flex gap-2 items-center">
+                <Badge variant="outline" className="text-xs px-2">
+                  {new Date(user.created_at).toLocaleDateString('id-ID')}
+                </Badge>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full"
+                  aria-label={`Edit ${user.full_name}`}
+                  onClick={() => setEditId(user.id)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
+        {userToEdit && (
+          <EditUserDialog
+            userId={userToEdit.id}
+            currentEmail={userToEdit.email || ""}
+            open={!!editId}
+            onOpenChange={(open) => !open && setEditId(null)}
+          />
+        )}
       </CardContent>
     </Card>
   );
