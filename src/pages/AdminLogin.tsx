@@ -24,32 +24,48 @@ export default function AdminLogin() {
     try {
       const { error } = await signIn(email, password);
 
-      // Tunggu userRole terupdate
-      setTimeout(() => {
-        if (error) {
-          toast({
-            title: "Error",
-            description: error.message,
-            variant: "destructive"
-          });
-          setLoading(false);
-          return;
-        }
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Setelah login, polling userRole sampai menjadi "admin" atau timeout
+      let waitTime = 0;
+      const pollingInterval = 250; // ms
+      const timeout = 3000; // ms
+      let roleChecked = false;
+
+      const pollRole = () => {
         if (userRole === 'admin') {
           toast({
             title: "Berhasil",
             description: "Login admin berhasil!"
           });
+          setLoading(false);
           navigate('/dashboard');
-        } else {
+          roleChecked = true;
+          return;
+        }
+        waitTime += pollingInterval;
+        if (waitTime >= timeout) {
           toast({
             title: "Akses Ditolak",
             description: "Akun Anda bukan admin.",
             variant: "destructive"
           });
           setLoading(false);
+          roleChecked = true;
+          return;
         }
-      }, 300); // tunggu 300ms supaya state userRole baru update
+        setTimeout(pollRole, pollingInterval);
+      };
+
+      pollRole();
     } catch (error) {
       toast({
         title: "Error",
