@@ -13,20 +13,24 @@ export function LandingBenefits() {
     'Support 24/7'
   ];
   return (
-    <section className="py-20 transition-colors">
+    <section className="py-20 transition-colors animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <Badge variant="outline" className="mb-4">💡 Keunggulan Platform</Badge>
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6">
+            <Badge variant="outline" className="mb-4 animate-fade-in">💡 Keunggulan Platform</Badge>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-6 animate-fade-in">
               Mengapa Memilih AI UMKM?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground mb-8 animate-fade-in">
               Kami memahami tantangan UMKM dan menyediakan solusi yang tepat sasaran
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3">
+                <div
+                  key={index}
+                  className="flex items-center gap-3 animate-scale-in"
+                  style={{ animationDelay: `${index * 70 + 70}ms`, animationFillMode: "both" }}
+                >
                   <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
                     <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
@@ -35,11 +39,11 @@ export function LandingBenefits() {
               ))}
             </div>
           </div>
-          <div className="relative">
+          <div className="relative animate-scale-in" style={{animationDelay: "300ms", animationFillMode: "both"}}>
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-3xl transform rotate-3"></div>
-            <Card className="relative bg-background/80 backdrop-blur border-0 p-8">
+            <Card className="relative bg-background/90 backdrop-blur border-0 p-8 shadow-xl hover:shadow-2xl hover-scale transition">
               <div className="space-y-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 animate-fade-in" style={{animationDelay: "100ms", animationFillMode: "both"}}>
                   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
@@ -48,7 +52,7 @@ export function LandingBenefits() {
                     <p className="text-sm text-muted-foreground">Rata-rata 35% dalam 3 bulan</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 animate-fade-in" style={{animationDelay: "180ms", animationFillMode: "both"}}>
                   <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
                     <Bot className="w-6 h-6 text-green-600 dark:text-green-400" />
                   </div>
@@ -57,7 +61,7 @@ export function LandingBenefits() {
                     <p className="text-sm text-muted-foreground">Hemat 60% waktu untuk konten</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 animate-fade-in" style={{animationDelay: "260ms", animationFillMode: "both"}}>
                   <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
                     <ChartBar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>

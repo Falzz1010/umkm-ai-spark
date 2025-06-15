@@ -34,19 +34,22 @@ export function LandingFeatures() {
     <section className="py-20 bg-muted/30 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <Badge variant="outline" className="mb-4">✨ Fitur Unggulan</Badge>
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          <Badge variant="outline" className="mb-4 animate-fade-in">✨ Fitur Unggulan</Badge>
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 animate-fade-in">
             Semua yang Anda Butuhkan dalam Satu Platform
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto animate-fade-in">
             Solusi lengkap untuk mengoptimalkan operasional dan marketing UMKM Anda
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="relative group hover:shadow-lg transition-all duration-300 border-0 bg-background/60 backdrop-blur">
+            <Card key={index}
+              className="relative group hover:shadow-2xl hover-scale border-0 bg-background/70 backdrop-blur transition-all duration-300 animate-scale-in"
+              style={{ animationDelay: `${index * 70 + 70}ms`, animationFillMode: "both" }}
+            >
               <CardHeader className="text-center pb-4">
-                <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-background to-muted flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-background to-muted flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow">
                   <feature.icon className={`h-8 w-8 ${feature.color}`} />
                 </div>
                 <CardTitle className="text-xl">{feature.title}</CardTitle>
