@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, Package, Users, Bot, TrendingUp } from 'lucide-react';
@@ -7,18 +8,8 @@ import { AdminStatsCards } from './admin/AdminStatsCards';
 import { AdminProductsTab } from './admin/AdminProductsTab';
 import { AdminUsersTab } from './admin/AdminUsersTab';
 import { AdminAITab } from './admin/AdminAITab';
-import { GlobalSearch } from './admin/GlobalSearch';
-import { SystemHealthMonitor } from './admin/SystemHealthMonitor';
-import { QuickActionButtons } from './admin/QuickActionButtons';
-import { FilterPresetManager } from './admin/FilterPresetManager';
-import { BulkActions } from './admin/BulkActions';
-import { WidgetCustomizer } from './admin/WidgetCustomizer';
 import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 
 export function AdminDashboard() {
   const {
@@ -28,117 +19,8 @@ export function AdminDashboard() {
     aiGenerations,
     analyticsData,
     deleteProduct,
-    refreshData,
     loading
   } = useAdminDashboard();
-
-  const { toast } = useToast();
-  const [widgetLayout, setWidgetLayout] = useState(['stats', 'health', 'analytics']);
-  const [isCustomizing, setIsCustomizing] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [currentFilters, setCurrentFilters] = useState({});
-  const [activeTab, setActiveTab] = useState('analytics');
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setWidgetLayout((items) => {
-        const oldIndex = items.indexOf(active.id as string);
-        const newIndex = items.indexOf(over.id as string);
-        
-        const newItems = [...items];
-        newItems.splice(oldIndex, 1);
-        newItems.splice(newIndex, 0, active.id as string);
-        
-        return newItems;
-      });
-    }
-  };
-
-  const handleSearchResult = (result: any) => {
-    toast({
-      title: "Search Result Selected",
-      description: `Selected ${result.type}: ${result.title}`,
-    });
-    
-    // Navigate to specific tab based on result type
-    switch (result.type) {
-      case 'user':
-        setActiveTab('users');
-        break;
-      case 'product':
-        setActiveTab('products');
-        break;
-      case 'ai':
-        setActiveTab('ai');
-        break;
-      case 'analytics':
-        setActiveTab('analytics');
-        break;
-    }
-  };
-
-  const handleQuickActions = {
-    onRefresh: () => {
-      refreshData();
-      toast({
-        title: "Data Refreshed",
-        description: "All dashboard data has been updated.",
-      });
-    },
-    onExport: () => {
-      toast({
-        title: "Export Started",
-        description: "Generating comprehensive admin report...",
-      });
-    },
-    onSettings: () => {
-      setIsCustomizing(!isCustomizing);
-    },
-    onNotifications: () => {
-      toast({
-        title: "Notifications",
-        description: "Opening notification center...",
-      });
-    }
-  };
-
-  const handleApplyPreset = (preset: any) => {
-    setCurrentFilters(preset.filters);
-    toast({
-      title: "Filter Preset Applied",
-      description: `Applied "${preset.name}" filters`,
-    });
-  };
-
-  const handleWidgetChange = (widgets: any[]) => {
-    const visibleWidgets = widgets.filter(w => w.visible).map(w => w.id);
-    setWidgetLayout(visibleWidgets);
-  };
-
-  const handleBulkSelection = {
-    onSelectAll: () => {
-      const allIds = getCurrentTabItems().map(item => item.id);
-      setSelectedItems(allIds);
-    },
-    onDeselectAll: () => {
-      setSelectedItems([]);
-    }
-  };
-
-  const getCurrentTabItems = () => {
-    switch (activeTab) {
-      case 'users':
-        return users;
-      case 'products':
-        return products;
-      case 'ai':
-        return aiGenerations;
-      default:
-        return [];
-    }
-  };
 
   if (loading) {
     return (
@@ -162,188 +44,120 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-2 sm:p-4 lg:p-6 xl:p-8 max-w-7xl mx-auto animate-fade-in page-transition">
-      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-        <div className="animate-slide-up">
-          <DashboardHeader
-            title="Dashboard Admin"
-            subtitle="Kelola pengguna dan monitor aktivitas platform"
-          />
-        </div>
+      <div className="animate-slide-up">
+        <DashboardHeader
+          title="Dashboard Admin"
+          subtitle="Kelola pengguna dan monitor aktivitas platform"
+        />
+      </div>
 
-        {/* Widget Customizer */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 0} as any}>
-          <WidgetCustomizer
-            onWidgetChange={handleWidgetChange}
-            isCustomizing={isCustomizing}
-            onToggleCustomize={() => setIsCustomizing(!isCustomizing)}
-          />
-        </div>
+      {/* Enhanced Stats Cards with responsive layout */}
+      <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 1} as any}>
+        <AdminStatsCards stats={stats} />
+      </div>
 
-        {/* Global Search and Quick Actions */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 space-y-4 animate-slide-up" style={{'--index': 1} as any}>
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-            <div className="flex-1">
-              <GlobalSearch onResultSelect={handleSearchResult} />
-            </div>
-            <div className="lg:w-80">
-              <QuickActionButtons {...handleQuickActions} />
-            </div>
-          </div>
-        </div>
+      {/* Main Content with enhanced responsive design */}
+      <div className="animate-slide-up" style={{'--index': 2} as any}>
+        <div className="bg-card/80 backdrop-blur-sm rounded-xl lg:rounded-2xl shadow-lg border border-border/50 p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-xl">
+          <Tabs defaultValue="analytics" className="space-y-3 sm:space-y-4 lg:space-y-6">
+            {/* Enhanced Responsive Tab List */}
+            <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-muted/50 p-1 sm:p-2 rounded-lg lg:rounded-xl shadow-inner">
+              <TabsTrigger 
+                value="analytics" 
+                className="
+                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
+                  data-[state=active]:bg-background data-[state=active]:shadow-md
+                  data-[state=active]:text-primary transition-all duration-200
+                  hover:bg-background/50 hover-scale
+                "
+              >
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden md:inline">Analytics</span>
+                <span className="xs:hidden sm:inline md:hidden">Chart</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="products" 
+                className="
+                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
+                  data-[state=active]:bg-background data-[state=active]:shadow-md
+                  data-[state=active]:text-primary transition-all duration-200
+                  hover:bg-background/50 hover-scale
+                "
+              >
+                <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden md:inline">Produk</span>
+                <span className="xs:hidden sm:inline md:hidden">Item</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="users" 
+                className="
+                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
+                  data-[state=active]:bg-background data-[state=active]:shadow-md
+                  data-[state=active]:text-primary transition-all duration-200
+                  hover:bg-background/50 hover-scale
+                "
+              >
+                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden md:inline">Users</span>
+                <span className="xs:hidden sm:inline md:hidden">User</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ai" 
+                className="
+                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
+                  data-[state=active]:bg-background data-[state=active]:shadow-md
+                  data-[state=active]:text-primary transition-all duration-200
+                  hover:bg-background/50 hover-scale
+                "
+              >
+                <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden md:inline">AI</span>
+                <span className="xs:hidden sm:inline md:hidden">Bot</span>
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Filter Presets */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 2} as any}>
-          <FilterPresetManager
-            onApplyPreset={handleApplyPreset}
-            currentFilters={currentFilters}
-          />
-        </div>
-
-        {/* Enhanced Stats Cards with responsive layout */}
-        <SortableContext items={widgetLayout} strategy={verticalListSortingStrategy}>
-          {widgetLayout.includes('stats') && (
-            <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 3} as any}>
-              <AdminStatsCards stats={stats} />
-            </div>
-          )}
-
-          {/* System Health Monitor */}
-          {widgetLayout.includes('health') && (
-            <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 4} as any}>
-              <SystemHealthMonitor />
-            </div>
-          )}
-        </SortableContext>
-
-        {/* Bulk Actions */}
-        {selectedItems.length > 0 && (
-          <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up">
-            <BulkActions
-              selectedItems={selectedItems}
-              onSelectAll={handleBulkSelection.onSelectAll}
-              onDeselectAll={handleBulkSelection.onDeselectAll}
-              totalItems={getCurrentTabItems().length}
-              itemType={activeTab as any}
-            />
-          </div>
-        )}
-
-        {/* Main Content with enhanced responsive design */}
-        <div className="animate-slide-up" style={{'--index': 5} as any}>
-          <div className="bg-card/80 backdrop-blur-sm rounded-xl lg:rounded-2xl shadow-lg border border-border/50 p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-xl">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-4 lg:space-y-6">
-              {/* Enhanced Responsive Tab List */}
-              <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-muted/50 p-1 sm:p-2 rounded-lg lg:rounded-xl shadow-inner">
-                <TabsTrigger 
-                  value="analytics" 
-                  className="
-                    flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                    px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                    data-[state=active]:bg-background data-[state=active]:shadow-md
-                    data-[state=active]:text-primary transition-all duration-200
-                    hover:bg-background/50 hover-scale
-                  "
-                >
-                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline sm:hidden md:inline">Analytics</span>
-                  <span className="xs:hidden sm:inline md:hidden">Chart</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="products" 
-                  className="
-                    flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                    px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                    data-[state=active]:bg-background data-[state=active]:shadow-md
-                    data-[state=active]:text-primary transition-all duration-200
-                    hover:bg-background/50 hover-scale
-                  "
-                >
-                  <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline sm:hidden md:inline">Produk</span>
-                  <span className="xs:hidden sm:inline md:hidden">Item</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="users" 
-                  className="
-                    flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                    px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                    data-[state=active]:bg-background data-[state=active]:shadow-md
-                    data-[state=active]:text-primary transition-all duration-200
-                    hover:bg-background/50 hover-scale
-                  "
-                >
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline sm:hidden md:inline">Users</span>
-                  <span className="xs:hidden sm:inline md:hidden">User</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="ai" 
-                  className="
-                    flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                    px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                    data-[state=active]:bg-background data-[state=active]:shadow-md
-                    data-[state=active]:text-primary transition-all duration-200
-                    hover:bg-background/50 hover-scale
-                  "
-                >
-                  <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline sm:hidden md:inline">AI</span>
-                  <span className="xs:hidden sm:inline md:hidden">Bot</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Tab Contents with enhanced responsive animations */}
-              <TabsContent value="analytics" className="animate-fade-in">
-                <Card className="bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-sm border-border/50 shadow-xl rounded-xl lg:rounded-2xl transition-all duration-300 hover:shadow-2xl">
-                  <CardHeader className="pb-2 sm:pb-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg w-fit">
-                        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                          Analytics & Insights
-                        </CardTitle>
-                        <CardDescription className="text-muted-foreground text-xs sm:text-sm">
-                          Visualisasi data dan tren aktivitas platform
-                        </CardDescription>
-                      </div>
+            {/* Tab Contents with enhanced responsive animations */}
+            <TabsContent value="analytics" className="animate-fade-in">
+              <Card className="bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-sm border-border/50 shadow-xl rounded-xl lg:rounded-2xl transition-all duration-300 hover:shadow-2xl">
+                <CardHeader className="pb-2 sm:pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg w-fit">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 p-3 sm:p-6">
-                    <AnalyticsCharts data={analyticsData} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    <div>
+                      <CardTitle className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                        Analytics & Insights
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground text-xs sm:text-sm">
+                        Visualisasi data dan tren aktivitas platform
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0 p-3 sm:p-6">
+                  <AnalyticsCharts data={analyticsData} />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-              <TabsContent value="products" className="animate-fade-in">
-                <AdminProductsTab 
-                  products={products} 
-                  onDeleteProduct={deleteProduct}
-                  selectedItems={selectedItems}
-                  onSelectionChange={setSelectedItems}
-                />
-              </TabsContent>
+            <TabsContent value="products" className="animate-fade-in">
+              <AdminProductsTab products={products} onDeleteProduct={deleteProduct} />
+            </TabsContent>
 
-              <TabsContent value="users" className="animate-fade-in">
-                <AdminUsersTab 
-                  users={users}
-                  selectedItems={selectedItems}
-                  onSelectionChange={setSelectedItems}
-                />
-              </TabsContent>
+            <TabsContent value="users" className="animate-fade-in">
+              <AdminUsersTab users={users} />
+            </TabsContent>
 
-              <TabsContent value="ai" className="animate-fade-in">
-                <AdminAITab 
-                  aiGenerations={aiGenerations}
-                  selectedItems={selectedItems}
-                  onSelectionChange={setSelectedItems}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
+            <TabsContent value="ai" className="animate-fade-in">
+              <AdminAITab aiGenerations={aiGenerations} />
+            </TabsContent>
+          </Tabs>
         </div>
-      </DndContext>
+      </div>
     </div>
   );
 }

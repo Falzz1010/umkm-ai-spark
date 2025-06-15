@@ -1,7 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Package, TrendingUp, Bot } from 'lucide-react';
-import { MiniChart } from './MiniChart';
 
 interface AdminStatsCardsProps {
   stats: {
@@ -13,14 +12,6 @@ interface AdminStatsCardsProps {
 }
 
 export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
-  // Generate sample data for mini charts
-  const generateChartData = (baseValue: number) => {
-    return Array.from({ length: 7 }, (_, i) => ({
-      name: `Day ${i + 1}`,
-      value: Math.floor(baseValue * (0.7 + Math.random() * 0.6))
-    }));
-  };
-
   const statsData = [
     {
       title: "Total Pengguna",
@@ -31,9 +22,7 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
       iconColor: "text-blue-600",
       textColor: "text-blue-700 dark:text-blue-300",
       change: "+12%",
-      changeColor: "text-green-600",
-      chartData: generateChartData(stats.totalUsers / 10),
-      chartColor: "#3b82f6"
+      changeColor: "text-green-600"
     },
     {
       title: "Total Produk",
@@ -44,9 +33,7 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
       iconColor: "text-green-600",
       textColor: "text-green-700 dark:text-green-300",
       change: "+8%",
-      changeColor: "text-green-600",
-      chartData: generateChartData(stats.totalProducts / 5),
-      chartColor: "#10b981"
+      changeColor: "text-green-600"
     },
     {
       title: "Produk Aktif",
@@ -57,9 +44,7 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
       iconColor: "text-yellow-600",
       textColor: "text-yellow-700 dark:text-yellow-300",
       change: "+5%",
-      changeColor: "text-green-600",
-      chartData: generateChartData(stats.activeProducts / 3),
-      chartColor: "#f59e0b"
+      changeColor: "text-green-600"
     },
     {
       title: "AI Generations",
@@ -70,9 +55,7 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
       iconColor: "text-purple-600",
       textColor: "text-purple-700 dark:text-purple-300",
       change: "+24%",
-      changeColor: "text-green-600",
-      chartData: generateChartData(stats.totalAIGenerations / 8),
-      chartColor: "#8b5cf6"
+      changeColor: "text-green-600"
     }
   ];
 
@@ -90,8 +73,7 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
               hover:scale-105 hover:-translate-y-1
               card-hover group cursor-pointer
               animate-slide-up
-              min-h-[120px] sm:min-h-[140px] lg:min-h-[160px]
-              overflow-hidden
+              min-h-[100px] sm:min-h-[120px] lg:min-h-[140px]
             `}
             style={{'--index': index} as any}
           >
@@ -108,21 +90,10 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
               </div>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
-              <div className={`text-lg sm:text-2xl lg:text-3xl font-bold ${stat.textColor} group-hover:scale-105 transition-transform mb-2`}>
+              <div className={`text-lg sm:text-2xl lg:text-3xl font-bold ${stat.textColor} group-hover:scale-105 transition-transform`}>
                 {stat.value.toLocaleString()}
               </div>
-              
-              {/* Mini Chart */}
-              <div className="mb-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                <MiniChart 
-                  data={stat.chartData}
-                  type="area"
-                  color={stat.chartColor}
-                  height={40}
-                />
-              </div>
-              
-              <div className="flex flex-col xs:flex-row xs:items-center gap-0.5 xs:gap-1">
+              <div className="flex flex-col xs:flex-row xs:items-center gap-0.5 xs:gap-1 mt-1">
                 <span className={`text-xs font-medium ${stat.changeColor}`}>
                   {stat.change}
                 </span>
