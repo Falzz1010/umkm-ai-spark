@@ -67,16 +67,25 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
     
     if (!deleteError) {
       // Kembalikan stok karena transaksi dihapus
-      const { error: stockError } = await supabase
+      const { data: currentProduct } = await supabase
         .from("products")
-        .update({ stock: supabase.sql`stock + ${transaction.quantity}` })
-        .eq("id", transaction.product_id);
+        .select("stock")
+        .eq("id", transaction.product_id)
+        .single();
 
-      if (!stockError) {
-        setSales((prev) => prev.filter((tx) => tx.id !== id));
-        toast({ title: "Transaksi dihapus!", description: "Data transaksi berhasil dihapus dan stok dikembalikan." });
-      } else {
-        toast({ title: "Gagal mengembalikan stok", description: stockError.message, variant: "destructive" });
+      if (currentProduct) {
+        const newStock = currentProduct.stock + transaction.quantity;
+        const { error: stockError } = await supabase
+          .from("products")
+          .update({ stock: newStock })
+          .eq("id", transaction.product_id);
+
+        if (!stockError) {
+          setSales((prev) => prev.filter((tx) => tx.id !== id));
+          toast({ title: "Transaksi dihapus!", description: "Data transaksi berhasil dihapus dan stok dikembalikan." });
+        } else {
+          toast({ title: "Gagal mengembalikan stok", description: stockError.message, variant: "destructive" });
+        }
       }
     } else {
       toast({ title: "Gagal menghapus", description: deleteError.message, variant: "destructive" });
@@ -105,14 +114,23 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
     if (!updateError) {
       // Update stok berdasarkan perubahan quantity
       if (quantityDifference !== 0) {
-        const { error: stockError } = await supabase
+        const { data: currentProduct } = await supabase
           .from("products")
-          .update({ stock: supabase.sql`stock - ${quantityDifference}` })
-          .eq("id", editing.product_id);
+          .select("stock")
+          .eq("id", editing.product_id)
+          .single();
 
-        if (stockError) {
-          toast({ title: "Gagal update stok", description: stockError.message, variant: "destructive" });
-          return;
+        if (currentProduct) {
+          const newStock = currentProduct.stock - quantityDifference;
+          const { error: stockError } = await supabase
+            .from("products")
+            .update({ stock: newStock })
+            .eq("id", editing.product_id);
+
+          if (stockError) {
+            toast({ title: "Gagal update stok", description: stockError.message, variant: "destructive" });
+            return;
+          }
         }
       }
 
