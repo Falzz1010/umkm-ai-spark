@@ -22,7 +22,7 @@ export function useRealtimeSubscription(
     // Add all subscriptions to the same channel
     configs.forEach((config) => {
       channel = channel.on(
-        'postgres_changes',
+        'postgres_changes' as any,
         {
           event: config.event,
           schema: 'public',
