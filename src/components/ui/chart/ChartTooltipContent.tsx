@@ -38,12 +38,14 @@ function getPayloadConfigFromPayload(config: any, payload: unknown, key: string)
     : config[key as keyof typeof config]
 }
 
-interface ChartTooltipContentProps extends React.ComponentProps<typeof RechartsPrimitive.Tooltip>, React.ComponentProps<"div"> {
+interface ChartTooltipContentProps extends Omit<React.ComponentProps<typeof RechartsPrimitive.Tooltip>, 'content'> {
   hideLabel?: boolean
   hideIndicator?: boolean
   indicator?: "line" | "dot" | "dashed"
   nameKey?: string
   labelKey?: string
+  className?: string
+  labelClassName?: string
 }
 
 export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContentProps>(

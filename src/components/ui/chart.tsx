@@ -3,7 +3,8 @@ import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
 // Export chart context and hooks
-export { ChartConfig, useChart } from "./chart/ChartContext"
+export type { ChartConfig } from "./chart/ChartContext"
+export { useChart } from "./chart/ChartContext"
 
 // Export chart components
 export { ChartContainer } from "./chart/ChartContainer"
