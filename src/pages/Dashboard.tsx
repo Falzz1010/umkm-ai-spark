@@ -6,7 +6,6 @@ import { UserDashboard } from '@/components/dashboard/UserDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { NotificationsProvider } from '@/hooks/NotificationsContext';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
 
 export default function Dashboard() {
   const { user, userRole, loading } = useAuth();
