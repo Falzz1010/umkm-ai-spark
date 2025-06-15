@@ -1,8 +1,10 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
+import { TabPricing } from './TabPricing';
 import { Product } from '@/types/database';
 import { DashboardStats } from '@/types/dashboard';
 import { Package, ShoppingCart, BarChart3, Bot, DollarSign, Brain } from 'lucide-react';
