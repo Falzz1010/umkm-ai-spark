@@ -10,14 +10,23 @@ interface UseSecureDataOptions {
   select?: string;
   orderBy?: OrderByConfig;
   filters?: DatabaseFilter[];
+  enabled?: boolean;
+}
+
+interface UseSecureDataResult<T> {
+  data: T[];
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
 }
 
 export function useSecureData<T>({
   tableName,
   select = '*',
   orderBy,
-  filters = []
-}: UseSecureDataOptions) {
+  filters = [],
+  enabled = true
+}: UseSecureDataOptions): UseSecureDataResult<T> {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +34,7 @@ export function useSecureData<T>({
   const { toast } = useToast();
 
   const fetchData = useCallback(async () => {
-    if (!user || !userRole) {
+    if (!enabled || !user || !userRole) {
       setData([]);
       setLoading(false);
       return;
@@ -56,7 +65,8 @@ export function useSecureData<T>({
       setData((result as T[]) || []);
     } catch (err: any) {
       console.error(`Error fetching ${tableName}:`, err);
-      setError(err.message || 'Terjadi kesalahan saat mengambil data');
+      const errorMessage = err.message || 'Terjadi kesalahan saat mengambil data';
+      setError(errorMessage);
       
       // Show toast for permission errors
       if (err.message?.includes('permission') || err.message?.includes('policy')) {
@@ -69,7 +79,7 @@ export function useSecureData<T>({
     } finally {
       setLoading(false);
     }
-  }, [user, userRole, tableName, select, JSON.stringify(filters), JSON.stringify(orderBy), toast]);
+  }, [user, userRole, tableName, select, JSON.stringify(filters), JSON.stringify(orderBy), toast, enabled]);
 
   const refetch = useCallback(() => {
     fetchData();

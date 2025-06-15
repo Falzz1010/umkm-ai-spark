@@ -7,6 +7,18 @@ import { useRoleValidation } from './useRoleValidation';
 import { UserRole } from '@/types/database';
 import { TableName, TableInsert } from '@/types/supabase';
 
+interface ActionResult<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+interface SecureActionOptions {
+  successMessage?: string;
+  errorMessage?: string;
+  actionId?: string;
+}
+
 export function useSecureActions() {
   const [loading, setLoading] = useState<string | null>(null);
   const { user } = useAuth();
@@ -16,10 +28,10 @@ export function useSecureActions() {
   const executeAction = async (
     action: () => Promise<any>,
     requiredRoles: UserRole[],
-    successMessage?: string,
-    errorMessage?: string,
-    actionId?: string
-  ) => {
+    options: SecureActionOptions = {}
+  ): Promise<ActionResult> => {
+    const { successMessage, errorMessage, actionId } = options;
+
     if (!user) {
       toast({
         title: "Error",
@@ -72,7 +84,7 @@ export function useSecureActions() {
     itemId: string,
     requiredRoles: UserRole[] = ['admin'],
     itemName?: string
-  ) => {
+  ): Promise<ActionResult> => {
     return executeAction(
       async () => {
         const { data, error } = await supabase
@@ -84,9 +96,11 @@ export function useSecureActions() {
         return data;
       },
       requiredRoles,
-      `${itemName || 'Item'} berhasil dihapus`,
-      `Gagal menghapus ${itemName || 'item'}`,
-      `delete-${itemId}`
+      {
+        successMessage: `${itemName || 'Item'} berhasil dihapus`,
+        errorMessage: `Gagal menghapus ${itemName || 'item'}`,
+        actionId: `delete-${itemId}`
+      }
     );
   };
 
@@ -96,7 +110,7 @@ export function useSecureActions() {
     updates: Record<string, any>,
     requiredRoles: UserRole[] = ['user'],
     itemName?: string
-  ) => {
+  ): Promise<ActionResult> => {
     return executeAction(
       async () => {
         const { data, error } = await supabase
@@ -108,9 +122,11 @@ export function useSecureActions() {
         return data;
       },
       requiredRoles,
-      `${itemName || 'Item'} berhasil diupdate`,
-      `Gagal mengupdate ${itemName || 'item'}`,
-      `update-${itemId}`
+      {
+        successMessage: `${itemName || 'Item'} berhasil diupdate`,
+        errorMessage: `Gagal mengupdate ${itemName || 'item'}`,
+        actionId: `update-${itemId}`
+      }
     );
   };
 
@@ -119,7 +135,7 @@ export function useSecureActions() {
     data: TableInsert<T>,
     requiredRoles: UserRole[] = ['user'],
     itemName?: string
-  ) => {
+  ): Promise<ActionResult> => {
     // Automatically add user_id if not present and user exists
     const insertData = { ...data } as any;
     if (!insertData.user_id && user && tableName !== 'profiles') {
@@ -136,9 +152,11 @@ export function useSecureActions() {
         return result;
       },
       requiredRoles,
-      `${itemName || 'Item'} berhasil dibuat`,
-      `Gagal membuat ${itemName || 'item'}`,
-      'create-new'
+      {
+        successMessage: `${itemName || 'Item'} berhasil dibuat`,
+        errorMessage: `Gagal membuat ${itemName || 'item'}`,
+        actionId: 'create-new'
+      }
     );
   };
 
