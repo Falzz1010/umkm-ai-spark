@@ -25,7 +25,6 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
-import { WhatsAppBroadcastTab } from './WhatsAppBroadcastTab';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
@@ -238,7 +237,6 @@ export function UserDashboard() {
           <TabsTrigger value="analytics" className="text-xs xs:text-sm py-2 px-1 leading-tight">Analytics</TabsTrigger>
           <TabsTrigger value="ai" className="text-xs xs:text-sm py-2 px-1 leading-tight">AI Assistant</TabsTrigger>
           <TabsTrigger value="sales" className="text-xs xs:text-sm py-2 px-1 leading-tight">Penjualan</TabsTrigger>
-          <TabsTrigger value="whatsapp" className="text-xs xs:text-sm py-2 px-1 leading-tight">WA Broadcast</TabsTrigger>
         </TabsList>
         <TabsContent value="products">
           {/* Tab Produk: stack dan scrollable jika penuh */}
@@ -275,11 +273,6 @@ export function UserDashboard() {
         <TabsContent value="sales">
           <div className="mt-2">
             <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
-          </div>
-        </TabsContent>
-        <TabsContent value="whatsapp">
-          <div className="mt-2">
-            <WhatsAppBroadcastTab />
           </div>
         </TabsContent>
       </Tabs>
