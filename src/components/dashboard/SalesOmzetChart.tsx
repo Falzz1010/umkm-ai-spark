@@ -87,7 +87,7 @@ export function SalesOmzetChart() {
     }
   ], [user?.id]);
 
-  // Memoized chart colors
+  // Enhanced chart colors for better desktop display
   const chartColors = useMemo(() => ({
     omzetBase: isDark ? "#22c55e" : "#4ade80",
     omzetHover: isDark ? "#4ade80" : "#22c55e",
@@ -98,7 +98,7 @@ export function SalesOmzetChart() {
     legendColor: isDark ? "rgba(235,238,245,0.88)" : "rgba(71,85,105,0.94)",
   }), [isDark]);
 
-  // Memoized tooltip styles
+  // Enhanced tooltip styles for desktop
   const tooltipStyles = useMemo(() => ({
     bg: isDark ? "bg-zinc-900" : "bg-white",
     border: isDark ? "border border-zinc-700" : "border border-zinc-200",
@@ -106,30 +106,30 @@ export function SalesOmzetChart() {
     subtle: isDark ? "text-zinc-400" : "text-zinc-500",
   }), [isDark]);
 
-  // Custom Tooltip component
+  // Enhanced Custom Tooltip component with better desktop formatting
   const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
     if (!active || !payload || payload.length === 0) return null;
     
     return (
-      <div className={`rounded-md shadow-lg px-4 py-3 ${tooltipStyles.bg} ${tooltipStyles.border}`}>
-        <div className={`mb-1 text-xs font-semibold ${tooltipStyles.subtle}`}>
+      <div className={`rounded-lg shadow-xl px-5 py-4 ${tooltipStyles.bg} ${tooltipStyles.border} min-w-[200px]`}>
+        <div className={`mb-2 text-sm font-semibold ${tooltipStyles.subtle}`}>
           {new Date(label as string).toLocaleDateString("id-ID", {
             day: "2-digit",
-            month: "short",
+            month: "long",
             year: "numeric",
           })}
         </div>
         {payload.map((entry, idx) => (
-          <div key={idx} className={`flex items-center gap-2 text-sm ${tooltipStyles.text}`}>
-            <span 
-              className="inline-block w-3 h-3 rounded-full" 
-              style={{ backgroundColor: entry.color }} 
-            />
-            <span>
-              {entry.name}: 
-              <span className={`font-medium ${tooltipStyles.text}`}>
-                {" "}Rp {Number(entry.value).toLocaleString("id-ID")}
-              </span>
+          <div key={idx} className={`flex items-center justify-between gap-4 text-sm ${tooltipStyles.text} mb-1`}>
+            <div className="flex items-center gap-2">
+              <span 
+                className="inline-block w-3 h-3 rounded-full" 
+                style={{ backgroundColor: entry.color }} 
+              />
+              <span>{entry.name}:</span>
+            </div>
+            <span className={`font-bold ${tooltipStyles.text}`}>
+              Rp {Number(entry.value).toLocaleString("id-ID")}
             </span>
           </div>
         ))}
@@ -141,12 +141,12 @@ export function SalesOmzetChart() {
     return (
       <Card className="shadow-lg border bg-white dark:bg-card transition-colors">
         <CardHeader>
-          <CardTitle className="text-base sm:text-lg font-semibold text-primary">
+          <CardTitle className="text-lg lg:text-xl font-semibold text-primary">
             Grafik Omzet & Laba Harian
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-6 text-sm text-muted-foreground">
+          <div className="py-8 text-center text-muted-foreground">
             Memuat grafik omzet & laba...
           </div>
         </CardContent>
@@ -158,12 +158,12 @@ export function SalesOmzetChart() {
     return (
       <Card className="shadow-lg border bg-white dark:bg-card transition-colors">
         <CardHeader>
-          <CardTitle className="text-base sm:text-lg font-semibold text-primary">
+          <CardTitle className="text-lg lg:text-xl font-semibold text-primary">
             Grafik Omzet & Laba Harian
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-6 text-sm text-muted-foreground">
+          <div className="py-8 text-center text-muted-foreground">
             Belum ada transaksi untuk grafik omzet/laba.
           </div>
         </CardContent>
@@ -174,113 +174,121 @@ export function SalesOmzetChart() {
   return (
     <Card className="shadow-lg border bg-white dark:bg-card transition-colors">
       <CardHeader>
-        <CardTitle className="text-base sm:text-lg font-semibold text-primary">
+        <CardTitle className="text-lg lg:text-xl font-semibold text-primary">
           Grafik Omzet & Laba Harian
         </CardTitle>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="w-full h-[260px] sm:h-[280px]">
+      <CardContent className="pb-4">
+        <div className="w-full h-[320px] lg:h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              margin={{ top: 18, right: 25, left: 2, bottom: 32 }}
-              barGap={8}
-              barCategoryGap="22%"
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              barGap={12}
+              barCategoryGap="20%"
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke={chartColors.gridColor}
+                opacity={0.7}
               />
               <XAxis
                 dataKey="sale_date"
                 tickFormatter={(d) =>
-                  new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })
+                  new Date(d).toLocaleDateString("id-ID", { 
+                    day: "2-digit", 
+                    month: "short",
+                    year: window.innerWidth > 1024 ? "2-digit" : undefined 
+                  })
                 }
-                tick={{ fontSize: 12, fill: chartColors.labelColor }}
-                angle={-15}
+                tick={{ fontSize: window.innerWidth > 1024 ? 13 : 12, fill: chartColors.labelColor }}
+                angle={window.innerWidth > 1024 ? -15 : -25}
                 textAnchor="end"
-                height={44}
+                height={50}
                 interval="preserveStartEnd"
-                minTickGap={6}
+                minTickGap={8}
               >
                 <Label
                   value="Tanggal"
-                  offset={-12}
+                  offset={-15}
                   position="insideBottom"
                   className="fill-muted-foreground font-semibold"
-                  fontSize={13}
+                  fontSize={14}
                 />
               </XAxis>
               <YAxis
-                tickFormatter={v => 'Rp ' + Number(v).toLocaleString("id-ID")}
-                tick={{ fontSize: 12, fill: chartColors.labelColor }}
-                width={74}
+                tickFormatter={v => window.innerWidth > 1024 
+                  ? 'Rp ' + Number(v).toLocaleString("id-ID")
+                  : 'Rp ' + (Number(v) / 1000).toFixed(0) + 'K'
+                }
+                tick={{ fontSize: window.innerWidth > 1024 ? 13 : 12, fill: chartColors.labelColor }}
+                width={window.innerWidth > 1024 ? 85 : 70}
                 axisLine={false}
                 tickLine={false}
               >
                 <Label
-                  value="Omzet & Laba (Rp)"
+                  value={window.innerWidth > 1024 ? "Omzet & Laba (Rp)" : "Nilai (Rp)"}
                   angle={-90}
-                  offset={-8}
+                  offset={-10}
                   position="insideLeft"
                   className="fill-muted-foreground font-semibold"
-                  fontSize={13}
+                  fontSize={14}
                   style={{ textAnchor: "middle" }}
                 />
               </YAxis>
               <Tooltip
                 content={CustomTooltip}
-                cursor={{ fill: "var(--accent)", opacity: 0.07 }}
+                cursor={{ fill: "var(--accent)", opacity: 0.1 }}
                 wrapperClassName="z-50"
               />
               <Legend
                 verticalAlign="top"
                 align="center"
                 iconType="circle"
-                height={32}
+                height={36}
                 wrapperStyle={{
                   top: 0,
-                  paddingBottom: 4,
-                  fontSize: 13,
+                  paddingBottom: 8,
+                  fontSize: window.innerWidth > 1024 ? 14 : 13,
                   color: chartColors.legendColor,
                   fontWeight: 500,
-                  letterSpacing: ".04em",
+                  letterSpacing: ".05em",
                 }}
               />
               <Bar
                 dataKey="total_omzet"
                 fill={chartColors.omzetBase}
                 name="Omzet"
-                radius={[7, 7, 0, 0]}
-                maxBarSize={38}
-                className="transition-all duration-150"
+                radius={[8, 8, 0, 0]}
+                maxBarSize={window.innerWidth > 1024 ? 45 : 35}
+                className="transition-all duration-200"
                 style={{
                   filter: isDark
-                    ? "drop-shadow(0 1.5px 6px #22c55e28)"
-                    : "drop-shadow(0 1.5px 6px #4ade8033)",
+                    ? "drop-shadow(0 2px 8px #22c55e30)"
+                    : "drop-shadow(0 2px 8px #4ade8035)",
                   cursor: "pointer",
                 }}
                 activeBar={{
                   fill: chartColors.omzetHover,
-                  opacity: 0.94,
+                  opacity: 0.95,
                 }}
               />
               <Bar
                 dataKey="total_laba"
                 fill={chartColors.labaBase}
                 name="Laba"
-                radius={[7, 7, 0, 0]}
-                maxBarSize={38}
-                className="transition-all duration-150"
+                radius={[8, 8, 0, 0]}
+                maxBarSize={window.innerWidth > 1024 ? 45 : 35}
+                className="transition-all duration-200"
                 style={{
                   filter: isDark
-                    ? "drop-shadow(0 1.5px 6px #fbbf243c)"
-                    : "drop-shadow(0 1.5px 6px #fde68a59)",
+                    ? "drop-shadow(0 2px 8px #fbbf2440)"
+                    : "drop-shadow(0 2px 8px #fde68a60)",
                   cursor: "pointer",
                 }}
                 activeBar={{
                   fill: chartColors.labaHover,
-                  opacity: 0.93,
+                  opacity: 0.94,
                 }}
               />
             </BarChart>
