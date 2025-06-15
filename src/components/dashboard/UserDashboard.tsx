@@ -1,3 +1,4 @@
+
 // Move this alongside other imports at the top
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,7 +26,7 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
-import { Dialog, DialogContent } from '@/components/ui/dialog'; // Tambah import modal Dialog
+// FIX: Move useIsMobile import to the top, here:
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
@@ -39,7 +40,6 @@ export function UserDashboard() {
     aiGenerations: 0
   });
   const [salesKey, setSalesKey] = useState(0);
-  const [activeTab, setActiveTab] = useState("products"); // track tab
 
   // TAMBAH STATE FILTER
   const [filterCategory, setFilterCategory] = useState("");
@@ -224,19 +224,8 @@ export function UserDashboard() {
         <DashboardStatsCards stats={stats} />
       </div>
 
-      {/* Modal AI Assistant pada mobile device, tampil jika tab "ai" aktif */}
-      {isMobile && activeTab === "ai" && (
-        <Dialog open onOpenChange={(open) => { if (!open) setActiveTab("products"); }}>
-          <DialogContent className="p-0 max-w-[95vw] w-full">
-            <div className="p-2 xs:p-4">
-              <TabAI products={products} onGenerationComplete={refreshData} />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Tabs utama responsif */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="products" className="space-y-3">
+      {/* Tabs utama responsif, selalu tampil 4 kolom tab di semua ukuran layar */}
+      <Tabs defaultValue="products" className="space-y-3">
         <TabsList
           className="
             w-full
@@ -278,14 +267,11 @@ export function UserDashboard() {
             <TabAnalytics analyticsData={analyticsData} />
           </div>
         </TabsContent>
-        {/* Desktop/Tablet: AI normal, Mobile: AI hanya muncul di modal */}
-        {!isMobile && (
-          <TabsContent value="ai">
-            <div className="mt-2">
-              <TabAI products={products} onGenerationComplete={refreshData} />
-            </div>
-          </TabsContent>
-        )}
+        <TabsContent value="ai">
+          <div className="mt-2">
+            <TabAI products={products} onGenerationComplete={refreshData} />
+          </div>
+        </TabsContent>
         <TabsContent value="sales">
           <div className="mt-2">
             <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
@@ -296,3 +282,4 @@ export function UserDashboard() {
   );
 }
 // File ini sudah terlalu panjang (>270 baris). Setelah dirapikan, sebaiknya difragment ke beberapa komponen modular agar maintainable.
+
