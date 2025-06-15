@@ -46,13 +46,12 @@ export function UserDashboard() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterStok, setFilterStok] = useState("");
 
-  // BEGIN: Real-time subscription to product changes for current user (auto-refresh)
+  // Real-time subscription untuk products dengan auto-refresh
   useEffect(() => {
     if (!user) return;
 
-    // create a supabase channel for product changes
     const channel = supabase
-      .channel('public:products')
+      .channel(`public:products:user:${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -62,7 +61,7 @@ export function UserDashboard() {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          // Fetch products & stats when product belonging to user changes
+          console.log('Real-time product change:', payload);
           refreshData();
         }
       )
@@ -71,9 +70,34 @@ export function UserDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-    // react to user.id only!
   }, [user?.id]); 
-  // END: real-time
+
+  // Real-time subscription untuk sales_transactions
+  useEffect(() => {
+    if (!user) return;
+
+    const salesChannel = supabase
+      .channel(`public:sales_transactions:user:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'sales_transactions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Real-time sales change:', payload);
+          refreshData();
+          refreshAnalytics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(salesChannel);
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     if (user) {
@@ -281,4 +305,3 @@ export function UserDashboard() {
     </div>
   );
 }
-// File ini sudah terlalu panjang (>270 baris). Setelah dirapikan, sebaiknya difragment ke beberapa komponen modular agar maintainable.

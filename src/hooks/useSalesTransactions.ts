@@ -21,25 +21,52 @@ export function useSalesTransactions(refreshKey: number) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
+  // Fetch initial data
+  const fetchSales = async () => {
     if (!user) return;
     setLoading(true);
     
-    supabase
+    const { data } = await supabase
       .from("sales_transactions")
       .select("id,created_at,product_id,quantity,price,total,products(name)")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setSales(
-          (data || []).map((row) => ({
-            ...row,
-            product_name: row.products?.name || "-",
-            total: row.total ?? row.price * row.quantity,
-          }))
-        );
-        setLoading(false);
-      });
+      .order("created_at", { ascending: false });
+
+    setSales(
+      (data || []).map((row) => ({
+        ...row,
+        product_name: row.products?.name || "-",
+        total: row.total ?? row.price * row.quantity,
+      }))
+    );
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    
+    fetchSales();
+
+    // Real-time subscription untuk sales_transactions
+    const salesChannel = supabase
+      .channel(`sales_transactions:user:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'sales_transactions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchSales();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(salesChannel);
+    };
   }, [user, refreshKey]);
 
   const handleDelete = async (id: string) => {
@@ -67,7 +94,6 @@ export function useSalesTransactions(refreshKey: number) {
           .eq("id", transaction.product_id);
 
         if (!stockError) {
-          setSales((prev) => prev.filter((tx) => tx.id !== id));
           toast({ title: "Transaksi dihapus!", description: "Data transaksi berhasil dihapus dan stok dikembalikan." });
         } else {
           toast({ title: "Gagal mengembalikan stok", description: stockError.message, variant: "destructive" });
@@ -115,18 +141,6 @@ export function useSalesTransactions(refreshKey: number) {
         }
       }
 
-      setSales((prev) =>
-        prev.map((row) =>
-          row.id === editing.id
-            ? {
-                ...row,
-                quantity: newValues.quantity,
-                price: newValues.price,
-                total: newValues.quantity * newValues.price,
-              }
-            : row
-        )
-      );
       toast({ title: "Transaksi diperbarui!", description: "Data transaksi berhasil diupdate dengan penyesuaian stok." });
       return true;
     } else {

@@ -17,14 +17,51 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [loading, setLoading] = useState(false);
+  const [currentProducts, setCurrentProducts] = useState<Product[]>(products);
 
-  const product = products.find((p) => p.id === selectedProduct);
+  const product = currentProducts.find((p) => p.id === selectedProduct);
 
   useEffect(() => {
-    if (!selectedProduct && products.length > 0) {
-      setSelectedProduct(products[0].id);
+    if (!selectedProduct && currentProducts.length > 0) {
+      setSelectedProduct(currentProducts[0].id);
     }
-  }, [products]);
+  }, [currentProducts]);
+
+  // Real-time subscription untuk products
+  useEffect(() => {
+    if (!user) return;
+
+    setCurrentProducts(products);
+
+    const productsChannel = supabase
+      .channel(`products:user:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products',
+          filter: `user_id=eq.${user.id}`,
+        },
+        async () => {
+          // Fetch updated products
+          const { data } = await supabase
+            .from('products')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+          
+          if (data) {
+            setCurrentProducts(data);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(productsChannel);
+    };
+  }, [user, products]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +102,7 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
     }
     toast({
       title: "Transaksi Berhasil",
-      description: "Data penjualan telah direkam.",
+      description: "Data penjualan telah direkam dan stok otomatis terupdate.",
     });
     setQuantity(1);
     onFinished?.();
@@ -80,7 +117,7 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
           value={selectedProduct}
           onChange={(e) => setSelectedProduct(e.target.value)}
         >
-          {products.map((p) => (
+          {currentProducts.map((p) => (
             <option
               value={p.id}
               key={p.id}
