@@ -1,5 +1,7 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button'; // FIX: Import Button
 import { Profile } from '@/types/database';
 import { EditUserDialog } from "./EditUserDialog";
 import { Pencil } from "lucide-react";
@@ -56,7 +58,7 @@ export function AdminUsersTab({ users }: AdminUsersTabProps) {
         {userToEdit && (
           <EditUserDialog
             userId={userToEdit.id}
-            currentEmail={userToEdit.email || ""}
+            currentEmail={""} // Fix: Profile has no .email; pass empty or fetch from elsewhere if needed
             open={!!editId}
             onOpenChange={(open) => !open && setEditId(null)}
           />
