@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useSalesTransactions, SaleRow } from "@/hooks/useSalesTransactions";
 import { SalesTransactionTable } from "./sales/SalesTransactionTable";
 import { EditTransactionDialog } from "./EditTransactionDialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number }) {
   const { sales, loading, deletingId, handleDelete, handleEditSubmit } = useSalesTransactions(refreshKey);
@@ -26,18 +27,22 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
 
   return (
     <div className="w-full">
-      <h3 className="font-semibold mb-2">Riwayat Penjualan</h3>
+      <h3 className="font-semibold mb-4">Riwayat Penjualan</h3>
       {loading ? (
         <div className="text-sm py-4 text-muted-foreground">Memuat...</div>
       ) : sales.length === 0 ? (
         <div className="text-sm py-4 text-muted-foreground">Belum ada transaksi penjualan.</div>
       ) : (
-        <SalesTransactionTable
-          sales={sales}
-          deletingId={deletingId}
-          onEdit={onEdit}
-          onDelete={handleDelete}
-        />
+        <div className="border rounded-lg">
+          <ScrollArea className="h-[400px] w-full">
+            <SalesTransactionTable
+              sales={sales}
+              deletingId={deletingId}
+              onEdit={onEdit}
+              onDelete={handleDelete}
+            />
+          </ScrollArea>
+        </div>
       )}
       <EditTransactionDialog
         open={editOpen}

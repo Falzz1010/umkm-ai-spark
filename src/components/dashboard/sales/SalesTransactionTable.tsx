@@ -13,28 +13,30 @@ interface SalesTransactionTableProps {
 
 export function SalesTransactionTable({ sales, deletingId, onEdit, onDelete }: SalesTransactionTableProps) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Tanggal</TableHead>
-          <TableHead>Produk</TableHead>
-          <TableHead>Jumlah</TableHead>
-          <TableHead>Harga Jual</TableHead>
-          <TableHead>Total</TableHead>
-          <TableHead></TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sales.map((sale) => (
-          <SalesTransactionRow
-            key={sale.id}
-            sale={sale}
-            deletingId={deletingId}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
-      </TableBody>
-    </Table>
+    <div className="w-full">
+      <Table>
+        <TableHeader className="sticky top-0 bg-background z-10">
+          <TableRow>
+            <TableHead className="w-[100px]">Tanggal</TableHead>
+            <TableHead className="min-w-[120px]">Produk</TableHead>
+            <TableHead className="w-[80px] text-center">Jumlah</TableHead>
+            <TableHead className="w-[120px] text-right">Harga Jual</TableHead>
+            <TableHead className="w-[120px] text-right">Total</TableHead>
+            <TableHead className="w-[100px] text-center">Aksi</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sales.map((sale) => (
+            <SalesTransactionRow
+              key={sale.id}
+              sale={sale}
+              deletingId={deletingId}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
