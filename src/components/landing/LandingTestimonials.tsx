@@ -16,6 +16,24 @@ export function LandingTestimonials() {
       business: 'Kedai Kopi Local',
       content: 'Analytics dashboard memberikan insight yang sangat berguna untuk strategi marketing saya.',
       rating: 5
+    },
+    {
+      name: 'Dewi Oktaviani',
+      business: 'Warung Sembako Makmur',
+      content: 'Fitur export ke Excel mempermudah saya mengelola laporan bulanan. Sangat membantu usaha kecil seperti saya!',
+      rating: 5
+    },
+    {
+      name: 'Budi Santoso',
+      business: 'Bengkel Motor Sukses',
+      content: 'Dengan dashboard analytics, saya jadi tahu produk/jasa mana yang paling diminati pelanggan.',
+      rating: 4
+    },
+    {
+      name: 'Linda Pranata',
+      business: 'Katering Harian Sehat',
+      content: 'Support yang responsif dan fitur AI membuat bisnis online saya semakin berkembang!',
+      rating: 5
     }
   ];
 
