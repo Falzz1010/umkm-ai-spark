@@ -1,42 +1,87 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Product } from '@/types/database';
 
-export function useProductFilters(products: Product[]) {
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterSearch, setFilterSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterStok, setFilterStok] = useState("");
+interface ProductFilters {
+  category: string;
+  search: string;
+  status: string;
+  stock: string;
+}
 
+export function useProductFilters(products: Product[]) {
+  const [filters, setFilters] = useState<ProductFilters>({
+    category: "",
+    search: "",
+    status: "",
+    stock: ""
+  });
+
+  // Optimized filter function with early returns
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      // Kategori
-      if (filterCategory && p.category !== filterCategory) return false;
-      // Status aktif
-      if (filterStatus === "active" && !p.is_active) return false;
-      if (filterStatus === "inactive" && p.is_active) return false;
-      // Stok
-      if (filterStok === "kosong" && (p.stock ?? 0) > 0) return false;
-      if (filterStok === "limit" && !((p.stock ?? 0) > 0 && (p.stock ?? 0) < 5)) return false;
-      if (filterStok === "ada" && (p.stock ?? 0) === 0) return false;
-      // Pencarian (case insensitive)
-      if (
-        filterSearch &&
-        !(p.name?.toLocaleLowerCase().includes(filterSearch.toLocaleLowerCase()))
-      )
+    if (!products.length) return [];
+
+    return products.filter((product) => {
+      // Category filter
+      if (filters.category && product.category !== filters.category) {
         return false;
+      }
+
+      // Status filter
+      if (filters.status === "active" && !product.is_active) {
+        return false;
+      }
+      if (filters.status === "inactive" && product.is_active) {
+        return false;
+      }
+
+      // Stock filter
+      const stock = product.stock ?? 0;
+      if (filters.stock === "kosong" && stock > 0) {
+        return false;
+      }
+      if (filters.stock === "limit" && !(stock > 0 && stock < 5)) {
+        return false;
+      }
+      if (filters.stock === "ada" && stock === 0) {
+        return false;
+      }
+
+      // Search filter (case insensitive)
+      if (filters.search && 
+          !product.name?.toLowerCase().includes(filters.search.toLowerCase())) {
+        return false;
+      }
+
       return true;
     });
-  }, [products, filterCategory, filterSearch, filterStatus, filterStok]);
+  }, [products, filters]);
+
+  // Memoized filter setters
+  const setFilterCategory = useCallback((category: string) => {
+    setFilters(prev => ({ ...prev, category }));
+  }, []);
+
+  const setFilterSearch = useCallback((search: string) => {
+    setFilters(prev => ({ ...prev, search }));
+  }, []);
+
+  const setFilterStatus = useCallback((status: string) => {
+    setFilters(prev => ({ ...prev, status }));
+  }, []);
+
+  const setFilterStok = useCallback((stock: string) => {
+    setFilters(prev => ({ ...prev, stock }));
+  }, []);
 
   return {
-    filterCategory,
+    filterCategory: filters.category,
     setFilterCategory,
-    filterSearch,
+    filterSearch: filters.search,
     setFilterSearch,
-    filterStatus,
+    filterStatus: filters.status,
     setFilterStatus,
-    filterStok,
+    filterStok: filters.stock,
     setFilterStok,
     filteredProducts
   };

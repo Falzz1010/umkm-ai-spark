@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { DailySalesData } from "@/types/sales";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
 import {
   BarChart,
   Bar,
@@ -15,100 +18,124 @@ import {
   TooltipProps,
 } from "recharts";
 
-type ChartData = {
-  sale_date: string;
-  total_omzet: number;
-  total_laba: number;
-};
-
 export function SalesOmzetChart() {
   const { user } = useAuth();
-  const [data, setData] = useState<ChartData[]>([]);
+  const [data, setData] = useState<DailySalesData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Theme check (prefer dark media query)
-  const [isDark, setIsDark] = useState(
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-color-scheme: dark)").matches
-      : false
-  );
-  
-  useEffect(() => {
+  // Theme detection with memoization
+  const isDark = useMemo(() => {
     if (typeof window !== "undefined") {
-      const media = window.matchMedia("(prefers-color-scheme: dark)");
-      const listener = (e: MediaQueryListEvent) => setIsDark(e.matches);
-      setIsDark(media.matches);
-      media.addEventListener("change", listener);
-      return () => media.removeEventListener("change", listener);
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
+    return false;
   }, []);
 
-  const fetchData = async () => {
+  // Memoized fetch function
+  const fetchData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     
     console.log('Fetching sales chart data for user:', user.id);
     
-    const { data, error } = await supabase
-      .from("daily_sales_summary")
-      .select("sale_date,total_omzet,total_laba")
-      .eq("user_id", user.id)
-      .order("sale_date", { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching chart data:', error);
-    } else {
-      console.log('Chart data fetched:', data?.length || 0, 'records');
+    try {
+      const { data: salesData, error } = await supabase
+        .from("daily_sales_summary")
+        .select("sale_date,total_omzet,total_laba")
+        .eq("user_id", user.id)
+        .order("sale_date", { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching chart data:', error);
+        return;
+      }
+
+      console.log('Chart data fetched:', salesData?.length || 0, 'records');
       setData(
-        (data || []).map((row) => ({
-          ...row,
+        (salesData || []).map((row) => ({
+          sale_date: row.sale_date,
           total_omzet: Number(row.total_omzet || 0),
           total_laba: Number(row.total_laba || 0),
         }))
       );
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
-  };
+  }, [user?.id]);
 
   // Initial fetch
   useEffect(() => {
-    fetchData();
-  }, [user?.id]);
+    if (user) {
+      fetchData();
+    }
+  }, [user, fetchData]);
 
-  // Real-time subscription
-  useEffect(() => {
-    if (!user) return;
+  // Real-time subscription with debounced fetch
+  useRealtimeSubscription([
+    {
+      table: 'sales_transactions',
+      event: '*',
+      filter: user ? `user_id=eq.${user.id}` : '',
+      callback: () => {
+        // Debounce the fetch to avoid excessive calls
+        setTimeout(() => {
+          fetchData();
+        }, 500);
+      }
+    }
+  ], [user?.id]);
+
+  // Memoized chart colors
+  const chartColors = useMemo(() => ({
+    omzetBase: isDark ? "#22c55e" : "#4ade80",
+    omzetHover: isDark ? "#4ade80" : "#22c55e",
+    labaBase: isDark ? "#fbbf24" : "#fde68a",
+    labaHover: isDark ? "#fde68a" : "#fbbf24",
+    gridColor: isDark ? "rgba(90,100,120,0.22)" : "rgba(180,200,220,0.19)",
+    labelColor: isDark ? "rgba(235,238,245,0.85)" : "rgba(75,85,99,0.92)",
+    legendColor: isDark ? "rgba(235,238,245,0.88)" : "rgba(71,85,105,0.94)",
+  }), [isDark]);
+
+  // Memoized tooltip styles
+  const tooltipStyles = useMemo(() => ({
+    bg: isDark ? "bg-zinc-900" : "bg-white",
+    border: isDark ? "border border-zinc-700" : "border border-zinc-200",
+    text: isDark ? "text-zinc-100" : "text-zinc-900",
+    subtle: isDark ? "text-zinc-400" : "text-zinc-500",
+  }), [isDark]);
+
+  // Custom Tooltip component
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+    if (!active || !payload || payload.length === 0) return null;
     
-    console.log('Setting up sales chart real-time subscription');
-    
-    const channel = supabase
-      .channel(`sales-chart-${user.id}-${Date.now()}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "sales_transactions",
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('Real-time sales change detected for chart:', payload);
-          // Add small delay to allow view to update
-          setTimeout(() => {
-            fetchData();
-          }, 500);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Sales chart subscription status:', status);
-      });
-      
-    return () => {
-      console.log('Cleaning up sales chart subscription');
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
+    return (
+      <div className={`rounded-md shadow-lg px-4 py-3 ${tooltipStyles.bg} ${tooltipStyles.border}`}>
+        <div className={`mb-1 text-xs font-semibold ${tooltipStyles.subtle}`}>
+          {new Date(label as string).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </div>
+        {payload.map((entry, idx) => (
+          <div key={idx} className={`flex items-center gap-2 text-sm ${tooltipStyles.text}`}>
+            <span 
+              className="inline-block w-3 h-3 rounded-full" 
+              style={{ backgroundColor: entry.color }} 
+            />
+            <span>
+              {entry.name}: 
+              <span className={`font-medium ${tooltipStyles.text}`}>
+                {" "}Rp {Number(entry.value).toLocaleString("id-ID")}
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -144,59 +171,6 @@ export function SalesOmzetChart() {
     );
   }
 
-  // Warna chart modern adaptif ke tema
-  const OMZET_BASE = isDark ? "#22c55e" : "#4ade80";
-  const OMZET_HOVER = isDark ? "#4ade80" : "#22c55e";
-  const LABA_BASE = isDark ? "#fbbf24" : "#fde68a";
-  const LABA_HOVER = isDark ? "#fde68a" : "#fbbf24";
-  const GRID_COLOR = isDark
-    ? "rgba(90,100,120,0.22)"
-    : "rgba(180,200,220,0.19)";
-  const LABEL_COLOR = isDark
-    ? "rgba(235,238,245,0.85)"
-    : "rgba(75,85,99,0.92)";
-  const LEGEND_COLOR = isDark
-    ? "rgba(235,238,245,0.88)"
-    : "rgba(71,85,105,0.94)";
-  const TOOLTIP_BG = isDark ? "bg-zinc-900" : "bg-white";
-  const TOOLTIP_BORDER = isDark
-    ? "border border-zinc-700"
-    : "border border-zinc-200";
-  const TOOLTIP_TEXT = isDark ? "text-zinc-100" : "text-zinc-900";
-  const TOOLTIP_SUBTLE = isDark ? "text-zinc-400" : "text-zinc-500";
-
-  // Custom Tooltip: full dark/light support + icon and adaptive classes.
-  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
-    active,
-    payload,
-    label,
-  }) => {
-    if (!active || !payload || payload.length === 0) return null;
-    return (
-      <div className={`rounded-md shadow-lg px-4 py-3 ${TOOLTIP_BG} ${TOOLTIP_BORDER}`}>
-        <div className={`mb-1 text-xs font-semibold ${TOOLTIP_SUBTLE}`}>
-          {new Date(label as string).toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </div>
-        {payload.map((entry, idx) => (
-          <div key={idx} className={`flex items-center gap-2 text-sm ${TOOLTIP_TEXT}`}>
-            <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span>
-              {entry.name}: 
-              <span className={`font-medium ${TOOLTIP_TEXT}`}>
-                {" "}
-                Rp {Number(entry.value).toLocaleString("id-ID")}
-              </span>
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <Card className="shadow-lg border bg-white dark:bg-card transition-colors">
       <CardHeader>
@@ -215,14 +189,14 @@ export function SalesOmzetChart() {
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke={GRID_COLOR}
+                stroke={chartColors.gridColor}
               />
               <XAxis
                 dataKey="sale_date"
                 tickFormatter={(d) =>
                   new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })
                 }
-                tick={{ fontSize: 12, fill: LABEL_COLOR }}
+                tick={{ fontSize: 12, fill: chartColors.labelColor }}
                 angle={-15}
                 textAnchor="end"
                 height={44}
@@ -239,7 +213,7 @@ export function SalesOmzetChart() {
               </XAxis>
               <YAxis
                 tickFormatter={v => 'Rp ' + Number(v).toLocaleString("id-ID")}
-                tick={{ fontSize: 12, fill: LABEL_COLOR }}
+                tick={{ fontSize: 12, fill: chartColors.labelColor }}
                 width={74}
                 axisLine={false}
                 tickLine={false}
@@ -268,14 +242,14 @@ export function SalesOmzetChart() {
                   top: 0,
                   paddingBottom: 4,
                   fontSize: 13,
-                  color: LEGEND_COLOR,
+                  color: chartColors.legendColor,
                   fontWeight: 500,
                   letterSpacing: ".04em",
                 }}
               />
               <Bar
                 dataKey="total_omzet"
-                fill={OMZET_BASE}
+                fill={chartColors.omzetBase}
                 name="Omzet"
                 radius={[7, 7, 0, 0]}
                 maxBarSize={38}
@@ -287,18 +261,13 @@ export function SalesOmzetChart() {
                   cursor: "pointer",
                 }}
                 activeBar={{
-                  fill: OMZET_HOVER,
+                  fill: chartColors.omzetHover,
                   opacity: 0.94,
-                  style: {
-                    filter: isDark
-                      ? "drop-shadow(0 2px 8px #4ade8040)"
-                      : "drop-shadow(0 2px 8px #22c55e40)",
-                  },
                 }}
               />
               <Bar
                 dataKey="total_laba"
-                fill={LABA_BASE}
+                fill={chartColors.labaBase}
                 name="Laba"
                 radius={[7, 7, 0, 0]}
                 maxBarSize={38}
@@ -310,13 +279,8 @@ export function SalesOmzetChart() {
                   cursor: "pointer",
                 }}
                 activeBar={{
-                  fill: LABA_HOVER,
+                  fill: chartColors.labaHover,
                   opacity: 0.93,
-                  style: {
-                    filter: isDark
-                      ? "drop-shadow(0 2px 8px #fde68a60)"
-                      : "drop-shadow(0 2px 8px #fbbf2460)",
-                  },
                 }}
               />
             </BarChart>
