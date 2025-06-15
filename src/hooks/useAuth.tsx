@@ -1,44 +1,27 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+
+import { useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { UserRole, Profile, UserRoleData } from '@/types/database';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  profile: Profile | null;
-  userRole: UserRole | null;
-  loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
-  updateProfile: (data: Partial<Profile>) => Promise<{ error: any }>;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Utility to cleanup all Supabase auth states in storage
-function cleanupAuthState() {
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-}
+import { AuthContext } from '@/contexts/AuthContext';
+import { useUserData } from '@/hooks/useUserData';
+import { useAuthOperations } from '@/hooks/useAuthOperations';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { 
+    profile, 
+    userRole, 
+    setProfile, 
+    setUserRole, 
+    fetchUserData, 
+    clearUserData 
+  } = useUserData();
+
+  const { signUp, signIn, updateProfile: updateProfileOperation } = useAuthOperations();
 
   useEffect(() => {
     // Set up auth state listener
@@ -49,8 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_OUT' || !session) {
           setSession(null);
           setUser(null);
-          setProfile(null);
-          setUserRole(null);
+          clearUserData();
           setLoading(false);
           return;
         }
@@ -84,8 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           cleanupAuthState();
           setSession(null);
           setUser(null);
-          setProfile(null);
-          setUserRole(null);
+          clearUserData();
         } else if (session) {
           setSession(session);
           setUser(session.user);
@@ -102,100 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchUserData = async (userId: string, retryCount = 0) => {
-    try {
-      console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
-      
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
-      } else if (profileData) {
-        setProfile(profileData);
-        console.log('fetchUserData: Profile found:', profileData);
-      }
-
-      // Fetch role with better error handling
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (roleError) {
-        console.error('Error fetching role:', roleError);
-
-        // Improved NetworkError detection and retry logic
-        const isNetworkError = roleError.message?.includes('NetworkError') || 
-                              roleError.message?.includes('Failed to fetch') ||
-                              roleError.message?.includes('fetch');
-        
-        if (isNetworkError && retryCount < 2) {
-          console.warn(`Network error fetching role, retrying... (attempt ${retryCount + 1})`);
-          await new Promise((res) => setTimeout(res, 1000 * (retryCount + 1))); // Progressive delay
-          return fetchUserData(userId, retryCount + 1);
-        } else {
-          console.error('Failed to fetch role after retries, setting userRole to null');
-          setUserRole(null);
-        }
-      } else if (roleData && roleData.role) {
-        setUserRole(roleData.role as UserRole);
-        console.log("fetchUserData: userRole found:", roleData.role);
-      } else {
-        console.warn("fetchUserData: No roleData found for user", userId);
-        setUserRole(null);
-      }
-    } catch (error: any) {
-      console.error('Error fetching user data (exception):', error);
-      
-      // If it's a network error and we haven't exceeded retry limit, try again
-      if (retryCount < 2 && (error.message?.includes('fetch') || error.message?.includes('Network'))) {
-        console.warn(`Exception during fetch, retrying... (attempt ${retryCount + 1})`);
-        await new Promise((res) => setTimeout(res, 1000 * (retryCount + 1)));
-        return fetchUserData(userId, retryCount + 1);
-      } else {
-        setUserRole(null);
-      }
-    }
-  };
-
-  const signUp = async (email: string, password: string, fullName: string) => {
-    cleanupAuthState();
-    try {
-      const redirectUrl = `${window.location.origin}/`;
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: { full_name: fullName }
-        }
-      });
-      return { error };
-    } catch (error) {
-      return { error };
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    cleanupAuthState();
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      return { error };
-    } catch (error) {
-      return { error };
-    }
-  };
+  }, [fetchUserData, clearUserData]);
 
   const signOut = async () => {
     try {
@@ -204,8 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
-      setProfile(null);
-      setUserRole(null);
+      clearUserData();
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {
@@ -216,22 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (data: Partial<Profile>) => {
-    if (!user) return { error: 'No user logged in' };
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(data)
-        .eq('id', user.id);
-
-      if (!error && profile) {
-        setProfile({ ...profile, ...data });
-      }
-
-      return { error };
-    } catch (error) {
-      return { error };
-    }
+    return updateProfileOperation(user, profile, setProfile, data);
   };
 
   return (
@@ -251,10 +123,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export { useAuth } from '@/contexts/AuthContext';
