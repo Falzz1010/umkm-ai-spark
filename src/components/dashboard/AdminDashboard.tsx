@@ -61,62 +61,90 @@ export function AdminDashboard() {
         <div className="bg-card/80 backdrop-blur-sm rounded-xl lg:rounded-2xl shadow-lg border border-border/50 p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-xl">
           <Tabs defaultValue="analytics" className="space-y-3 sm:space-y-4 lg:space-y-6">
             {/* Enhanced Responsive Tab List */}
-            <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-muted/50 p-1 sm:p-2 rounded-lg lg:rounded-xl shadow-inner">
+            <TabsList className="w-full h-auto grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-gradient-to-r from-muted/40 via-muted/60 to-muted/40 p-1.5 sm:p-2 lg:p-3 rounded-xl shadow-inner backdrop-blur-sm border border-border/30">
               <TabsTrigger 
                 value="analytics" 
                 className="
-                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                  data-[state=active]:bg-background data-[state=active]:shadow-md
-                  data-[state=active]:text-primary transition-all duration-200
-                  hover:bg-background/50 hover-scale
+                  flex items-center justify-center gap-1.5 sm:gap-2 
+                  text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5
+                  rounded-lg lg:rounded-xl
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-background data-[state=active]:to-background/95
+                  data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10
+                  data-[state=active]:text-primary data-[state=active]:font-semibold
+                  data-[state=active]:border data-[state=active]:border-primary/20
+                  transition-all duration-300 ease-out
+                  hover:bg-background/60 hover:shadow-md hover:scale-[1.02]
+                  active:scale-[0.98]
+                  min-h-[44px] sm:min-h-[48px]
                 "
               >
-                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline sm:hidden md:inline">Analytics</span>
-                <span className="xs:hidden sm:inline md:hidden">Chart</span>
+                <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
+                <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">Analytics</span>
+                <span className="xs:hidden sm:inline lg:hidden">Chart</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="products" 
                 className="
-                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                  data-[state=active]:bg-background data-[state=active]:shadow-md
-                  data-[state=active]:text-primary transition-all duration-200
-                  hover:bg-background/50 hover-scale
+                  flex items-center justify-center gap-1.5 sm:gap-2 
+                  text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5
+                  rounded-lg lg:rounded-xl
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-background data-[state=active]:to-background/95
+                  data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10
+                  data-[state=active]:text-primary data-[state=active]:font-semibold
+                  data-[state=active]:border data-[state=active]:border-primary/20
+                  transition-all duration-300 ease-out
+                  hover:bg-background/60 hover:shadow-md hover:scale-[1.02]
+                  active:scale-[0.98]
+                  min-h-[44px] sm:min-h-[48px]
                 "
               >
-                <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline sm:hidden md:inline">Produk</span>
-                <span className="xs:hidden sm:inline md:hidden">Item</span>
+                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
+                <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">Produk</span>
+                <span className="xs:hidden sm:inline lg:hidden">Item</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="users" 
                 className="
-                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                  data-[state=active]:bg-background data-[state=active]:shadow-md
-                  data-[state=active]:text-primary transition-all duration-200
-                  hover:bg-background/50 hover-scale
+                  flex items-center justify-center gap-1.5 sm:gap-2 
+                  text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5
+                  rounded-lg lg:rounded-xl
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-background data-[state=active]:to-background/95
+                  data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10
+                  data-[state=active]:text-primary data-[state=active]:font-semibold
+                  data-[state=active]:border data-[state=active]:border-primary/20
+                  transition-all duration-300 ease-out
+                  hover:bg-background/60 hover:shadow-md hover:scale-[1.02]
+                  active:scale-[0.98]
+                  min-h-[44px] sm:min-h-[48px]
                 "
               >
-                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline sm:hidden md:inline">Users</span>
-                <span className="xs:hidden sm:inline md:hidden">User</span>
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
+                <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">Users</span>
+                <span className="xs:hidden sm:inline lg:hidden">User</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="ai" 
                 className="
-                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
-                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
-                  data-[state=active]:bg-background data-[state=active]:shadow-md
-                  data-[state=active]:text-primary transition-all duration-200
-                  hover:bg-background/50 hover-scale
+                  flex items-center justify-center gap-1.5 sm:gap-2 
+                  text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5
+                  rounded-lg lg:rounded-xl
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-background data-[state=active]:to-background/95
+                  data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10
+                  data-[state=active]:text-primary data-[state=active]:font-semibold
+                  data-[state=active]:border data-[state=active]:border-primary/20
+                  transition-all duration-300 ease-out
+                  hover:bg-background/60 hover:shadow-md hover:scale-[1.02]
+                  active:scale-[0.98]
+                  min-h-[44px] sm:min-h-[48px]
                 "
               >
-                <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline sm:hidden md:inline">AI</span>
-                <span className="xs:hidden sm:inline md:hidden">Bot</span>
+                <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
+                <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">AI</span>
+                <span className="xs:hidden sm:inline lg:hidden">Bot</span>
               </TabsTrigger>
             </TabsList>
 
