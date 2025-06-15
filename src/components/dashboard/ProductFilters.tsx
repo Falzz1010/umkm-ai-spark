@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectItem, SelectValue, SelectContent } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Product } from "@/types/database";
-import { Filter, Search } from "lucide-react";
+import { Filter, Search } from "lucide-react"; // <-- FIXED here
 
 type ProductFiltersProps = {
   products: Product[];
@@ -93,3 +93,4 @@ export function ProductFilters({
     </div>
   );
 }
+
