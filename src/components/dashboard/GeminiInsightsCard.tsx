@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useGeminiInsights } from '@/hooks/useGeminiInsights';
 import { Product } from '@/types/database';
+import { GeminiInsight } from '@/types/gemini';
 import { Brain, TrendingUp, Target, BarChart3, Zap, X } from 'lucide-react';
 
 interface GeminiInsightsCardProps {
@@ -14,7 +15,7 @@ interface GeminiInsightsCardProps {
 export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
   const { insights, loading, dismissInsight } = useGeminiInsights(products);
 
-  const getInsightIcon = (type: string) => {
+  const getInsightIcon = (type: GeminiInsight['type']) => {
     switch (type) {
       case 'prediction': return <TrendingUp className="h-4 w-4" />;
       case 'strategy': return <Target className="h-4 w-4" />;
@@ -24,7 +25,7 @@ export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: GeminiInsight['priority']) => {
     switch (priority) {
       case 'high': return 'destructive';
       case 'medium': return 'secondary';
@@ -33,7 +34,7 @@ export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
     }
   };
 
-  const getTypeLabel = (type: string) => {
+  const getTypeLabel = (type: GeminiInsight['type']) => {
     switch (type) {
       case 'prediction': return 'Prediksi';
       case 'strategy': return 'Strategi';
