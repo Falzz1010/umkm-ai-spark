@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +25,35 @@ export function UserDashboard() {
     activeProducts: 0,
     aiGenerations: 0
   });
+
+  // BEGIN: Real-time subscription to product changes for current user (auto-refresh)
+  useEffect(() => {
+    if (!user) return;
+
+    // create a supabase channel for product changes
+    const channel = supabase
+      .channel('public:products')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Fetch products & stats when product belonging to user changes
+          refreshData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // react to user.id only!
+  }, [user?.id]); 
+  // END: real-time
 
   useEffect(() => {
     if (user) {
