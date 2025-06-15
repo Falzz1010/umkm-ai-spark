@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
@@ -6,6 +5,8 @@ import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
 import { Product } from '@/types/database';
 import { DashboardStats } from '@/types/dashboard';
+import { Package, ShoppingCart, BarChart3, Bot, DollarSign, Brain } from 'lucide-react';
+import { useUserData } from '@/hooks/useUserData';
 
 interface DashboardTabsProps {
   products: Product[];
@@ -29,6 +30,7 @@ interface DashboardTabsProps {
 
 export function DashboardTabs({
   products,
+  stats,
   salesKey,
   setSalesKey,
   analyticsData,
@@ -45,33 +47,44 @@ export function DashboardTabs({
   handleExportReport,
   refreshData
 }: DashboardTabsProps) {
+  const { updateProduct } = useUserData();
+
+  const handlePriceUpdate = async (productId: string, newPrice: number) => {
+    try {
+      await updateProduct(productId, { price: newPrice });
+      refreshData();
+    } catch (error) {
+      console.error('Error updating price:', error);
+    }
+  };
+
   return (
-    <div className="animate-fade-in animate-slide-up" style={{'--index': 2} as any}>
-      <Tabs defaultValue="products" className="space-y-6 transition-all duration-300">
-        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gradient-to-r from-background/80 to-muted/40 backdrop-blur-sm border border-border/50 rounded-xl p-2 shadow-lg hover:shadow-xl transition-all duration-300 min-h-[3.5rem] animate-fade-in">
-          <TabsTrigger 
-            value="products" 
-            className="text-xs sm:text-sm py-3 px-3 leading-tight rounded-lg transition-all duration-200 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/60 whitespace-nowrap overflow-hidden"
-          >
-            Produk Saya
+    <div className="animate-slide-up" style={{'--index': 3} as any}>
+      <Tabs defaultValue="products" className="w-full">
+        <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsTrigger value="products" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            <span className="hidden sm:inline">Produk</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="analytics" 
-            className="text-xs sm:text-sm py-3 px-3 leading-tight rounded-lg transition-all duration-200 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/60 whitespace-nowrap overflow-hidden"
-          >
-            Analytics
+          <TabsTrigger value="sales" className="flex items-center gap-2">
+            <ShoppingCart className="h-4 w-4" />
+            <span className="hidden sm:inline">Penjualan</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="ai" 
-            className="text-xs sm:text-sm py-3 px-3 leading-tight rounded-lg transition-all duration-200 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/60 whitespace-nowrap overflow-hidden"
-          >
-            AI Assistant
+          <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Analitik</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="sales" 
-            className="text-xs sm:text-sm py-3 px-3 leading-tight rounded-lg transition-all duration-200 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-muted/60 whitespace-nowrap overflow-hidden"
-          >
-            Penjualan
+          <TabsTrigger value="ai" className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            <span className="hidden sm:inline">AI</span>
+          </TabsTrigger>
+          <TabsTrigger value="pricing" className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4" />
+            <span className="hidden sm:inline">Pricing</span>
+          </TabsTrigger>
+          <TabsTrigger value="insights" className="flex items-center gap-2">
+            <Brain className="h-4 w-4" />
+            <span className="hidden sm:inline">Insights</span>
           </TabsTrigger>
         </TabsList>
         
@@ -95,6 +108,12 @@ export function DashboardTabs({
           </div>
         </TabsContent>
         
+        <TabsContent value="sales" className="animate-fade-in animate-slide-up mt-4 transition-all duration-300">
+          <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
+            <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
+          </div>
+        </TabsContent>
+        
         <TabsContent value="analytics" className="animate-fade-in animate-slide-in-right mt-4 transition-all duration-300">
           <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
             <TabAnalytics analyticsData={analyticsData} products={products} />
@@ -107,10 +126,11 @@ export function DashboardTabs({
           </div>
         </TabsContent>
         
-        <TabsContent value="sales" className="animate-fade-in animate-slide-up mt-4 transition-all duration-300">
-          <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
-            <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
-          </div>
+        <TabsContent value="pricing" className="space-y-6">
+          <TabPricing 
+            products={products}
+            onPriceUpdate={handlePriceUpdate}
+          />
         </TabsContent>
       </Tabs>
     </div>
