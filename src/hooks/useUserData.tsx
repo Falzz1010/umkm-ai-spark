@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { UserRole, Profile, Product } from '@/types/database';
+import { UserRole, Profile } from '@/types/database';
 
 export function useUserData(setProfile?: (profile: Profile | null) => void, setUserRole?: (role: UserRole | null) => void) {
   const [localProfile, setLocalProfile] = useState<Profile | null>(null);
@@ -11,27 +11,6 @@ export function useUserData(setProfile?: (profile: Profile | null) => void, setU
   // Use passed setters if available, otherwise use local state
   const profileSetter = setProfile || setLocalProfile;
   const roleSetter = setUserRole || setLocalUserRole;
-
-  const updateProduct = async (productId: string, updates: Partial<Product>) => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .update(updates)
-        .eq('id', productId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating product:', error);
-        throw error;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Exception updating product:', error);
-      throw error;
-    }
-  };
 
   const fetchUserData = async (userId: string, session: Session, retryCount = 0) => {
     try {
@@ -137,7 +116,6 @@ export function useUserData(setProfile?: (profile: Profile | null) => void, setU
     userRole: localUserRole,
     setProfile: profileSetter,
     setUserRole: roleSetter,
-    updateProduct,
     fetchUserData,
     clearUserData
   };
