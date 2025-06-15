@@ -74,7 +74,7 @@ export function UserDashboard() {
       </div>
 
       {/* Stat cards dengan animasi stagger */}
-      <div className="flex flex-col gap-2 sm:gap-4 mb-2 sm:mb-4 stagger-children">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6 stagger-children">
         <div className="animate-slide-in-left" style={{'--index': 0} as any}>
           <ProductFinanceCards omzet={omzet} laba={laba} />
         </div>
@@ -85,82 +85,81 @@ export function UserDashboard() {
 
       {/* Tabs dengan animasi smooth */}
       <div className="animate-slide-up" style={{'--index': 2} as any}>
-        <Tabs defaultValue="products" className="space-y-3">
+        <Tabs defaultValue="products" className="space-y-4">
           <TabsList
             className="
               w-full
               grid grid-cols-4 gap-1
               overflow-x-auto
-              !mb-1
+              !mb-2
               glass-effect
               shadow-smooth
               hover:shadow-lg
               transition-all duration-300
+              p-1.5
               "
             style={{ minWidth: 320 }}
           >
             <TabsTrigger 
               value="products" 
-              className="text-xs xs:text-sm py-2 px-1 leading-tight hover-scale transition-all duration-200"
+              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
             >
               Produk Saya
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
-              className="text-xs xs:text-sm py-2 px-1 leading-tight hover-scale transition-all duration-200"
+              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
             >
               Analytics
             </TabsTrigger>
             <TabsTrigger 
               value="ai" 
-              className="text-xs xs:text-sm py-2 px-1 leading-tight hover-scale transition-all duration-200"
+              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
             >
               AI Assistant
             </TabsTrigger>
             <TabsTrigger 
               value="sales" 
-              className="text-xs xs:text-sm py-2 px-1 leading-tight hover-scale transition-all duration-200"
+              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
             >
               Penjualan
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="products" className="animate-fade-in">
-            <div className="flex flex-col gap-3">
-              <div className="w-full">
-                <TabProducts
-                  products={products}
-                  filteredProducts={filteredProducts}
-                  filterCategory={filterCategory}
-                  filterSearch={filterSearch}
-                  filterStatus={filterStatus}
-                  filterStok={filterStok}
-                  setFilterCategory={setFilterCategory}
-                  setFilterSearch={setFilterSearch}
-                  setFilterStatus={setFilterStatus}
-                  setFilterStok={setFilterStok}
-                  handleExportExcel={() => handleExportExcel(products)}
-                  handleExportReport={() => handleExportReport(products)}
-                  refreshData={refreshData}
-                />
-              </div>
+          <TabsContent value="products" className="animate-fade-in mt-4">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
+              <TabProducts
+                products={products}
+                filteredProducts={filteredProducts}
+                filterCategory={filterCategory}
+                filterSearch={filterSearch}
+                filterStatus={filterStatus}
+                filterStok={filterStok}
+                setFilterCategory={setFilterCategory}
+                setFilterSearch={setFilterSearch}
+                setFilterStatus={setFilterStatus}
+                setFilterStok={setFilterStok}
+                handleExportExcel={() => handleExportExcel(products)}
+                handleExportReport={() => handleExportReport(products)}
+                refreshData={refreshData}
+              />
             </div>
           </TabsContent>
           
-          <TabsContent value="analytics" className="animate-fade-in">
-            <div className="mt-2">
+          <TabsContent value="analytics" className="animate-fade-in mt-4">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
               <TabAnalytics analyticsData={analyticsData} products={products} />
             </div>
           </TabsContent>
           
-          <TabsContent value="ai" className="animate-fade-in">
-            <div className="mt-2">
+          <TabsContent value="ai" className="animate-fade-in mt-4">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
               <TabAI products={products} onGenerationComplete={refreshData} />
             </div>
           </TabsContent>
           
-          <TabsContent value="sales" className="animate-fade-in">
-            <div className="mt-2">
+          <TabsContent value="sales" className="animate-fade-in mt-4">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
               <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
             </div>
           </TabsContent>
