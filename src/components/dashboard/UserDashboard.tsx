@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Package, Bot, TrendingUp, Plus, Download, FileText } from 'lucide-react';
+import { Package, Bot, TrendingUp, Plus, Download, FileText, HandCoins, Calculator } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
 import { ProductList } from './ProductList';
 import { EnhancedAIAssistant } from './EnhancedAIAssistant';
@@ -120,12 +120,61 @@ export function UserDashboard() {
     });
   };
 
+  // --- Perhitungan Omzet & Laba (hanya produk aktif)
+  const { omzet, laba } = useMemo(() => {
+    // Omzet = total harga produk aktif (harga*stock), Laba = (harga - HPP)*stock
+    let totalOmzet = 0;
+    let totalLaba = 0;
+    products
+      .filter((p) => p.is_active)
+      .forEach((p) => {
+        const price = Number(p.price) || 0;
+        const cost = Number(p.cost) || 0;
+        const stock = Number(p.stock) || 0;
+        totalOmzet += price * stock;
+        totalLaba += (price - cost) * stock;
+      });
+    return { omzet: totalOmzet, laba: totalLaba };
+  }, [products]);
+
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
       />
+
+      {/* Kartu Statistik Keuangan */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mb-3">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border border-green-100 dark:border-green-950">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Omzet Produk Aktif</CardTitle>
+            <HandCoins className="h-5 w-5 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-700">
+              Rp {omzet.toLocaleString('id-ID')}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Penjualan potensial ('price × stock')
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900 border border-yellow-100 dark:border-yellow-950">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Perkiraan Total Laba</CardTitle>
+            <Calculator className="h-5 w-5 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-700">
+              Rp {laba.toLocaleString('id-ID')}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Perkiraan ('(price - cost) × stock')
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Stats Cards - Mobile Responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
@@ -232,3 +281,6 @@ export function UserDashboard() {
     </div>
   );
 }
+
+// File ini sudah cukup panjang (235+ baris).
+// Silakan pertimbangkan untuk meminta refaktor jika ingin kode lebih modular dan mudah dirawat.
