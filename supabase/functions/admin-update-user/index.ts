@@ -12,7 +12,7 @@ const corsHeaders = {
 };
 
 async function isAdmin(req: Request): Promise<boolean> {
-  // implementasi: via JWT, role user harus 'admin'. 
+  // implementasi: via JWT, role user harus 'admin'.
   // Untuk contoh, izinkan semua (silakan ubah dengan pengecekan lebih ketat sesuai kebutuhan).
   // Production: lakukan verifikasi JWT dan role admin di sini
   return true;
@@ -22,6 +22,21 @@ serve(async (req: Request) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Cek presence env variable
+  if (!SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_URL) {
+    console.log("Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_URL!");
+    return new Response(
+      JSON.stringify({
+        error: "SUPABASE_SERVICE_ROLE_KEY atau SUPABASE_URL belum diisi di secrets.",
+        detail: {
+          SUPABASE_SERVICE_ROLE_KEY_exists: !!SUPABASE_SERVICE_ROLE_KEY,
+          SUPABASE_URL_exists: !!SUPABASE_URL,
+        },
+      }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   if (!(await isAdmin(req))) {
@@ -52,36 +67,45 @@ serve(async (req: Request) => {
       );
     }
 
-    // PATCH via Supabase Auth Admin API
     const updates: Record<string, string> = {};
     if (new_email) updates.email = new_email;
     if (new_password) updates.password = new_password;
 
     console.log("PATCH request payload:", updates);
 
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${user_id}`, {
+    const patchUrl = `${SUPABASE_URL}/auth/v1/admin/users/${user_id}`;
+    const patchHeaders = {
+      "Content-Type": "application/json",
+      "apiKey": SUPABASE_SERVICE_ROLE_KEY!,
+      "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+    };
+    console.log("PATCH URL:", patchUrl);
+    console.log("PATCH Headers:", patchHeaders);
+
+    const res = await fetch(patchUrl, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "apiKey": SUPABASE_SERVICE_ROLE_KEY!,
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      },
+      headers: patchHeaders,
       body: JSON.stringify(updates),
     });
 
-    let bodyText = await res.text();
-    console.log("PATCH response status:", res.status, "body:", bodyText);
+    const bodyText = await res.text();
+    console.log("PATCH response status:", res.status, "headers:", JSON.stringify(Object.fromEntries(res.headers)), "body:", bodyText);
 
     let apiRes: any;
     try {
       apiRes = JSON.parse(bodyText);
     } catch (_) {
-      apiRes = { error: "Invalid JSON response", body: bodyText };
+      apiRes = { error: "Invalid JSON response from Supabase", body: bodyText };
     }
 
     if (!res.ok) {
       return new Response(
-        JSON.stringify({ error: apiRes.error || "Failed to update user.", body: apiRes.body || bodyText }),
+        JSON.stringify({
+          error: apiRes.error || "Failed to update user.",
+          body: apiRes.body || bodyText,
+          status: res.status,
+          headers: Object.fromEntries(res.headers),
+        }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
