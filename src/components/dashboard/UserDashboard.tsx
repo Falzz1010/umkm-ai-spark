@@ -224,13 +224,21 @@ export function UserDashboard() {
         <DashboardStatsCards stats={stats} />
       </div>
 
-      {/* Tabs utama responsif, tidak akan overflow di mobile */}
+      {/* Tabs utama responsif, selalu tampil 4 kolom tab di semua ukuran layar */}
       <Tabs defaultValue="products" className="space-y-3">
-        <TabsList className="w-full grid gap-1 xs:grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="products" className="text-xs xs:text-sm py-2">Produk Saya</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs xs:text-sm py-2">Analytics</TabsTrigger>
-          <TabsTrigger value="ai" className="text-xs xs:text-sm py-2">AI Assistant</TabsTrigger>
-          <TabsTrigger value="sales" className="text-xs xs:text-sm py-2">Penjualan</TabsTrigger>
+        <TabsList
+          className="
+            w-full
+            grid grid-cols-4 gap-1
+            overflow-x-auto
+            !mb-1
+            "
+          style={{ minWidth: 320 }}
+        >
+          <TabsTrigger value="products" className="text-xs xs:text-sm py-2 px-1 leading-tight">Produk Saya</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs xs:text-sm py-2 px-1 leading-tight">Analytics</TabsTrigger>
+          <TabsTrigger value="ai" className="text-xs xs:text-sm py-2 px-1 leading-tight">AI Assistant</TabsTrigger>
+          <TabsTrigger value="sales" className="text-xs xs:text-sm py-2 px-1 leading-tight">Penjualan</TabsTrigger>
         </TabsList>
         <TabsContent value="products">
           {/* Tab Produk: stack dan scrollable jika penuh */}
