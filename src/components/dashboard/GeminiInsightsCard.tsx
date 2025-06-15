@@ -45,17 +45,19 @@ export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
 
   if (insights.length === 0 && !loading) {
     return (
-      <Card>
+      <Card className="dark:border-gray-700">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-purple-600" />
+            <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             AI Business Intelligence
-            <Badge variant="outline" className="text-xs">Powered by Gemini</Badge>
+            <Badge variant="outline" className="text-xs border-purple-200 text-purple-700 dark:border-purple-600 dark:text-purple-300">
+              Powered by Gemini
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <Brain className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
             <p className="text-muted-foreground">
               AI sedang menganalisis data bisnis Anda untuk memberikan insight yang lebih cerdas...
             </p>
@@ -66,18 +68,18 @@ export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
   }
 
   return (
-    <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+    <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-white dark:border-purple-600 dark:from-purple-950/20 dark:to-background">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-purple-600" />
+          <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
           AI Business Intelligence
-          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700">
+          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-600">
             Powered by Gemini
           </Badge>
           {loading && (
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-purple-600">Analyzing...</span>
+              <div className="w-2 h-2 bg-purple-500 dark:bg-purple-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-purple-600 dark:text-purple-400">Analyzing...</span>
             </div>
           )}
         </CardTitle>
@@ -87,31 +89,33 @@ export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
           {insights.map((insight) => (
             <div
               key={insight.id}
-              className="relative p-4 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow"
+              className="relative p-4 rounded-lg border bg-white shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800/50 dark:border-gray-700 dark:hover:shadow-lg dark:hover:shadow-purple-500/10"
             >
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5 p-1 rounded-full bg-purple-100">
-                  {getInsightIcon(insight.type)}
+                <div className="flex-shrink-0 mt-0.5 p-1 rounded-full bg-purple-100 dark:bg-purple-900/40">
+                  <div className="text-purple-600 dark:text-purple-400">
+                    {getInsightIcon(insight.type)}
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-semibold text-sm text-gray-900">
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                       {insight.title}
                     </h4>
                     <Badge variant={getPriorityColor(insight.priority)} className="text-xs">
                       {getTypeLabel(insight.type)}
                     </Badge>
                     {insight.confidence && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs dark:border-gray-600 dark:text-gray-300">
                         {insight.confidence}% confidence
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
                     {insight.message}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {insight.timestamp.toLocaleTimeString('id-ID', { 
                         hour: '2-digit', 
                         minute: '2-digit' 
@@ -121,9 +125,9 @@ export function GeminiInsightsCard({ products }: GeminiInsightsCardProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => dismissInsight(insight.id)}
-                      className="h-6 w-6 p-0 hover:bg-gray-100"
+                      className="h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-3 w-3 text-gray-500 dark:text-gray-400" />
                     </Button>
                   </div>
                 </div>
