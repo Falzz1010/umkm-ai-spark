@@ -1,4 +1,3 @@
-
 import React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -39,7 +38,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
     };
   }, [emblaApi]);
 
-  // Variants untuk animasi testimonial (dengan cubic bezier yang smooth)
+  // Variants untuk animasi testimonial (pakai ease string agar kompatibel TS & animasi tetap smooth)
   const cardVariants = {
     hidden: { opacity: 0, y: 44, scale: 0.98, filter: "blur(2px)" },
     visible: {
@@ -49,7 +48,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
       filter: "blur(0)",
       transition: {
         duration: 0.62,
-        ease: [0.42, 0, 0.58, 1]
+        ease: "easeInOut"
       }
     },
     exit: {
@@ -57,7 +56,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
       y: -28,
       scale: 0.97,
       filter: "blur(4px)",
-      transition: { duration: 0.45, ease: [0.7, 0, 0.84, 0] }
+      transition: { duration: 0.45, ease: "easeOut" }
     }
   };
 
