@@ -4,6 +4,7 @@ import { Product } from '@/types/database';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -80,58 +81,60 @@ export function ProductList({ products, onRefresh }: ProductListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {products.map((product) => (
-        <Card key={product.id} className="relative">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">{product.name}</CardTitle>
-              <Badge variant={product.is_active ? "default" : "secondary"}>
-                {product.is_active ? "Aktif" : "Tidak Aktif"}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {product.description || 'Belum ada deskripsi'}
-              </p>
-              <div className="flex items-center justify-between text-sm">
-                <span>Kategori: {product.category || '-'}</span>
-                <span className="font-medium">
-                  Rp {product.price?.toLocaleString() || '-'}
-                </span>
+    <ScrollArea className="h-[600px] w-full rounded-md border">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+        {products.map((product) => (
+          <Card key={product.id} className="relative">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">{product.name}</CardTitle>
+                <Badge variant={product.is_active ? "default" : "secondary"}>
+                  {product.is_active ? "Aktif" : "Tidak Aktif"}
+                </Badge>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span>Modal: Rp {product.cost?.toLocaleString() || '-'}</span>
-                <span>Stok: {product.stock}</span>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {product.description || 'Belum ada deskripsi'}
+                </p>
+                <div className="flex items-center justify-between text-sm">
+                  <span>Kategori: {product.category || '-'}</span>
+                  <span className="font-medium">
+                    Rp {product.price?.toLocaleString() || '-'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span>Modal: Rp {product.cost?.toLocaleString() || '-'}</span>
+                  <span>Stok: {product.stock}</span>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex gap-2 mt-4">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => toggleProductStatus(product.id, product.is_active)}
-                disabled={loading === product.id}
-              >
-                {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-              <Button size="sm" variant="outline">
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button 
-                size="sm" 
-                variant="destructive"
-                onClick={() => deleteProduct(product.id)}
-                disabled={loading === product.id}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+              
+              <div className="flex gap-2 mt-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleProductStatus(product.id, product.is_active)}
+                  disabled={loading === product.id}
+                >
+                  {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Button size="sm" variant="outline">
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="destructive"
+                  onClick={() => deleteProduct(product.id)}
+                  disabled={loading === product.id}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </ScrollArea>
   );
 }
