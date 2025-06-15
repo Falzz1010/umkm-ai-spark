@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/database";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useSecureActions } from "@/hooks/common/useSecureActions";
+import { useRoleValidation } from "@/hooks/common/useRoleValidation";
+import { RoleGuard } from "@/components/common/RoleGuard";
 
 interface Props {
   products: Product[];
@@ -12,11 +12,10 @@ interface Props {
 }
 
 export function SalesTransactionsForm({ products, onFinished }: Props) {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { createItem, loading } = useSecureActions();
+  const { canAccess } = useRoleValidation();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
-  const [loading, setLoading] = useState(false);
   const [currentProducts, setCurrentProducts] = useState<Product[]>(products);
 
   const product = currentProducts.find((p) => p.id === selectedProduct);
@@ -37,59 +36,43 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !product) return;
+    if (!product) return;
     
     if (quantity <= 0) {
-      toast({
-        title: "Jumlah tidak valid",
-        description: "Masukkan jumlah penjualan minimal 1.",
-        variant: "destructive",
-      });
       return;
     }
     
     if ((product.stock ?? 0) < quantity) {
-      toast({
-        title: "Stok tidak cukup",
-        description: "Stok produk tidak mencukupi untuk transaksi ini.",
-        variant: "destructive",
-      });
       return;
     }
     
-    setLoading(true);
     console.log('Creating sales transaction:', { product_id: product.id, quantity, price: product.price });
     
-    const { error } = await supabase.from("sales_transactions").insert([
+    const result = await createItem(
+      'sales_transactions',
       {
-        user_id: user.id,
         product_id: product.id,
         quantity,
         price: product.price,
       },
-    ]);
+      ['user'],
+      'Transaksi penjualan'
+    );
     
-    setLoading(false);
-    
-    if (error) {
-      console.error('Error creating sales transaction:', error);
-      toast({
-        title: "Gagal menyimpan penjualan",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
+    if (result.success) {
+      console.log('Sales transaction created successfully');
+      setQuantity(1);
+      onFinished?.();
     }
-    
-    console.log('Sales transaction created successfully');
-    toast({
-      title: "Transaksi Berhasil",
-      description: "Data penjualan telah direkam dan stok otomatis terupdate.",
-    });
-    
-    setQuantity(1);
-    onFinished?.();
   };
+
+  if (!canAccess(['user'])) {
+    return (
+      <RoleGuard allowedRoles={['user']}>
+        <div />
+      </RoleGuard>
+    );
+  }
 
   if (currentProducts.length === 0) {
     return (
@@ -138,8 +121,11 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
           Stok tersedia: {product?.stock ?? 0}
         </p>
       </div>
-      <Button type="submit" disabled={loading || !product || (product.stock ?? 0) < quantity}>
-        {loading ? "Menyimpan..." : "Catat Penjualan"}
+      <Button 
+        type="submit" 
+        disabled={loading === 'create-new' || !product || (product.stock ?? 0) < quantity}
+      >
+        {loading === 'create-new' ? "Menyimpan..." : "Catat Penjualan"}
       </Button>
     </form>
   );
