@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 
 interface EditProductDialogProps {
   product: Product | null;
@@ -17,7 +17,7 @@ interface EditProductDialogProps {
 
 export function EditProductDialog({ product, open, onOpenChange, onSuccess }: EditProductDialogProps) {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -45,6 +45,8 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
     if (!product) return;
 
     setLoading(true);
+    showLoading("Mengupdate produk...");
+    
     try {
       const { error } = await supabase
         .from('products')
@@ -58,20 +60,16 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
         })
         .eq('id', product.id);
 
+      closeLoading();
+
       if (error) throw error;
 
-      toast({
-        title: "Berhasil",
-        description: "Produk berhasil diupdate"
-      });
+      showSuccess("Berhasil", "Produk berhasil diupdate");
       onSuccess();
       onOpenChange(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Gagal mengupdate produk",
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      closeLoading();
+      showError("Error", "Gagal mengupdate produk: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -92,6 +90,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                disabled={loading}
               />
             </div>
             <div className="grid gap-2">
@@ -100,6 +99,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                disabled={loading}
               />
             </div>
             <div className="grid gap-2">
@@ -108,6 +108,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                disabled={loading}
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -118,6 +119,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
                   type="number"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  disabled={loading}
                 />
               </div>
               <div className="grid gap-2">
@@ -127,6 +129,7 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
                   type="number"
                   value={formData.cost}
                   onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -137,15 +140,23 @@ export function EditProductDialog({ product, open, onOpenChange, onSuccess }: Ed
                 type="number"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                disabled={loading}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
               Batal
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Menyimpan..." : "Simpan"}
+            <Button type="submit" disabled={loading} className="relative">
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Menyimpan...
+                </>
+              ) : (
+                "Simpan"
+              )}
             </Button>
           </DialogFooter>
         </form>

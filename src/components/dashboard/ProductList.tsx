@@ -8,6 +8,7 @@ import { EditProductDialog } from './EditProductDialog';
 import { SecureDataTable } from '@/components/common/SecureDataTable';
 import { ActionButton } from '@/components/common/ActionButton';
 import { useSecureActions } from '@/hooks/common/useSecureActions';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 
 interface ProductListProps {
   products: Product[];
@@ -16,6 +17,7 @@ interface ProductListProps {
 
 export function ProductList({ products, onRefresh }: ProductListProps) {
   const { updateItem, deleteItem, loading } = useSecureActions();
+  const { showConfirm } = useSweetAlert();
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -25,7 +27,8 @@ export function ProductList({ products, onRefresh }: ProductListProps) {
       product.id,
       { is_active: !product.is_active },
       ['user'],
-      'Status produk'
+      'Status produk',
+      true
     );
     
     if (result.success) {
@@ -34,16 +37,22 @@ export function ProductList({ products, onRefresh }: ProductListProps) {
   };
 
   const handleDeleteProduct = async (product: Product) => {
-    if (!confirm('Yakin ingin menghapus produk ini?')) return;
+    const result = await showConfirm(
+      'Hapus Produk',
+      `Yakin ingin menghapus produk "${product.name}"? Data ini tidak dapat dikembalikan.`
+    );
 
-    const result = await deleteItem(
+    if (!result.isConfirmed) return;
+
+    const deleteResult = await deleteItem(
       'products',
       product.id,
       ['user'],
-      'Produk'
+      'Produk',
+      true
     );
     
-    if (result.success) {
+    if (deleteResult.success) {
       onRefresh();
     }
   };

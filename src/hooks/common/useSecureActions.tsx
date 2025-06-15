@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { useRoleValidation } from './useRoleValidation';
 import { UserRole } from '@/types/database';
 import { TableName, TableInsert } from '@/types/supabase';
@@ -17,6 +18,8 @@ interface SecureActionOptions {
   successMessage?: string;
   errorMessage?: string;
   actionId?: string;
+  useSweet?: boolean;
+  showLoading?: boolean;
 }
 
 export function useSecureActions() {
@@ -24,54 +27,78 @@ export function useSecureActions() {
   const { user } = useAuth();
   const { canAccess } = useRoleValidation();
   const { toast } = useToast();
+  const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
 
   const executeAction = async (
     action: () => Promise<any>,
     requiredRoles: UserRole[],
     options: SecureActionOptions = {}
   ): Promise<ActionResult> => {
-    const { successMessage, errorMessage, actionId } = options;
+    const { successMessage, errorMessage, actionId, useSweet = false, showLoading: showLoadingAlert = false } = options;
 
     if (!user) {
-      toast({
-        title: "Error",
-        description: "Anda harus login terlebih dahulu",
-        variant: "destructive"
-      });
+      const message = "Anda harus login terlebih dahulu";
+      if (useSweet) {
+        showError("Error", message);
+      } else {
+        toast({
+          title: "Error",
+          description: message,
+          variant: "destructive"
+        });
+      }
       return { success: false, error: "Tidak ada user yang login" };
     }
 
     if (!canAccess(requiredRoles)) {
-      toast({
-        title: "Akses Ditolak",
-        description: "Anda tidak memiliki izin untuk melakukan aksi ini",
-        variant: "destructive"
-      });
+      const message = "Anda tidak memiliki izin untuk melakukan aksi ini";
+      if (useSweet) {
+        showError("Akses Ditolak", message);
+      } else {
+        toast({
+          title: "Akses Ditolak",
+          description: message,
+          variant: "destructive"
+        });
+      }
       return { success: false, error: "Akses ditolak" };
     }
 
     try {
       if (actionId) setLoading(actionId);
+      if (showLoadingAlert) showLoading("Sedang memproses...");
       
       const result = await action();
       
+      if (showLoadingAlert) closeLoading();
+      
       if (successMessage) {
-        toast({
-          title: "Berhasil",
-          description: successMessage
-        });
+        if (useSweet) {
+          showSuccess("Berhasil", successMessage);
+        } else {
+          toast({
+            title: "Berhasil",
+            description: successMessage
+          });
+        }
       }
       
       return { success: true, data: result };
     } catch (error: any) {
       console.error('Secure action error:', error);
       
+      if (showLoadingAlert) closeLoading();
+      
       const message = errorMessage || error.message || 'Terjadi kesalahan';
-      toast({
-        title: "Error",
-        description: message,
-        variant: "destructive"
-      });
+      if (useSweet) {
+        showError("Error", message);
+      } else {
+        toast({
+          title: "Error",
+          description: message,
+          variant: "destructive"
+        });
+      }
       
       return { success: false, error: message };
     } finally {
@@ -83,7 +110,8 @@ export function useSecureActions() {
     tableName: TableName,
     itemId: string,
     requiredRoles: UserRole[] = ['admin'],
-    itemName?: string
+    itemName?: string,
+    useSweet: boolean = false
   ): Promise<ActionResult> => {
     return executeAction(
       async () => {
@@ -99,7 +127,9 @@ export function useSecureActions() {
       {
         successMessage: `${itemName || 'Item'} berhasil dihapus`,
         errorMessage: `Gagal menghapus ${itemName || 'item'}`,
-        actionId: `delete-${itemId}`
+        actionId: `delete-${itemId}`,
+        useSweet,
+        showLoading: useSweet
       }
     );
   };
@@ -109,7 +139,8 @@ export function useSecureActions() {
     itemId: string,
     updates: Record<string, any>,
     requiredRoles: UserRole[] = ['user'],
-    itemName?: string
+    itemName?: string,
+    useSweet: boolean = false
   ): Promise<ActionResult> => {
     return executeAction(
       async () => {
@@ -125,7 +156,9 @@ export function useSecureActions() {
       {
         successMessage: `${itemName || 'Item'} berhasil diupdate`,
         errorMessage: `Gagal mengupdate ${itemName || 'item'}`,
-        actionId: `update-${itemId}`
+        actionId: `update-${itemId}`,
+        useSweet,
+        showLoading: useSweet
       }
     );
   };
@@ -134,7 +167,8 @@ export function useSecureActions() {
     tableName: T,
     data: TableInsert<T>,
     requiredRoles: UserRole[] = ['user'],
-    itemName?: string
+    itemName?: string,
+    useSweet: boolean = false
   ): Promise<ActionResult> => {
     // Automatically add user_id if not present and user exists
     const insertData = { ...data } as any;
@@ -155,7 +189,9 @@ export function useSecureActions() {
       {
         successMessage: `${itemName || 'Item'} berhasil dibuat`,
         errorMessage: `Gagal membuat ${itemName || 'item'}`,
-        actionId: 'create-new'
+        actionId: 'create-new',
+        useSweet,
+        showLoading: useSweet
       }
     );
   };

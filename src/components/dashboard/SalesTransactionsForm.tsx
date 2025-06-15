@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useSecureActions } from "@/hooks/common/useSecureActions";
 import { useRoleValidation } from "@/hooks/common/useRoleValidation";
 import { RoleGuard } from "@/components/common/RoleGuard";
+import { useSweetAlert } from "@/hooks/useSweetAlert";
 
 interface Props {
   products: Product[];
@@ -14,6 +15,7 @@ interface Props {
 export function SalesTransactionsForm({ products, onFinished }: Props) {
   const { createItem, loading } = useSecureActions();
   const { canAccess } = useRoleValidation();
+  const { showError } = useSweetAlert();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [currentProducts, setCurrentProducts] = useState<Product[]>(products);
@@ -39,10 +41,12 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
     if (!product) return;
     
     if (quantity <= 0) {
+      showError("Jumlah Tidak Valid", "Jumlah harus lebih dari 0");
       return;
     }
     
     if ((product.stock ?? 0) < quantity) {
+      showError("Stok Tidak Cukup", `Stok tersedia hanya ${product.stock}, tidak dapat menjual ${quantity} unit`);
       return;
     }
     
@@ -57,7 +61,8 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
         total: (product.price || 0) * quantity
       },
       ['user'],
-      'Transaksi penjualan'
+      'Transaksi penjualan',
+      true
     );
     
     if (result.success) {
@@ -125,8 +130,16 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
       <Button 
         type="submit" 
         disabled={loading === 'create-new' || !product || (product.stock ?? 0) < quantity}
+        className="relative"
       >
-        {loading === 'create-new' ? "Menyimpan..." : "Catat Penjualan"}
+        {loading === 'create-new' ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Menyimpan...
+          </>
+        ) : (
+          "Catat Penjualan"
+        )}
       </Button>
     </form>
   );

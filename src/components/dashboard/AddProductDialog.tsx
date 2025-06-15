@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 
 interface AddProductDialogProps {
   onProductAdded: () => void;
@@ -17,7 +17,7 @@ interface AddProductDialogProps {
 
 export function AddProductDialog({ onProductAdded, children }: AddProductDialogProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
+  const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,6 +44,8 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
     if (!user) return;
 
     setLoading(true);
+    showLoading("Menambahkan produk...");
+    
     try {
       const { error } = await supabase.from('products').insert([
         {
@@ -57,12 +59,11 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
         }
       ]);
 
+      closeLoading();
+
       if (error) throw error;
 
-      toast({
-        title: "Berhasil",
-        description: "Produk berhasil ditambahkan"
-      });
+      showSuccess("Berhasil", "Produk berhasil ditambahkan");
 
       setFormData({
         name: '',
@@ -74,12 +75,9 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
       });
       setOpen(false);
       onProductAdded();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Gagal menambahkan produk",
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      closeLoading();
+      showError("Error", "Gagal menambahkan produk: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -88,7 +86,7 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>{children}</Button>
+        <Button disabled={loading}>{children}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -106,6 +104,7 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Contoh: Kopi Arabica Premium"
               required
+              disabled={loading}
             />
           </div>
 
@@ -117,6 +116,7 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Deskripsi singkat produk..."
               rows={3}
+              disabled={loading}
             />
           </div>
 
@@ -129,6 +129,7 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
                 value={formData.cost}
                 onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
                 placeholder="50000"
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -139,13 +140,18 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="75000"
+                disabled={loading}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="category">Kategori</Label>
-            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => setFormData({ ...formData, category: value })}
+              disabled={loading}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
@@ -167,6 +173,7 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
               value={formData.stock}
               onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
               placeholder="100"
+              disabled={loading}
             />
           </div>
 
@@ -174,8 +181,15 @@ export function AddProductDialog({ onProductAdded, children }: AddProductDialogP
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
               Batal
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Menyimpan...' : 'Simpan Produk'}
+            <Button type="submit" disabled={loading} className="relative">
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Menyimpan...
+                </>
+              ) : (
+                'Simpan Produk'
+              )}
             </Button>
           </div>
         </form>
