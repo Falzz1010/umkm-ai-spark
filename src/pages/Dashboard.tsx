@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,14 +46,9 @@ export default function Dashboard() {
 
   return (
     <NotificationsProvider>
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-background transition-colors duration-200">
-          <AppSidebar />
-          <SidebarInset>
-            {userRole === 'admin' ? <AdminDashboard /> : <UserDashboard />}
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
+      <div className="min-h-screen bg-background transition-colors duration-200">
+        {userRole === 'admin' ? <AdminDashboard /> : <UserDashboard />}
+      </div>
     </NotificationsProvider>
   );
 }
