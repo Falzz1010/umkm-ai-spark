@@ -76,12 +76,16 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
       <div>
         <label className="text-sm font-semibold">Produk</label>
         <select
-          className="mt-1 border rounded w-full px-3 py-2"
+          className="mt-1 border rounded w-full px-3 py-2 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={selectedProduct}
           onChange={(e) => setSelectedProduct(e.target.value)}
         >
           {products.map((p) => (
-            <option value={p.id} key={p.id}>
+            <option
+              value={p.id}
+              key={p.id}
+              className="text-gray-800 dark:text-zinc-100 bg-white dark:bg-zinc-900"
+            >
               {p.name}
             </option>
           ))}
@@ -91,7 +95,7 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
         <label className="text-sm font-semibold">Jumlah Terjual</label>
         <input
           type="number"
-          className="mt-1 border rounded w-full px-3 py-2"
+          className="mt-1 border rounded w-full px-3 py-2 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           min={1}
           max={product?.stock ?? undefined}
           value={quantity}
