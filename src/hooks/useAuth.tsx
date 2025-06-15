@@ -48,11 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Fetch user data with delay to prevent blocking
+          // Fetch user data with the session - pass it to avoid another getSession call
           setTimeout(async () => {
             if (mounted) {
               try {
-                await fetchUserData(session.user.id);
+                await fetchUserData(session.user.id, session);
               } catch (error) {
                 console.error('Error fetching user data after auth:', error);
               }
@@ -88,9 +88,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Fetch user data
+          // Fetch user data with the session
           try {
-            await fetchUserData(session.user.id);
+            await fetchUserData(session.user.id, session);
           } catch (error) {
             console.error('Error fetching user data during init:', error);
           }

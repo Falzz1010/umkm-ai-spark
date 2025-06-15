@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserRole, Profile } from '@/types/database';
 
@@ -7,17 +8,20 @@ export function useUserData() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
 
-  const fetchUserData = async (userId: string, retryCount = 0) => {
+  const fetchUserData = async (userId: string, session?: Session | null, retryCount = 0) => {
     try {
       console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
       
-      // Check if there's an authenticated session before making API calls
-      const { data: { session } } = await supabase.auth.getSession();
+      // If no session is provided, check for one - but only if we don't have a valid user ID
       if (!session) {
-        console.log('fetchUserData: No authenticated session, skipping data fetch');
-        setProfile(null);
-        setUserRole(null);
-        return;
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (!currentSession) {
+          console.log('fetchUserData: No authenticated session, skipping data fetch');
+          setProfile(null);
+          setUserRole(null);
+          return;
+        }
+        session = currentSession;
       }
       
       // Fetch profile first
@@ -60,7 +64,7 @@ export function useUserData() {
             console.warn(`Network error fetching role, retrying in ${delay}ms... (attempt ${retryCount + 1})`);
             
             await new Promise((resolve) => setTimeout(resolve, delay));
-            return fetchUserData(userId, retryCount + 1);
+            return fetchUserData(userId, session, retryCount + 1);
           } else {
             console.error('Failed to fetch role after retries or non-network error, setting userRole to null');
             setUserRole(null);
@@ -86,7 +90,7 @@ export function useUserData() {
           console.warn(`Exception during role fetch, retrying in ${delay}ms... (attempt ${retryCount + 1})`);
           
           await new Promise((resolve) => setTimeout(resolve, delay));
-          return fetchUserData(userId, retryCount + 1);
+          return fetchUserData(userId, session, retryCount + 1);
         } else {
           console.error('Failed to fetch role due to exception, setting userRole to null');
           setUserRole(null);
@@ -101,7 +105,7 @@ export function useUserData() {
         console.warn(`General error, retrying in ${delay}ms... (attempt ${retryCount + 1})`);
         
         await new Promise((resolve) => setTimeout(resolve, delay));
-        return fetchUserData(userId, retryCount + 1);
+        return fetchUserData(userId, session, retryCount + 1);
       } else {
         console.error('Failed to fetch user data after final retry');
         setUserRole(null);
