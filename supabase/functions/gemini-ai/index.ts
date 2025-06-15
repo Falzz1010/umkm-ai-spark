@@ -34,47 +34,37 @@ serve(async (req) => {
     let systemPrompt = '';
     switch (type) {
       case 'business_insights':
-        systemPrompt = `Anda adalah AI Business Intelligence untuk UMKM Indonesia yang sangat berpengalaman. Analisis data bisnis berikut dan berikan 3-4 insight strategis yang actionable:
+        systemPrompt = `Analisis data UMKM berikut dan berikan 3 insight singkat:
 
-Data Bisnis:
-- Total Produk: ${businessData?.totalProducts || 0}
-- Produk Aktif: ${businessData?.activeProducts || 0}
-- Total Stok: ${businessData?.totalStock || 0}
-- Produk Stok Rendah: ${businessData?.lowStockProducts || 0}
-- Revenue Mingguan: Rp${(businessData?.weeklyRevenue || 0).toLocaleString()}
-- Revenue Bulanan: Rp${(businessData?.monthlyRevenue || 0).toLocaleString()}
-- Transaksi Minggu ini: ${businessData?.weeklyTransactions || 0}
-- Kategori: ${businessData?.categories?.join(', ') || 'N/A'}
-- Produk Terlaris: ${businessData?.topSellingProducts?.map(p => `${p.name} (${p.quantity} terjual)`).join(', ') || 'N/A'}
-- Range Harga: Rp${(businessData?.priceRanges?.min || 0).toLocaleString()} - Rp${(businessData?.priceRanges?.max || 0).toLocaleString()}
+Data: Produk ${businessData?.totalProducts || 0}, Stok ${businessData?.totalStock || 0}, Revenue Rp${(businessData?.weeklyRevenue || 0).toLocaleString()}, Transaksi ${businessData?.weeklyTransactions || 0}/minggu
 
-Berikan insight dalam format:
-1. [Judul Insight] - [Penjelasan detail dengan angka spesifik dan rekomendasi actionable]
-2. [Judul Insight] - [Penjelasan detail dengan angka spesifik dan rekomendasi actionable]
-3. [Judul Insight] - [Penjelasan detail dengan angka spesifik dan rekomendasi actionable]
+Format jawaban:
+1. [Judul] - [1-2 kalimat saran spesifik]
+2. [Judul] - [1-2 kalimat saran spesifik] 
+3. [Judul] - [1-2 kalimat saran spesifik]
 
-Fokus pada: prediksi trends, optimasi stok, strategi pricing, peluang growth, dan risk management. Gunakan bahasa Indonesia yang mudah dipahami UMKM.`;
+Fokus: stok, penjualan, dan pertumbuhan. Bahasa sederhana.`;
         break;
       case 'description':
-        systemPrompt = `Anda adalah AI assistant untuk UMKM Indonesia. Buatkan deskripsi produk yang menarik dan profesional untuk produk: ${productData?.name || 'produk'}. Kategori: ${productData?.category || 'umum'}. Harga modal: Rp ${productData?.cost || 0}. Fokus pada manfaat, kualitas, dan nilai jual. Maksimal 150 kata.`;
+        systemPrompt = `Buat deskripsi produk singkat untuk: ${productData?.name || 'produk'}. Kategori: ${productData?.category || 'umum'}. Maksimal 100 kata, fokus manfaat dan kualitas.`;
         break;
       case 'promotion':
-        systemPrompt = `Buatkan caption promosi untuk social media (Instagram/Facebook) yang engaging untuk produk: ${productData?.name || 'produk'}. Sertakan emoji, hashtag yang relevan, dan call-to-action yang kuat. Gaya bahasa santai tapi profesional.`;
+        systemPrompt = `Buat caption Instagram singkat untuk: ${productData?.name || 'produk'}. Sertakan emoji dan hashtag. Maksimal 150 kata.`;
         break;
       case 'pricing':
-        systemPrompt = `Analisis harga jual optimal untuk produk: ${productData?.name || 'produk'} dengan modal Rp ${productData?.cost || 0}. Berikan saran markup 30-70% sesuai kategori ${productData?.category || 'umum'}. Sertakan pertimbangan kompetitor dan positioning.`;
+        systemPrompt = `Saran harga jual untuk: ${productData?.name || 'produk'} dengan modal Rp ${productData?.cost || 0}. Berikan 2-3 opsi harga dengan alasan singkat.`;
         break;
       case 'campaign':
-        systemPrompt = `Buatkan strategi kampanye promosi lengkap untuk produk: ${productData?.name || 'produk'}. Sertakan: 1) Judul kampanye, 2) Target audiens, 3) Platform yang cocok, 4) Timeline 7 hari, 5) Content calendar, 6) CTA yang efektif.`;
+        systemPrompt = `Strategi promosi 7 hari untuk: ${productData?.name || 'produk'}. Format: Hari - Aktivitas - Platform. Singkat dan praktis.`;
         break;
       case 'schedule':
-        systemPrompt = `Buatkan jadwal promosi 7 hari untuk UMKM dengan produk: ${productData?.name || 'produk'}. Format: Hari - Jenis konten - Platform - Waktu posting optimal. Variasi konten: diskon, testimoni, behind the scenes, tips, giveaway.`;
+        systemPrompt = `Jadwal posting 7 hari untuk: ${productData?.name || 'produk'}. Format: Hari - Konten - Waktu. Variasi: promo, tips, testimoni.`;
         break;
       default:
-        systemPrompt = `Anda adalah AI assistant untuk UMKM Indonesia. Bantu dengan pertanyaan: ${prompt}`;
+        systemPrompt = `Jawab singkat untuk UMKM: ${prompt}`;
     }
 
-    const fullPrompt = `${systemPrompt}\n\nPertanyaan: ${prompt || 'Tolong berikan analisis dan saran untuk data bisnis ini'}`;
+    const fullPrompt = `${systemPrompt}\n\nPertanyaan: ${prompt || 'Berikan analisis singkat'}`;
     console.log('Full prompt:', fullPrompt);
 
     const geminiBody = {
@@ -85,7 +75,7 @@ Fokus pada: prediksi trends, optimasi stok, strategi pricing, peluang growth, da
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 512,
       }
     };
 
