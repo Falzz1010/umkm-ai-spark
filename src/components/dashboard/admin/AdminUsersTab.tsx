@@ -17,7 +17,7 @@ export function AdminUsersTab({ users }: AdminUsersTabProps) {
   const userToEdit = editId ? users.find(u => u.id === editId) : null;
 
   return (
-    <Card className="bg-card/80 shadow-md border-0 rounded-xl">
+    <Card className="bg-card shadow-md border-0 rounded-xl transition-colors">
       <CardHeader>
         <CardTitle className="text-lg">Pengguna Terbaru</CardTitle>
         <CardDescription>Daftar pengguna yang baru mendaftar</CardDescription>
@@ -30,12 +30,12 @@ export function AdminUsersTab({ users }: AdminUsersTabProps) {
           {users.map((user) => (
             <div
               key={user.id}
-              className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg shadow-sm bg-background/70 hover:shadow-lg transition-all group space-y-2 lg:space-y-0"
+              className="flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg shadow-sm bg-background hover:bg-accent/40 hover:shadow-lg transition-all group space-y-2 lg:space-y-0"
             >
               <div>
                 <h3 className="font-semibold group-hover:text-primary transition">{user.full_name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{user.business_name || 'Belum diset'}</p>
-                <p className="text-sm text-gray-500">{user.phone || 'Belum diset'}</p>
+                <p className="text-sm text-muted-foreground">{user.business_name || 'Belum diset'}</p>
+                <p className="text-sm text-muted-foreground">{user.phone || 'Belum diset'}</p>
                 <span className="text-xs text-muted-foreground">{user.id}</span>
               </div>
               <div className="flex gap-2 items-center">

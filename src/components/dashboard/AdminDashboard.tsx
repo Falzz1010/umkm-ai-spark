@@ -30,7 +30,7 @@ export function AdminDashboard() {
         <AdminStatsCards stats={stats} />
       </div>
 
-      <div className="rounded-xl shadow-md bg-background/60 ring-1 ring-border/40 p-0 sm:p-2 sm:pt-4 space-y-6">
+      <div className="rounded-xl shadow-md bg-background ring-1 ring-border p-0 sm:p-2 sm:pt-4 space-y-6 transition-colors">
         <Tabs defaultValue="analytics" className="space-y-4">
           <TabsList className="w-full grid grid-cols-2 lg:grid-cols-4 gap-2 sticky top-0 z-10 bg-background/90 backdrop-blur border rounded-lg p-1 mb-2">
             <TabsTrigger value="analytics" className="text-xs lg:text-sm font-semibold data-[state=active]:bg-primary/90 data-[state=active]:text-white transition-all">
@@ -49,7 +49,7 @@ export function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="analytics">
-            <Card className="rounded-xl shadow-sm border-0 bg-gradient-to-tr from-background via-card/80 to-background/80">
+            <Card className="rounded-xl shadow-sm border-0 bg-card transition-colors">
               <CardHeader>
                 <CardTitle className="text-lg font-bold">Analytics & Insights</CardTitle>
                 <CardDescription>
