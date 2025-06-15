@@ -4,7 +4,6 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip,
   Legend,
   Label,
 } from "recharts";
@@ -60,11 +59,7 @@ export const ChartConfig: React.FC<ChartConfigProps> = ({ isDark }) => {
           style={{ textAnchor: "middle" }}
         />
       </YAxis>
-      <Tooltip
-        content={(props) => <ChartTooltip {...props} isDark={isDark} />}
-        cursor={{ fill: "var(--accent)", opacity: 0.1 }}
-        wrapperClassName="z-50"
-      />
+      <ChartTooltip isDark={isDark} />
       <Legend
         verticalAlign="top"
         align="center"
