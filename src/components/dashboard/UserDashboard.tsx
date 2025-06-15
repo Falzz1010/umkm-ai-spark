@@ -25,7 +25,7 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
-import { useProductAIRecs } from '@/hooks/useProductAIRecs'; // (tidak wajib impor di sini untuk user dashboard, cukup kirim products ke TabAnalytics)
+import { useProductAIInsights } from '@/hooks/useProductAIInsights'; // (tidak wajib impor di sini untuk user dashboard, cukup kirim products ke TabAnalytics)
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
