@@ -1,3 +1,5 @@
+
+// Move this alongside other imports at the top
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +26,8 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
+// FIX: Move useIsMobile import to the top, here:
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
   const { user, profile } = useAuth();
@@ -205,7 +209,6 @@ export function UserDashboard() {
   }, [products, filterCategory, filterSearch, filterStatus, filterStok]);
 
   // --- Gunakan useIsMobile untuk responsif (akan auto rerender di mobile) ---
-  import { useIsMobile } from '@/hooks/use-mobile';
   const isMobile = useIsMobile();
 
   return (
@@ -271,3 +274,4 @@ export function UserDashboard() {
   );
 }
 // File ini sudah terlalu panjang (>270 baris). Setelah dirapikan, sebaiknya difragment ke beberapa komponen modular agar maintainable.
+
