@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SystemEvent {
@@ -51,6 +51,7 @@ export function useSystemHealth() {
     lastUpdated: new Date().toLocaleString()
   });
   const [loading, setLoading] = useState(true);
+  const channelsRef = useRef<any[]>([]);
 
   // Real-time API response time measurement
   const measureApiResponseTime = useCallback(async () => {
@@ -68,7 +69,7 @@ export function useSystemHealth() {
   const measureDbPerformance = useCallback(async () => {
     const startTime = Date.now();
     try {
-      await supabase.from('users').select('count').limit(1);
+      await supabase.from('profiles').select('count').limit(1);
       return Date.now() - startTime;
     } catch (error) {
       console.log('DB measurement failed, using simulated data');
@@ -87,15 +88,15 @@ export function useSystemHealth() {
     const memoryUsage = Math.floor(Math.random() * 85) + 15; // 15-100%
     const activeConnections = Math.floor(Math.random() * 50) + 10;
     
-    // Determine statuses based on real metrics
-    const apiStatus = apiResponseTime > 200 ? 'error' : apiResponseTime > 100 ? 'warning' : 'healthy';
-    const dbStatus = dbConnectionTime > 50 ? 'error' : dbConnectionTime > 30 ? 'warning' : 'healthy';
-    const errorStatus = errorRate > 2 ? 'error' : errorRate > 1 ? 'warning' : 'healthy';
-    const loadStatus = systemLoad > 80 ? 'error' : systemLoad > 60 ? 'warning' : 'healthy';
+    // Determine statuses based on real metrics with proper typing
+    const apiStatus: 'healthy' | 'warning' | 'error' = apiResponseTime > 200 ? 'error' : apiResponseTime > 100 ? 'warning' : 'healthy';
+    const dbStatus: 'healthy' | 'warning' | 'error' = dbConnectionTime > 50 ? 'error' : dbConnectionTime > 30 ? 'warning' : 'healthy';
+    const errorStatus: 'healthy' | 'warning' | 'error' = errorRate > 2 ? 'error' : errorRate > 1 ? 'warning' : 'healthy';
+    const loadStatus: 'healthy' | 'warning' | 'error' = systemLoad > 80 ? 'error' : systemLoad > 60 ? 'warning' : 'healthy';
     
     // Overall status based on worst individual status
     const statuses = [apiStatus, dbStatus, errorStatus, loadStatus];
-    const overallStatus = statuses.includes('error') ? 'error' : 
+    const overallStatus: 'healthy' | 'warning' | 'error' = statuses.includes('error') ? 'error' : 
                          statuses.includes('warning') ? 'warning' : 'healthy';
 
     // Generate dynamic events based on current status
@@ -154,11 +155,11 @@ export function useSystemHealth() {
       // Set error state with timestamp
       setHealthData(prev => ({
         ...prev,
-        overallStatus: 'error',
+        overallStatus: 'error' as const,
         lastUpdated: new Date().toLocaleString(),
         recentEvents: [
           {
-            type: 'error',
+            type: 'error' as const,
             message: 'Failed to fetch system health metrics - using cached data',
             timestamp: new Date().toLocaleString()
           },
@@ -190,9 +191,15 @@ export function useSystemHealth() {
   useEffect(() => {
     console.log('🔗 Setting up real-time subscriptions for health monitoring...');
     
+    // Clean up any existing channels first
+    channelsRef.current.forEach(channel => {
+      supabase.removeChannel(channel);
+    });
+    channelsRef.current = [];
+
     // Monitor products table for API activity
     const productsChannel = supabase
-      .channel('health-products-monitor')
+      .channel(`health-products-monitor-${Date.now()}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'products' },
         () => {
@@ -204,7 +211,7 @@ export function useSystemHealth() {
 
     // Monitor sales transactions for activity tracking
     const salesChannel = supabase
-      .channel('health-sales-monitor')
+      .channel(`health-sales-monitor-${Date.now()}`)
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'sales_transactions' },
         () => {
@@ -214,10 +221,15 @@ export function useSystemHealth() {
       )
       .subscribe();
 
+    // Store channels for cleanup
+    channelsRef.current = [productsChannel, salesChannel];
+
     return () => {
       console.log('🧹 Cleaning up real-time health monitoring subscriptions');
-      supabase.removeChannel(productsChannel);
-      supabase.removeChannel(salesChannel);
+      channelsRef.current.forEach(channel => {
+        supabase.removeChannel(channel);
+      });
+      channelsRef.current = [];
     };
   }, [fetchHealthData]);
 
