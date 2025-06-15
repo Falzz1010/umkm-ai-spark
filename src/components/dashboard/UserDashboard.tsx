@@ -14,6 +14,9 @@ import { Product } from '@/types/database';
 import { exportToExcel, generateProductReport } from '@/lib/exportUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useUserAnalytics } from '@/hooks/useUserAnalytics';
+import { SalesTransactionsForm } from "./SalesTransactionsForm";
+import { SalesTransactionsHistory } from "./SalesTransactionsHistory";
+import { SalesOmzetChart } from "./SalesOmzetChart";
 
 export function UserDashboard() {
   const { user, profile } = useAuth();
@@ -25,6 +28,7 @@ export function UserDashboard() {
     activeProducts: 0,
     aiGenerations: 0
   });
+  const [salesKey, setSalesKey] = useState(0);
 
   // BEGIN: Real-time subscription to product changes for current user (auto-refresh)
   useEffect(() => {
@@ -242,10 +246,11 @@ export function UserDashboard() {
 
       {/* Main Content */}
       <Tabs defaultValue="products" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
           <TabsTrigger value="products" className="text-sm">Produk Saya</TabsTrigger>
           <TabsTrigger value="analytics" className="text-sm">Analytics</TabsTrigger>
           <TabsTrigger value="ai" className="text-sm">AI Assistant</TabsTrigger>
+          <TabsTrigger value="sales" className="text-sm">Penjualan</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products">
@@ -304,6 +309,29 @@ export function UserDashboard() {
 
         <TabsContent value="ai">
           <EnhancedAIAssistant products={products} onGenerationComplete={refreshData} />
+        </TabsContent>
+
+        <TabsContent value="sales">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Catat Transaksi Penjualan</CardTitle>
+                <CardDescription>Catat penjualan manual produk yang sudah terjual.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SalesTransactionsForm
+                  products={products}
+                  onFinished={() => setSalesKey((v) => v + 1)}
+                />
+              </CardContent>
+            </Card>
+            <div>
+              <SalesOmzetChart />
+            </div>
+          </div>
+          <div className="mt-8">
+            <SalesTransactionsHistory refreshKey={salesKey} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

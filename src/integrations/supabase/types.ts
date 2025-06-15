@@ -213,7 +213,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      daily_sales_summary: {
+        Row: {
+          sale_date: string | null
+          total_laba: number | null
+          total_omzet: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
