@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,22 +11,21 @@ export default function Dashboard() {
   const { user, userRole, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Cek akses dashboard yang benar sesuai role
   useEffect(() => {
+    console.log("Dashboard mount: loading:", loading, "user:", user, "userRole:", userRole, "path:", window.location.pathname);
     if (!loading && !user) {
       navigate('/auth');
     }
-
     // Jika user login dari admin/login tapi bukan admin (Atau sebaliknya), signOut
     if (!loading && user && window.location.pathname === '/dashboard') {
-      // Role admin: boleh akses. Role user: redirect ke user dashboard
-      // Di dalam dashboard, jadi kita bisa cek
       if (!userRole) {
+        console.log("No userRole found, signOut called!");
         signOut();
       } else if (
         (userRole === 'admin' && window.location.pathname !== '/dashboard') ||
         (userRole === 'user' && window.location.pathname !== '/dashboard')
       ) {
+        console.log("Role mismatch, signOut called!");
         signOut();
       }
     }
@@ -55,8 +55,22 @@ export default function Dashboard() {
 
   if (!user || !userRole) {
     // Jangan render dashboard sama sekali jika tidak ada user atau role
+    // Tambahkan pesan error jika bukan role admin/user
+    if (!loading && user && !userRole) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+          <p className="text-red-600 text-lg font-semibold">
+            Akses ditolak! Akun Anda belum memiliki role yang benar.<br />
+            Silakan hubungi admin.
+          </p>
+        </div>
+      );
+    }
     return null;
   }
+
+  // Log info sebelum render dashboard
+  console.log("Render dashboard. userRole:", userRole);
 
   return (
     <NotificationsProvider>
