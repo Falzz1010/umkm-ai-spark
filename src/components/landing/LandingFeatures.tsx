@@ -56,11 +56,7 @@ export function LandingFeatures() {
     visible: { 
       opacity: 1, 
       y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
+      scale: 1
     }
   };
 
@@ -98,6 +94,7 @@ export function LandingFeatures() {
             <motion.div
               key={feature.title}
               variants={itemVariants}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               whileHover={{ 
                 y: -8,
                 scale: 1.02,
