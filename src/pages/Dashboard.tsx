@@ -8,14 +8,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { NotificationsProvider } from '@/hooks/NotificationsContext';
 
 export default function Dashboard() {
-  const { user, userRole, loading } = useAuth();
+  const { user, userRole, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
-  }, [user, loading, navigate]);
+    // Jika role tidak ditemukan (userRoles row sudah dihapus), paksa logout dan redirect
+    if (!loading && user && !userRole) {
+      // signOut juga sudah memaksa redirect ke /auth
+      signOut();
+    }
+  }, [user, loading, userRole, navigate, signOut]);
 
   if (loading) {
     return (
@@ -39,7 +44,8 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) {
+  if (!user || !userRole) {
+    // Jangan render dashboard sama sekali jika tidak ada user atau role
     return null;
   }
 
