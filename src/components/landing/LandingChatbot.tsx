@@ -26,7 +26,8 @@ export function LandingChatbot() {
     e?.preventDefault();
     if (!input.trim()) return;
 
-    const newMessages = [
+    // Explicitly set sender as "user"
+    const newMessages: ChatMessage[] = [
       ...messages,
       { sender: "user", content: input },
     ];
@@ -50,7 +51,8 @@ export function LandingChatbot() {
         ...prev,
         {
           sender: "ai",
-          content: data.generatedText ||
+          content:
+            data.generatedText ||
             "Maaf, saya belum dapat menjawab saat ini. Coba lagi nanti.",
         },
       ]);
