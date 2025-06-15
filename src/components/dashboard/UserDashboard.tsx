@@ -17,6 +17,7 @@ import { useUserAnalytics } from '@/hooks/useUserAnalytics';
 import { SalesTransactionsForm } from "./SalesTransactionsForm";
 import { SalesTransactionsHistory } from "./SalesTransactionsHistory";
 import { SalesOmzetChart } from "./SalesOmzetChart";
+import { ProductFilters } from './ProductFilters';
 
 export function UserDashboard() {
   const { user, profile } = useAuth();
@@ -29,6 +30,12 @@ export function UserDashboard() {
     aiGenerations: 0
   });
   const [salesKey, setSalesKey] = useState(0);
+
+  // TAMBAH STATE FILTER
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStok, setFilterStok] = useState("");
 
   // BEGIN: Real-time subscription to product changes for current user (auto-refresh)
   useEffect(() => {
@@ -169,6 +176,28 @@ export function UserDashboard() {
     return { omzet: totalOmzet, laba: totalLaba };
   }, [products]);
 
+  // FILTER PRODUK
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      // Kategori
+      if (filterCategory && p.category !== filterCategory) return false;
+      // Status aktif
+      if (filterStatus === "active" && !p.is_active) return false;
+      if (filterStatus === "inactive" && p.is_active) return false;
+      // Stok
+      if (filterStok === "kosong" && (p.stock ?? 0) > 0) return false;
+      if (filterStok === "limit" && !((p.stock ?? 0) > 0 && (p.stock ?? 0) < 5)) return false;
+      if (filterStok === "ada" && (p.stock ?? 0) === 0) return false;
+      // Pencarian (case insensitive)
+      if (
+        filterSearch &&
+        !(p.name?.toLocaleLowerCase().includes(filterSearch.toLocaleLowerCase()))
+      )
+        return false;
+      return true;
+    });
+  }, [products, filterCategory, filterSearch, filterStatus, filterStok]);
+
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto">
       <DashboardHeader 
@@ -286,7 +315,20 @@ export function UserDashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <ProductList products={products} onRefresh={refreshData} />
+              {/* FILTERS */}
+              <ProductFilters
+                products={products}
+                category={filterCategory}
+                onCategoryChange={setFilterCategory}
+                search={filterSearch}
+                onSearchChange={setFilterSearch}
+                showActive={filterStatus}
+                onShowActiveChange={setFilterStatus}
+                stokStatus={filterStok}
+                onStokStatusChange={setFilterStok}
+              />
+              {/* DAFTAR PRODUK */}
+              <ProductList products={filteredProducts} onRefresh={refreshData} />
             </CardContent>
           </Card>
         </TabsContent>
