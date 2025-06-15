@@ -32,10 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         if (!mounted) return;
         
-        console.log('Auth state changed:', event, session?.user?.id);
+        console.log('Auth state changed:', event, session?.user?.id || 'no session');
         
-        // Handle sign out or no session
-        if (event === 'SIGNED_OUT' || !session) {
+        // Handle explicit sign out
+        if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
           clearUserData();
@@ -43,12 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Handle valid session events (but not INITIAL_SESSION with undefined)
-        if (session && (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN')) {
+        // Handle valid sessions - only process SIGNED_IN and TOKEN_REFRESHED
+        if (session && session.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
           setSession(session);
           setUser(session.user);
           
-          // Fetch user data with a small delay to avoid blocking
+          // Fetch user data with delay to prevent blocking
           setTimeout(async () => {
             if (mounted) {
               try {
@@ -58,6 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
           }, 100);
+        }
+        
+        // Ignore INITIAL_SESSION events - we handle those separately
+        if (event === 'INITIAL_SESSION') {
+          console.log('Ignoring INITIAL_SESSION event, will handle with getSession()');
+          return;
         }
         
         setLoading(false);
@@ -77,11 +83,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(null);
           setUser(null);
           clearUserData();
-        } else if (session) {
+        } else if (session && session.user) {
           console.log('Initial session found:', session.user.id);
           setSession(session);
           setUser(session.user);
-          await fetchUserData(session.user.id);
+          
+          // Fetch user data
+          try {
+            await fetchUserData(session.user.id);
+          } catch (error) {
+            console.error('Error fetching user data during init:', error);
+          }
+        } else {
+          console.log('No initial session found');
+          setSession(null);
+          setUser(null);
+          clearUserData();
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
