@@ -29,7 +29,7 @@ export function useRealSalesData(): RealSalesData {
           total,
           quantity,
           price,
-          products!inner(cost, price as product_price)
+          products!inner(cost, price)
         `)
         .eq('user_id', user.id);
 
