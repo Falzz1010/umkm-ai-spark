@@ -8,7 +8,7 @@ export function LandingCTA() {
   const navigate = useNavigate();
   return (
     <motion.section
-      className="py-20 relative overflow-hidden"
+      className="py-10 sm:py-20 relative overflow-hidden"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -22,7 +22,7 @@ export function LandingCTA() {
       ></motion.div>
       <div className="relative max-w-4xl mx-auto text-center px-4 text-white">
         <motion.h2
-          className="text-3xl lg:text-4xl font-bold mb-4"
+          className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4"
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -31,7 +31,7 @@ export function LandingCTA() {
           Siap Mengembangkan Bisnis UMKM Anda?
         </motion.h2>
         <motion.p
-          className="text-xl mb-8 opacity-90"
+          className="text-base sm:text-xl mb-6 sm:mb-8 opacity-90"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -40,26 +40,30 @@ export function LandingCTA() {
           Bergabunglah dengan ribuan UMKM yang sudah merasakan transformasi digital
         </motion.p>
         <motion.div
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center"
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.33 }}
         >
           <motion.div whileHover={{ scale: 1.08 }}>
-            <Button size="lg"
+            <Button
+              size="lg"
               variant="secondary"
-              className="text-lg px-8 py-6 hover-scale shadow-xl"
-              onClick={() => navigate('/auth')}>
+              className="text-base sm:text-lg px-6 py-4 sm:px-8 sm:py-6 hover-scale shadow-xl"
+              onClick={() => navigate('/auth')}
+            >
               Mulai Gratis Sekarang
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
           <motion.div whileHover={{ scale: 1.08 }}>
-            <Button size="lg"
+            <Button
+              size="lg"
               variant="outline"
-              className="text-lg px-8 py-6 border-white text-white hover:bg-white hover:text-purple-600 hover-scale transition"
-              onClick={() => navigate('/auth')}>
+              className="text-base sm:text-lg px-6 py-4 sm:px-8 sm:py-6 border-white text-white hover:bg-white hover:text-purple-600 hover-scale transition"
+              onClick={() => navigate('/auth')}
+            >
               Hubungi Sales
             </Button>
           </motion.div>

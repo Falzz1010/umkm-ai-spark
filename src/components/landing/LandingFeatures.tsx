@@ -36,27 +36,27 @@ export function LandingFeatures() {
     <motion.section
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className="py-20 bg-muted/30"
+      className="py-12 sm:py-20 bg-muted/30"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
         >
-          <Badge variant="outline" className="mb-4">✨ Fitur Unggulan</Badge>
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          <Badge variant="outline" className="mb-3 sm:mb-4 text-xs sm:text-sm p-2">✨ Fitur Unggulan</Badge>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-3 sm:mb-4">
             Semua yang Anda Butuhkan dalam Satu Platform
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto">
             Solusi lengkap untuk mengoptimalkan operasional dan marketing UMKM Anda
           </p>
         </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -69,13 +69,13 @@ export function LandingFeatures() {
             >
               <Card className="relative border-0 bg-background/70 backdrop-blur transition-all duration-300 group-hover:shadow-2xl hover-scale">
                 <CardHeader className="text-center pb-4">
-                  <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-background to-muted flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow">
-                    <feature.icon className={`h-8 w-8 ${feature.color}`} />
+                  <div className="mx-auto mb-3 sm:mb-4 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-background to-muted flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow">
+                    <feature.icon className={`h-7 w-7 sm:h-8 sm:w-8 ${feature.color}`} />
                   </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardTitle className="text-base sm:text-xl">{feature.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <CardDescription className="text-base leading-relaxed">
+                <CardContent className="text-center px-2 sm:px-0">
+                  <CardDescription className="text-sm sm:text-base leading-relaxed">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
