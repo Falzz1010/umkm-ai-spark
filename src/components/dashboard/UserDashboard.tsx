@@ -205,60 +205,69 @@ export function UserDashboard() {
   }, [products, filterCategory, filterSearch, filterStatus, filterStok]);
 
   return (
-    <div className="p-4 lg:p-6 max-w-7xl mx-auto">
+    <div className="px-2 py-3 sm:px-4 lg:p-6 max-w-7xl mx-auto">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
       />
 
-      {/* Kartu Statistik Keuangan */}
-      <ProductFinanceCards omzet={omzet} laba={laba} />
-
-      {/* Stats Cards - Mobile Responsive */}
-      <DashboardStatsCards stats={stats} />
+      {/* Kartu Statistik Keuangan (Responsif) */}
+      <div className="flex flex-col gap-3 sm:gap-4 mb-3 sm:mb-4">
+        <ProductFinanceCards omzet={omzet} laba={laba} />
+        <DashboardStatsCards stats={stats} />
+      </div>
 
       {/* Main Content */}
       <Tabs defaultValue="products" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
-          <TabsTrigger value="products" className="text-sm">Produk Saya</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-sm">Analytics</TabsTrigger>
-          <TabsTrigger value="ai" className="text-sm">AI Assistant</TabsTrigger>
-          <TabsTrigger value="sales" className="text-sm">Penjualan</TabsTrigger>
+        <TabsList className="w-full grid gap-1 xs:grid-cols-2 sm:grid-cols-4">
+          <TabsTrigger value="products" className="text-sm py-2">Produk Saya</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-sm py-2">Analytics</TabsTrigger>
+          <TabsTrigger value="ai" className="text-sm py-2">AI Assistant</TabsTrigger>
+          <TabsTrigger value="sales" className="text-sm py-2">Penjualan</TabsTrigger>
         </TabsList>
 
         <TabsContent value="products">
-          <TabProducts
-            products={products}
-            filteredProducts={filteredProducts}
-            filterCategory={filterCategory}
-            filterSearch={filterSearch}
-            filterStatus={filterStatus}
-            filterStok={filterStok}
-            setFilterCategory={setFilterCategory}
-            setFilterSearch={setFilterSearch}
-            setFilterStatus={setFilterStatus}
-            setFilterStok={setFilterStok}
-            handleExportExcel={handleExportExcel}
-            handleExportReport={handleExportReport}
-            refreshData={refreshData}
-          />
+          {/* Produk Tab, header + action full-width di mobile */}
+          <div className="flex flex-col gap-4">
+            <TabProducts
+              products={products}
+              filteredProducts={filteredProducts}
+              filterCategory={filterCategory}
+              filterSearch={filterSearch}
+              filterStatus={filterStatus}
+              filterStok={filterStok}
+              setFilterCategory={setFilterCategory}
+              setFilterSearch={setFilterSearch}
+              setFilterStatus={setFilterStatus}
+              setFilterStok={setFilterStok}
+              handleExportExcel={handleExportExcel}
+              handleExportReport={handleExportReport}
+              refreshData={refreshData}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics">
-          <TabAnalytics analyticsData={analyticsData} />
+          <div className="mt-2">
+            <TabAnalytics analyticsData={analyticsData} />
+          </div>
         </TabsContent>
 
         <TabsContent value="ai">
-          <TabAI products={products} onGenerationComplete={refreshData} />
+          <div className="mt-2">
+            <TabAI products={products} onGenerationComplete={refreshData} />
+          </div>
         </TabsContent>
 
         <TabsContent value="sales">
-          <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
+          <div className="mt-2">
+            <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-// File ini sudah cukup panjang (235+ baris).
-// Silakan pertimbangkan untuk meminta refaktor jika ingin kode lebih modular dan mudah dirawat.
+// File ini sudah cukup panjang (265 baris+).
+// Jika ingin pengelolaan lebih mudah, silakan pertimbangkan untuk refaktor menjadi file lebih kecil.
