@@ -53,7 +53,8 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
       {
         product_id: product.id,
         quantity,
-        price: product.price,
+        price: product.price || 0,
+        total: (product.price || 0) * quantity
       },
       ['user'],
       'Transaksi penjualan'

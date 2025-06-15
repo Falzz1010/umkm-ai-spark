@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useRoleValidation } from './useRoleValidation';
 import { UserRole } from '@/types/database';
+import { TableName } from '@/types/supabase';
 
 export function useSecureActions() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -67,13 +68,21 @@ export function useSecureActions() {
   };
 
   const deleteItem = async (
-    tableName: string,
+    tableName: TableName,
     itemId: string,
     requiredRoles: UserRole[] = ['admin'],
     itemName?: string
   ) => {
     return executeAction(
-      () => supabase.from(tableName).delete().eq('id', itemId),
+      async () => {
+        const { data, error } = await supabase
+          .from(tableName)
+          .delete()
+          .eq('id', itemId);
+        
+        if (error) throw error;
+        return data;
+      },
       requiredRoles,
       `${itemName || 'Item'} berhasil dihapus`,
       `Gagal menghapus ${itemName || 'item'}`,
@@ -82,14 +91,22 @@ export function useSecureActions() {
   };
 
   const updateItem = async (
-    tableName: string,
+    tableName: TableName,
     itemId: string,
     updates: Record<string, any>,
     requiredRoles: UserRole[] = ['user'],
     itemName?: string
   ) => {
     return executeAction(
-      () => supabase.from(tableName).update(updates).eq('id', itemId),
+      async () => {
+        const { data, error } = await supabase
+          .from(tableName)
+          .update(updates)
+          .eq('id', itemId);
+        
+        if (error) throw error;
+        return data;
+      },
       requiredRoles,
       `${itemName || 'Item'} berhasil diupdate`,
       `Gagal mengupdate ${itemName || 'item'}`,
@@ -98,7 +115,7 @@ export function useSecureActions() {
   };
 
   const createItem = async (
-    tableName: string,
+    tableName: TableName,
     data: Record<string, any>,
     requiredRoles: UserRole[] = ['user'],
     itemName?: string
@@ -109,7 +126,14 @@ export function useSecureActions() {
     }
 
     return executeAction(
-      () => supabase.from(tableName).insert([data]),
+      async () => {
+        const { data: result, error } = await supabase
+          .from(tableName)
+          .insert(data);
+        
+        if (error) throw error;
+        return result;
+      },
       requiredRoles,
       `${itemName || 'Item'} berhasil dibuat`,
       `Gagal membuat ${itemName || 'item'}`,

@@ -3,12 +3,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { TableName, DatabaseFilter, OrderByConfig } from '@/types/supabase';
 
 interface UseSecureDataOptions {
-  tableName: string;
+  tableName: TableName;
   select?: string;
-  orderBy?: { column: string; ascending?: boolean };
-  filters?: Array<{ column: string; operator: string; value: any }>;
+  orderBy?: OrderByConfig;
+  filters?: DatabaseFilter[];
 }
 
 export function useSecureData<T>({
@@ -52,7 +53,7 @@ export function useSecureData<T>({
         throw fetchError;
       }
 
-      setData(result || []);
+      setData((result as T[]) || []);
     } catch (err: any) {
       console.error(`Error fetching ${tableName}:`, err);
       setError(err.message || 'Terjadi kesalahan saat mengambil data');
