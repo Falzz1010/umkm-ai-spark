@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -85,6 +84,13 @@ export default function Index() {
               <ThemeToggle />
               <Button variant="ghost" onClick={() => navigate('/auth')}>
                 Login
+              </Button>
+              <Button
+                variant="outline"
+                className="text-indigo-600 border-indigo-600"
+                onClick={() => navigate('/auth/admin')}
+              >
+                Login Admin
               </Button>
               <Button onClick={() => navigate('/auth')}>
                 Daftar Gratis
