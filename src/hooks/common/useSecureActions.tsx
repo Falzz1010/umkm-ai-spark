@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useRoleValidation } from './useRoleValidation';
 import { UserRole } from '@/types/database';
-import { TableName } from '@/types/supabase';
+import { TableName, TableInsert } from '@/types/supabase';
 
 export function useSecureActions() {
   const [loading, setLoading] = useState<string | null>(null);
@@ -114,22 +114,23 @@ export function useSecureActions() {
     );
   };
 
-  const createItem = async (
-    tableName: TableName,
-    data: Record<string, any>,
+  const createItem = async <T extends TableName>(
+    tableName: T,
+    data: TableInsert<T>,
     requiredRoles: UserRole[] = ['user'],
     itemName?: string
   ) => {
-    // Automatically add user_id if not present
-    if (!data.user_id && user) {
-      data.user_id = user.id;
+    // Automatically add user_id if not present and user exists
+    const insertData = { ...data } as any;
+    if (!insertData.user_id && user && tableName !== 'profiles') {
+      insertData.user_id = user.id;
     }
 
     return executeAction(
       async () => {
         const { data: result, error } = await supabase
           .from(tableName)
-          .insert(data);
+          .insert(insertData as any);
         
         if (error) throw error;
         return result;
