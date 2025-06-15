@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -50,7 +49,41 @@ export function LandingChatbot() {
         }),
       });
 
-      const data = await res.json();
+      let data: any;
+      // Cek response type
+      const contentType = res.headers.get("content-type");
+
+      if (!res.ok) {
+        // Coba baca text dulu
+        const errorText = await res.text();
+        // Tampilkan status code dan informasi error di chat
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            content: `❌ [${res.status}] Error dari server: ${errorText?.slice(0,80) || "Unknown error, silakan cek backend Gemini AI"}`,
+          }
+        ]);
+        setErrorMsg(`Error dari server (status: ${res.status})`);
+        return;
+      }
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        // Respon tidak berupa JSON
+        const rawText = await res.text();
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            content: `❌ [Server bukan JSON]: ${rawText?.slice(0,80) || "(empty response)"}`,
+          }
+        ]);
+        setErrorMsg("Respons server bukan dalam format JSON.");
+        return;
+      }
+
       // For debugging, log response
       console.log("[Chatbot Gemini] Response", data);
 
@@ -87,7 +120,7 @@ export function LandingChatbot() {
         ...prev,
         {
           sender: "ai",
-          content: "Terjadi kesalahan terhubung ke server. Silakan coba lagi.",
+          content: "Terjadi kesalahan saat parsing jawaban server. Silakan coba lagi.",
         },
       ]);
       setErrorMsg(err?.message || "Unknown Error");
