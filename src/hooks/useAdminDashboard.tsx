@@ -19,6 +19,7 @@ interface AnalyticsData {
 }
 
 export function useAdminDashboard() {
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalProducts: 0,
@@ -248,12 +249,16 @@ export function useAdminDashboard() {
     }
   };
 
-  const refreshData = () => {
-    fetchStats();
-    fetchProducts();
-    fetchUsers();
-    fetchAIGenerations();
-    fetchAnalyticsData();
+  const refreshData = async () => {
+    setLoading(true);
+    await Promise.all([
+      fetchStats(),
+      fetchProducts(),
+      fetchUsers(),
+      fetchAIGenerations(),
+      fetchAnalyticsData()
+    ]);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -267,6 +272,7 @@ export function useAdminDashboard() {
     aiGenerations,
     analyticsData,
     deleteProduct,
-    refreshData
+    refreshData,
+    loading
   };
 }

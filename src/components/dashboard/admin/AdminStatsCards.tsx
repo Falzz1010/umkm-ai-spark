@@ -60,7 +60,7 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 stagger-children">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 stagger-children">
       {statsData.map((stat, index) => {
         const IconComponent = stat.icon;
         return (
@@ -73,30 +73,32 @@ export function AdminStatsCards({ stats }: AdminStatsCardsProps) {
               hover:scale-105 hover:-translate-y-1
               card-hover group cursor-pointer
               animate-slide-up
+              min-h-[100px] sm:min-h-[120px] lg:min-h-[140px]
             `}
             style={{'--index': index} as any}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-3 sm:p-4 lg:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors line-clamp-2">
                 {stat.title}
               </CardTitle>
               <div className={`
-                p-2 rounded-lg bg-background/20 backdrop-blur-sm
+                p-1.5 sm:p-2 rounded-lg bg-background/20 backdrop-blur-sm
                 group-hover:bg-background/40 transition-all duration-200
                 group-hover:scale-110
               `}>
-                <IconComponent className={`h-4 w-4 ${stat.iconColor} group-hover:scale-110 transition-transform`} />
+                <IconComponent className={`h-3 w-3 sm:h-4 sm:w-4 ${stat.iconColor} group-hover:scale-110 transition-transform`} />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className={`text-2xl lg:text-3xl font-bold ${stat.textColor} group-hover:scale-105 transition-transform`}>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
+              <div className={`text-lg sm:text-2xl lg:text-3xl font-bold ${stat.textColor} group-hover:scale-105 transition-transform`}>
                 {stat.value.toLocaleString()}
               </div>
-              <div className="flex items-center gap-1 mt-1">
+              <div className="flex flex-col xs:flex-row xs:items-center gap-0.5 xs:gap-1 mt-1">
                 <span className={`text-xs font-medium ${stat.changeColor}`}>
                   {stat.change}
                 </span>
-                <span className="text-xs text-muted-foreground">vs bulan lalu</span>
+                <span className="text-xs text-muted-foreground hidden xs:inline">vs bulan lalu</span>
+                <span className="text-xs text-muted-foreground xs:hidden">vs bulan lalu</span>
               </div>
             </CardContent>
           </Card>
