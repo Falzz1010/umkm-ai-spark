@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardHeader } from './DashboardHeader';
@@ -85,42 +84,95 @@ export function UserDashboard() {
 
       {/* Tabs dengan animasi smooth */}
       <div className="animate-slide-up" style={{'--index': 2} as any}>
-        <Tabs defaultValue="products" className="space-y-4">
+        <Tabs defaultValue="products" className="space-y-6">
           <TabsList
             className="
               w-full
-              grid grid-cols-4 gap-1
-              overflow-x-auto
-              !mb-2
-              glass-effect
-              shadow-smooth
-              hover:shadow-lg
+              grid grid-cols-2 sm:grid-cols-4 gap-2
+              bg-gradient-to-r from-background/80 to-muted/40
+              backdrop-blur-sm
+              border border-border/50
+              rounded-xl
+              p-2
+              shadow-lg
+              hover:shadow-xl
               transition-all duration-300
-              p-1.5
+              min-h-[3.5rem]
               "
-            style={{ minWidth: 320 }}
           >
             <TabsTrigger 
               value="products" 
-              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
+              className="
+                text-xs sm:text-sm 
+                py-3 px-3 
+                leading-tight 
+                rounded-lg
+                transition-all duration-200
+                font-medium
+                data-[state=active]:bg-primary
+                data-[state=active]:text-primary-foreground
+                data-[state=active]:shadow-md
+                hover:bg-muted/60
+                whitespace-nowrap
+                overflow-hidden
+              "
             >
               Produk Saya
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
-              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
+              className="
+                text-xs sm:text-sm 
+                py-3 px-3 
+                leading-tight 
+                rounded-lg
+                transition-all duration-200
+                font-medium
+                data-[state=active]:bg-primary
+                data-[state=active]:text-primary-foreground
+                data-[state=active]:shadow-md
+                hover:bg-muted/60
+                whitespace-nowrap
+                overflow-hidden
+              "
             >
               Analytics
             </TabsTrigger>
             <TabsTrigger 
               value="ai" 
-              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
+              className="
+                text-xs sm:text-sm 
+                py-3 px-3 
+                leading-tight 
+                rounded-lg
+                transition-all duration-200
+                font-medium
+                data-[state=active]:bg-primary
+                data-[state=active]:text-primary-foreground
+                data-[state=active]:shadow-md
+                hover:bg-muted/60
+                whitespace-nowrap
+                overflow-hidden
+              "
             >
               AI Assistant
             </TabsTrigger>
             <TabsTrigger 
               value="sales" 
-              className="text-xs xs:text-sm py-2.5 px-2 leading-tight hover-scale transition-all duration-200 font-medium"
+              className="
+                text-xs sm:text-sm 
+                py-3 px-3 
+                leading-tight 
+                rounded-lg
+                transition-all duration-200
+                font-medium
+                data-[state=active]:bg-primary
+                data-[state=active]:text-primary-foreground
+                data-[state=active]:shadow-md
+                hover:bg-muted/60
+                whitespace-nowrap
+                overflow-hidden
+              "
             >
               Penjualan
             </TabsTrigger>
