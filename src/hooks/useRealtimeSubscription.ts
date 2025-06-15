@@ -17,13 +17,12 @@ export function useRealtimeSubscription(
     
     console.log('Setting up real-time subscriptions:', configs.map(c => c.table));
 
-    // Create channel
-    const channel = supabase.channel(channelName);
+    let channel = supabase.channel(channelName);
 
     // Add all subscriptions to the same channel
     configs.forEach((config) => {
-      channel.on(
-        'postgres_changes' as any,
+      channel = channel.on(
+        'postgres_changes',
         {
           event: config.event,
           schema: 'public',
