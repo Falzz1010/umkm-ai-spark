@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,7 +17,7 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, signOut } = useAuth();
-  const { toast } = useToast();
+  const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
   const navigate = useNavigate();
 
   // Tambahkan filter role di login user (role hanya 'user', bukan 'admin')
@@ -25,23 +26,18 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      showLoading('Sedang login...');
       const { error } = await signIn(email, password);
       
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        closeLoading();
+        showError("Login Gagal", error.message);
       } else {
         // Ambil user role
         const { data: user } = await supabase.auth.getUser();
         if (!user || !user.user) {
-          toast({
-            title: "Error",
-            description: "User tidak ditemukan setelah login.",
-            variant: "destructive"
-          });
+          closeLoading();
+          showError("Login Gagal", "User tidak ditemukan setelah login.");
           setLoading(false);
           return;
         }
@@ -54,39 +50,28 @@ export default function Auth() {
           .single();
 
         if (roleError || !roleData) {
-          toast({
-            title: "Akses Ditolak",
-            description: "Tidak dapat menemukan role user.",
-            variant: "destructive"
-          });
+          closeLoading();
+          showError("Akses Ditolak", "Tidak dapat menemukan role user.");
           setLoading(false);
           await signOut();
           return;
         }
 
         if (roleData.role === 'user') {
-          toast({
-            title: "Berhasil",
-            description: "Login berhasil!"
-          });
+          closeLoading();
+          showSuccess("Login Berhasil", "Selamat datang kembali!");
           navigate('/dashboard');
         } else {
-          toast({
-            title: "Akses Ditolak",
-            description: "Anda bukan user biasa. Silakan login lewat halaman admin.",
-            variant: "destructive"
-          });
+          closeLoading();
+          showError("Akses Ditolak", "Anda bukan user biasa. Silakan login lewat halaman admin.");
           setLoading(false);
           await signOut(); // Logout bila admin coba login di sini
           return;
         }
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan saat login",
-        variant: "destructive"
-      });
+      closeLoading();
+      showError("Login Gagal", "Terjadi kesalahan saat login");
     } finally {
       setLoading(false);
     }
@@ -97,26 +82,19 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      showLoading('Sedang mendaftar...');
       const { error } = await signUp(email, password, fullName);
       
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        closeLoading();
+        showError("Pendaftaran Gagal", error.message);
       } else {
-        toast({
-          title: "Berhasil",
-          description: "Akun berhasil dibuat! Silakan login."
-        });
+        closeLoading();
+        showSuccess("Pendaftaran Berhasil", "Akun berhasil dibuat! Silakan login.");
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan saat mendaftar",
-        variant: "destructive"
-      });
+      closeLoading();
+      showError("Pendaftaran Gagal", "Terjadi kesalahan saat mendaftar");
     } finally {
       setLoading(false);
     }

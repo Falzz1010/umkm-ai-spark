@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,7 +15,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signOut } = useAuth();
-  const { toast } = useToast();
+  const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
   const navigate = useNavigate();
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -23,14 +23,12 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      showLoading('Sedang login admin...');
       const { error } = await signIn(email, password);
 
       if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
+        closeLoading();
+        showError("Login Gagal", error.message);
         setLoading(false);
         return;
       }
@@ -38,11 +36,8 @@ export default function AdminLogin() {
       // Fetch user for role check
       const { data: user } = await supabase.auth.getUser();
       if (!user || !user.user) {
-        toast({
-          title: "Error",
-          description: "User tidak ditemukan setelah login.",
-          variant: "destructive"
-        });
+        closeLoading();
+        showError("Login Gagal", "User tidak ditemukan setelah login.");
         setLoading(false);
         return;
       }
@@ -55,38 +50,27 @@ export default function AdminLogin() {
         .single();
 
       if (roleError || !roleData) {
-        toast({
-          title: "Akses Ditolak",
-          description: "Tidak dapat menemukan role user.",
-          variant: "destructive"
-        });
+        closeLoading();
+        showError("Akses Ditolak", "Tidak dapat menemukan role user.");
         setLoading(false);
         await signOut();
         return;
       }
 
       if (roleData.role === 'admin') {
-        toast({
-          title: "Berhasil",
-          description: "Login admin berhasil!"
-        });
+        closeLoading();
+        showSuccess("Login Admin Berhasil", "Selamat datang Admin!");
         setLoading(false);
         navigate('/dashboard');
       } else {
-        toast({
-          title: "Akses Ditolak",
-          description: "Akun Anda bukan admin.",
-          variant: "destructive"
-        });
+        closeLoading();
+        showError("Akses Ditolak", "Akun Anda bukan admin.");
         setLoading(false);
         await signOut(); // Logout jika login bukan admin
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan saat login",
-        variant: "destructive"
-      });
+      closeLoading();
+      showError("Login Gagal", "Terjadi kesalahan saat login");
       setLoading(false);
     }
   };
