@@ -49,7 +49,7 @@ export interface SalesTransactionInsert extends BaseTableInsert {
   product_id: string;
   quantity: number;
   price: number;
-  total?: number;
+  // Removed total since it's a generated column
 }
 
 export interface AIGenerationInsert extends BaseTableInsert {

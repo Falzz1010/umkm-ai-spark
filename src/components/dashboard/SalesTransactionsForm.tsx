@@ -52,13 +52,13 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
     
     console.log('Creating sales transaction:', { product_id: product.id, quantity, price: product.price });
     
+    // Remove total from the data since it's a generated column
     const result = await createItem(
       'sales_transactions',
       {
         product_id: product.id,
         quantity,
-        price: product.price || 0,
-        total: (product.price || 0) * quantity
+        price: product.price || 0
       },
       ['user'],
       'Transaksi penjualan',
