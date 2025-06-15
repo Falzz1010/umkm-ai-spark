@@ -4,14 +4,15 @@ import { Product } from '@/types/database';
 export const getTopSellingProducts = (sales: any[]) => {
   const productSales = sales.reduce((acc, sale) => {
     const name = sale.products?.name || 'Unknown';
-    acc[name] = (acc[name] || 0) + sale.quantity;
+    const quantity = Number(sale.quantity) || 0;
+    acc[name] = (acc[name] || 0) + quantity;
     return acc;
   }, {});
   
   return Object.entries(productSales)
     .sort(([,a], [,b]) => (b as number) - (a as number))
     .slice(0, 3)
-    .map(([name, qty]) => ({ name, quantity: qty }));
+    .map(([name, qty]) => ({ name, quantity: qty as number }));
 };
 
 export const getPriceRanges = (products: Product[]) => {
