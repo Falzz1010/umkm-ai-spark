@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectItem, SelectValue, SelectContent } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Product } from "@/types/database";
-import { Filter, Search } from "lucide-react"; // <-- FIXED here
+import { Filter, Search } from "lucide-react";
 
 type ProductFiltersProps = {
   products: Product[];
@@ -49,12 +49,12 @@ export function ProductFilters({
       </div>
       {/* Kategori */}
       <div className="min-w-[150px]">
-        <Select value={category} onValueChange={onCategoryChange}>
+        <Select value={category || "all"} onValueChange={val => onCategoryChange(val === "all" ? "" : val)}>
           <SelectTrigger>
             <SelectValue placeholder="Semua Kategori" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Semua Kategori</SelectItem>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Semua Kategori</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat as string} value={cat as string}>
                 {cat}
@@ -65,12 +65,12 @@ export function ProductFilters({
       </div>
       {/* Status Aktif */}
       <div className="min-w-[130px]">
-        <Select value={showActive} onValueChange={onShowActiveChange}>
+        <Select value={showActive || "all"} onValueChange={val => onShowActiveChange(val === "all" ? "" : val)}>
           <SelectTrigger>
             <SelectValue placeholder="Status" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Semua Status</SelectItem>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Semua Status</SelectItem>
             <SelectItem value="active">Aktif</SelectItem>
             <SelectItem value="inactive">Tidak Aktif</SelectItem>
           </SelectContent>
@@ -78,12 +78,12 @@ export function ProductFilters({
       </div>
       {/* Stok */}
       <div className="min-w-[120px]">
-        <Select value={stokStatus} onValueChange={onStokStatusChange}>
+        <Select value={stokStatus || "all"} onValueChange={val => onStokStatusChange(val === "all" ? "" : val)}>
           <SelectTrigger>
             <SelectValue placeholder="Stok" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">Semua Stok</SelectItem>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Semua Stok</SelectItem>
             <SelectItem value="kosong">Stok Kosong</SelectItem>
             <SelectItem value="limit">Stok Sedikit (&lt;5)</SelectItem>
             <SelectItem value="ada">Stok Tersedia</SelectItem>
