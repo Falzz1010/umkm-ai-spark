@@ -22,14 +22,14 @@ export function useRealSalesData(): RealSalesData {
     try {
       console.log('Fetching real sales data for user:', user.id);
       
-      // Query untuk mendapatkan total omzet dari sales_transactions
+      // Query untuk mendapatkan data penjualan dengan join ke products
       const { data: salesData, error: salesError } = await supabase
         .from('sales_transactions')
         .select(`
           total,
           quantity,
           price,
-          products!inner(cost, price)
+          products(cost, price)
         `)
         .eq('user_id', user.id);
 
@@ -38,20 +38,32 @@ export function useRealSalesData(): RealSalesData {
         return;
       }
 
+      console.log('Raw sales data:', salesData);
+
       // Hitung total omzet dan laba dari sales aktual
       let calculatedOmzet = 0;
       let calculatedLaba = 0;
 
       salesData?.forEach((sale: any) => {
         // Total omzet dari penjualan aktual
-        calculatedOmzet += Number(sale.total) || 0;
+        const saleTotal = Number(sale.total) || 0;
+        calculatedOmzet += saleTotal;
         
         // Hitung laba: (harga jual - cost) × quantity
         const salePrice = Number(sale.price) || 0;
         const productCost = Number(sale.products?.cost) || 0;
         const quantity = Number(sale.quantity) || 0;
         
-        calculatedLaba += (salePrice - productCost) * quantity;
+        const profit = (salePrice - productCost) * quantity;
+        calculatedLaba += profit;
+
+        console.log('Sale calculation:', {
+          salePrice,
+          productCost,
+          quantity,
+          profit,
+          saleTotal
+        });
       });
 
       console.log('Real sales data calculated:', { 
