@@ -61,20 +61,37 @@ export function GlobalSearch({ onResultSelect }: GlobalSearchProps) {
     const mockResults: SearchResult[] = [
       {
         id: '1',
-        type: 'user',
+        type: 'user' as const,
         title: 'John Doe',
         subtitle: 'john@example.com',
         data: { id: '1', email: 'john@example.com' }
       },
       {
         id: '2',
-        type: 'product',
+        type: 'product' as const,
         title: 'Wireless Headphones',
         subtitle: 'Electronics • $99.99',
         data: { id: '2', category: 'Electronics' }
+      },
+      {
+        id: '3',
+        type: 'ai' as const,
+        title: 'Product Description AI',
+        subtitle: 'Generated 2 hours ago',
+        data: { id: '3', type: 'description' }
+      },
+      {
+        id: '4',
+        type: 'analytics' as const,
+        title: 'Sales Report',
+        subtitle: 'Monthly Analytics',
+        data: { id: '4', period: 'monthly' }
       }
     ].filter(result => 
       activeFilters.length === 0 || activeFilters.includes(result.type)
+    ).filter(result =>
+      result.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      result.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     setResults(mockResults);

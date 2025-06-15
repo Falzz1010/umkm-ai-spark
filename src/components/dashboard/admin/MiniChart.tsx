@@ -10,17 +10,11 @@ interface MiniChartProps {
 }
 
 export function MiniChart({ data, type, color = '#3b82f6', height = 60 }: MiniChartProps) {
-  const commonProps = {
-    width: '100%',
-    height: height,
-    data: data
-  };
-
   const renderChart = () => {
     switch (type) {
       case 'line':
         return (
-          <LineChart {...commonProps}>
+          <LineChart data={data}>
             <Line 
               type="monotone" 
               dataKey="value" 
@@ -32,7 +26,7 @@ export function MiniChart({ data, type, color = '#3b82f6', height = 60 }: MiniCh
         );
       case 'area':
         return (
-          <AreaChart {...commonProps}>
+          <AreaChart data={data}>
             <Area 
               type="monotone" 
               dataKey="value" 
@@ -44,7 +38,7 @@ export function MiniChart({ data, type, color = '#3b82f6', height = 60 }: MiniCh
         );
       case 'bar':
         return (
-          <BarChart {...commonProps}>
+          <BarChart data={data}>
             <Bar dataKey="value" fill={color} />
           </BarChart>
         );
