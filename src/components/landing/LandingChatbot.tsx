@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -10,18 +11,36 @@ interface ChatMessage {
   content: string;
 }
 
+const DUMMY_RESPONSES: { [key: string]: string } = {
+  "hai": "Halo! 👋 Saya chatbot demo UMKM. Silakan ajukan pertanyaan seputar bisnis, promosi, atau produk Anda.",
+  "siapa kamu": "Saya chatbot manual dummy tanpa AI. Jawaban saya tidak otomatis, hanya berdasarkan data statis.",
+  "produk": "Produk UMKM sebaiknya punya keunikan (unique selling point) dan promosi kreatif.",
+  "promosi": "Promosi efektif bisa dilakukan lewat media sosial, diskon khusus, dan testimoni pelanggan.",
+  "harga": "Tentukan harga jual dengan memperhitungkan modal, markup, dan harga pasar.",
+  "default": "Terima kasih atas pertanyaannya! (Ini jawaban dummy, chatbot AI telah diganti dengan manual response.)"
+};
+
+function getDummyResponse(input: string): string {
+  const cleaned = input.trim().toLowerCase();
+  for (const key in DUMMY_RESPONSES) {
+    if (cleaned.includes(key) && key !== "default") {
+      return DUMMY_RESPONSES[key];
+    }
+  }
+  return DUMMY_RESPONSES["default"];
+}
+
 export function LandingChatbot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: "ai",
       content:
-        "Hai! 👋 Saya asisten AI Gemini. Tanyakan apapun tentang bisnis UMKM, promosi, atau produk Anda di sini.",
+        "Hai! 👋 Saya chatbot demo UMKM, tanpa AI. Tanyakan apapun tentang bisnis UMKM, promosi, atau produk Anda di sini.",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sendMessage = async (e?: React.FormEvent) => {
@@ -35,102 +54,19 @@ export function LandingChatbot() {
     setMessages(newMessages);
     setInput("");
     setLoading(true);
-    setErrorMsg(null);
 
-    try {
-      const res = await fetch("/functions/v1/gemini-ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: input,
-          type: "",
-        }),
-      });
-
-      let data: any;
-      // Cek response type
-      const contentType = res.headers.get("content-type");
-
-      if (!res.ok) {
-        // Coba baca text dulu
-        const errorText = await res.text();
-        // Tampilkan status code dan informasi error di chat
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "ai",
-            content: `❌ [${res.status}] Error dari server: ${errorText?.slice(0,80) || "Unknown error, silakan cek backend Gemini AI"}`,
-          }
-        ]);
-        setErrorMsg(`Error dari server (status: ${res.status})`);
-        return;
-      }
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await res.json();
-      } else {
-        // Respon tidak berupa JSON
-        const rawText = await res.text();
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "ai",
-            content: `❌ [Server bukan JSON]: ${rawText?.slice(0,80) || "(empty response)"}`,
-          }
-        ]);
-        setErrorMsg("Respons server bukan dalam format JSON.");
-        return;
-      }
-
-      // For debugging, log response
-      console.log("[Chatbot Gemini] Response", data);
-
-      if (data?.success && data.generatedText) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "ai",
-            content: data.generatedText,
-          },
-        ]);
-      } else if (data?.error) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "ai",
-            content: `❌ ${data.error}`,
-          },
-        ]);
-        setErrorMsg(data.error);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "ai",
-            content:
-              "Maaf, saya belum dapat menjawab saat ini. Coba lagi nanti.",
-          },
-        ]);
-        setErrorMsg("Tidak ada respons dari Gemini.");
-      }
-    } catch (err: any) {
+    // Simulasi delay agar terasa seperti loading ke server/AI.
+    setTimeout(() => {
+      const response = getDummyResponse(input);
       setMessages((prev) => [
         ...prev,
-        {
-          sender: "ai",
-          content: "Terjadi kesalahan saat parsing jawaban server. Silakan coba lagi.",
-        },
+        { sender: "ai", content: response }
       ]);
-      setErrorMsg(err?.message || "Unknown Error");
-      console.error("[Chatbot Gemini] Fetch error:", err);
-    } finally {
       setLoading(false);
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 200);
-    }
+    }, 700);
   };
 
   return (
@@ -140,7 +76,7 @@ export function LandingChatbot() {
         variant="secondary"
         size="icon"
         className="fixed bottom-6 right-6 rounded-full shadow-lg z-50 w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 hover:scale-105 transition"
-        aria-label="Buka Chatbot AI Gemini"
+        aria-label="Buka Chatbot Dummy"
         style={{ boxShadow: "0 2px 12px 0 rgba(80,0,220,.14)" }}
       >
         <Bot className="w-7 h-7 text-white" />
@@ -153,8 +89,8 @@ export function LandingChatbot() {
                 <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow">
                   <Bot className="w-5 h-5 text-white" />
                 </span>
-                <CardTitle className="text-lg">ChatBot Gemini AI</CardTitle>
-                <Badge variant="outline" className="ml-auto text-xs">Beta</Badge>
+                <CardTitle className="text-lg">ChatBot Demo Manual</CardTitle>
+                <Badge variant="outline" className="ml-auto text-xs">Demo</Badge>
                 <DialogClose asChild>
                   <button
                     className="ml-3 p-2 rounded hover:bg-accent focus:outline-none transition"
@@ -165,13 +101,8 @@ export function LandingChatbot() {
                 </DialogClose>
               </div>
               <p className="text-sm text-muted-foreground">
-                Dapatkan bantuan instan untuk ide, deskripsi, dan strategi UMKM Anda.
+                Chatbot ini hanya menggunakan data manual statis untuk keperluan demo.
               </p>
-              {errorMsg && (
-                <div className="mt-2 text-red-600 text-xs font-medium">
-                  {errorMsg}
-                </div>
-              )}
             </CardHeader>
             <CardContent>
               <div className="h-64 max-h-80 overflow-y-auto rounded-md border bg-muted/20 p-3 space-y-3 transition-colors"
@@ -220,3 +151,4 @@ export function LandingChatbot() {
 }
 
 export default LandingChatbot;
+
