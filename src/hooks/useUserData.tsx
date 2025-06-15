@@ -11,6 +11,15 @@ export function useUserData() {
     try {
       console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
       
+      // Check if there's an authenticated session before making API calls
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log('fetchUserData: No authenticated session, skipping data fetch');
+        setProfile(null);
+        setUserRole(null);
+        return;
+      }
+      
       // Fetch profile first
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
