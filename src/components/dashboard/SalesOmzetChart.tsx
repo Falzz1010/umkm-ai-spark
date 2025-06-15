@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +12,7 @@ import {
   ResponsiveContainer,
   Legend,
   Label,
+  TooltipProps,
 } from "recharts";
 
 type ChartData = {
@@ -89,13 +89,13 @@ export function SalesOmzetChart() {
     );
   }
 
-  // Custom Tooltip for better UX
-  const CustomTooltip = ({ active, payload, label }) => {
+  // Custom Tooltip with correct props type
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
     if (!active || !payload || payload.length === 0) return null;
     return (
       <div className="rounded-md shadow-sm bg-background p-3 border border-muted">
         <div className="mb-1 text-xs text-muted-foreground font-semibold">
-          {new Date(label).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+          {new Date(label as string).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
         </div>
         {payload.map((entry, idx) => (
           <div key={idx} className="flex items-center gap-2 text-sm">
@@ -163,7 +163,7 @@ export function SalesOmzetChart() {
                 />
               </YAxis>
               <Tooltip 
-                content={<CustomTooltip />}
+                content={CustomTooltip}
                 cursor={{ fill: "var(--accent)", opacity: 0.06 }} 
               />
               <Legend
@@ -185,7 +185,6 @@ export function SalesOmzetChart() {
                 maxBarSize={32}
                 className="transition-all duration-150"
                 style={{ filter: "drop-shadow(0 2px 6px #34d39933)" }}
-                // highlight on hover using recharts style prop
                 activeBar={{ fill: "#059669" }}
               />
               <Bar
