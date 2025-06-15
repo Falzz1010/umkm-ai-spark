@@ -11,6 +11,7 @@ import { LandingHero } from '@/components/landing/LandingHero';
 import { LandingFeatures } from '@/components/landing/LandingFeatures';
 import { LandingBenefits } from '@/components/landing/LandingBenefits';
 import { LandingTestimonials } from '@/components/landing/LandingTestimonials';
+import { LandingFAQ } from '@/components/landing/LandingFAQ';
 import { LandingCTA } from '@/components/landing/LandingCTA';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { LandingChatbot } from "@/components/landing/LandingChatbot";
@@ -83,6 +84,8 @@ export default function Index() {
       <LandingFeatures />
       <LandingBenefits />
       <LandingTestimonials />
+      {/* FAQ Accordion Section */}
+      <LandingFAQ />
       {/* Chatbot Gemini AI (Baru Ditambahkan Dibawah Testimoni) */}
       <section className="py-12 transition-colors">
         <LandingChatbot />
