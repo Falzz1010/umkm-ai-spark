@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +17,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Utility to cleanup all Supabase auth states in storage
+function cleanupAuthState() {
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -28,12 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
-          // Fetch profile and role
+          // Fetch profile and role slightly deferred
           setTimeout(async () => {
             await fetchUserData(session.user.id);
           }, 0);
@@ -87,20 +102,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    cleanupAuthState();
+    // optional: try global sign out, ignore result
+    try { await supabase.auth.signOut({ scope: 'global' }); } catch (err) {}
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: {
-            full_name: fullName
-          }
+          data: { full_name: fullName }
         }
       });
-      
       return { error };
     } catch (error) {
       return { error };
@@ -108,12 +122,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    cleanupAuthState();
+    // optional: try global sign out, ignore error
+    try { await supabase.auth.signOut({ scope: 'global' }); } catch (err) {}
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
-      
       return { error };
     } catch (error) {
       return { error };
@@ -122,17 +138,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      cleanupAuthState();
+      // global sign out (try catch untuk fallback)
+      try { await supabase.auth.signOut({ scope: 'global' }); } catch (err) {}
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
-      // Redirect to landing page instead of auth page
-      window.location.href = '/';
+      window.location.href = '/auth'; // paksa reload dan pastikan state fresh
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Even if there's an error, redirect to landing page
-      window.location.href = '/';
+      // Bahkan jika error, tetap force ke /auth
+      window.location.href = '/auth';
     }
   };
 
