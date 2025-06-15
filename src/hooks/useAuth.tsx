@@ -1,4 +1,3 @@
-
 import { useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +5,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import { useUserData } from '@/hooks/useUserData';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
 import { cleanupAuthState } from '@/utils/authUtils';
+import { Profile } from '@/types/database';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
