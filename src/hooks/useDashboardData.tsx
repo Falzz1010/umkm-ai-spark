@@ -106,6 +106,7 @@ export function useDashboardData() {
         event: '*' as const,
         filter: `user_id=eq.${user.id}`,
         callback: () => {
+          // Pastikan setiap kali terjadi transaksi penjualan, produk juga di-refresh!
           fetchProducts();
           fetchStats();
           refreshAnalytics();
