@@ -48,9 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Fetch user data with the session - pass it to avoid another getSession call
+          // Fetch user data with delay to prevent blocking - only if we have a session
           setTimeout(async () => {
-            if (mounted) {
+            if (mounted && session) {
               try {
                 await fetchUserData(session.user.id, session);
               } catch (error) {
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(session);
           setUser(session.user);
           
-          // Fetch user data with the session
+          // Fetch user data only if we have a valid session
           try {
             await fetchUserData(session.user.id, session);
           } catch (error) {

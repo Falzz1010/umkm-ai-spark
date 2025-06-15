@@ -8,21 +8,12 @@ export function useUserData() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
 
-  const fetchUserData = async (userId: string, session?: Session | null, retryCount = 0) => {
+  const fetchUserData = async (userId: string, session: Session, retryCount = 0) => {
     try {
       console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
       
-      // If no session is provided, check for one - but only if we don't have a valid user ID
-      if (!session) {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (!currentSession) {
-          console.log('fetchUserData: No authenticated session, skipping data fetch');
-          setProfile(null);
-          setUserRole(null);
-          return;
-        }
-        session = currentSession;
-      }
+      // Don't check for session again - trust the session passed from auth context
+      console.log('fetchUserData: Using provided session for API calls');
       
       // Fetch profile first
       const { data: profileData, error: profileError } = await supabase
