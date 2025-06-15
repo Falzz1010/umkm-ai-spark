@@ -5,6 +5,7 @@ import { DashboardLayout } from './DashboardLayout';
 import { DashboardLoadingSkeleton } from './DashboardLoadingSkeleton';
 import { DashboardStatsSection } from './DashboardStatsSection';
 import { DashboardTabs } from './DashboardTabs';
+import { RealtimeInsights } from './RealtimeInsights';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 
@@ -54,6 +55,11 @@ export function UserDashboard() {
         omzet={omzet} 
         laba={laba} 
       />
+
+      {/* Real-time Business Insights */}
+      <div className="mb-6 animate-slide-up" style={{'--index': 2} as any}>
+        <RealtimeInsights products={products} />
+      </div>
 
       <DashboardTabs
         products={products}
