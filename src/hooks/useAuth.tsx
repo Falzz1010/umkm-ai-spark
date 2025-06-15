@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (roleError) {
         console.error('Error fetching role:', roleError);
@@ -138,8 +138,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await new Promise((res) => setTimeout(res, 400)); // 400ms debounce
           return fetchUserData(userId, retryCount + 1);
         }
-      } else if (roleData) {
+      } 
+      if (roleData && roleData.role) {
         setUserRole(roleData.role as UserRole);
+        console.log("fetchUserData: userRole found:", roleData.role);
+      } else {
+        setUserRole(null);
+        console.warn("fetchUserData: roleData not found for user", userId);
       }
     } catch (error: any) {
       console.error('Error fetching user data (exception):', error);
