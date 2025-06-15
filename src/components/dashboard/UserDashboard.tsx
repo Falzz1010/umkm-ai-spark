@@ -18,6 +18,12 @@ import { SalesTransactionsForm } from "./SalesTransactionsForm";
 import { SalesTransactionsHistory } from "./SalesTransactionsHistory";
 import { SalesOmzetChart } from "./SalesOmzetChart";
 import { ProductFilters } from './ProductFilters';
+import { ProductFinanceCards } from './ProductFinanceCards';
+import { DashboardStatsCards } from './DashboardStatsCards';
+import { TabProducts } from './TabProducts';
+import { TabAnalytics } from './TabAnalytics';
+import { TabAI } from './TabAI';
+import { TabSales } from './TabSales';
 
 export function UserDashboard() {
   const { user, profile } = useAuth();
@@ -206,72 +212,10 @@ export function UserDashboard() {
       />
 
       {/* Kartu Statistik Keuangan */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mb-3">
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border border-green-100 dark:border-green-950">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Omzet Produk Aktif</CardTitle>
-            <HandCoins className="h-5 w-5 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-700">
-              Rp {omzet.toLocaleString('id-ID')}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Penjualan potensial ('price × stock')
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900 border border-yellow-100 dark:border-yellow-950">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Perkiraan Total Laba</CardTitle>
-            <Calculator className="h-5 w-5 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-700">
-              Rp {laba.toLocaleString('id-ID')}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Perkiraan ('(price - cost) × stock')
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <ProductFinanceCards omzet={omzet} laba={laba} />
 
       {/* Stats Cards - Mobile Responsive */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-        <Card className="bg-card border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Produk</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">Semua produk Anda</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produk Aktif</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeProducts}</div>
-            <p className="text-xs text-muted-foreground">Siap dipasarkan</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border sm:col-span-2 lg:col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AI Generations</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.aiGenerations}</div>
-            <p className="text-xs text-muted-foreground">Total bantuan AI</p>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardStatsCards stats={stats} />
 
       {/* Main Content */}
       <Tabs defaultValue="products" className="space-y-4">
@@ -283,97 +227,33 @@ export function UserDashboard() {
         </TabsList>
 
         <TabsContent value="products">
-          <Card>
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-              <div>
-                <CardTitle>Produk Saya</CardTitle>
-                <CardDescription>Kelola produk bisnis Anda</CardDescription>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={handleExportExcel}
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Excel
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleExportReport}
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Download Laporan
-                </Button>
-                <AddProductDialog onProductAdded={refreshData}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Tambah Produk
-                </AddProductDialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {/* FILTERS */}
-              <ProductFilters
-                products={products}
-                category={filterCategory}
-                onCategoryChange={setFilterCategory}
-                search={filterSearch}
-                onSearchChange={setFilterSearch}
-                showActive={filterStatus}
-                onShowActiveChange={setFilterStatus}
-                stokStatus={filterStok}
-                onStokStatusChange={setFilterStok}
-              />
-              {/* DAFTAR PRODUK */}
-              <ProductList products={filteredProducts} onRefresh={refreshData} />
-            </CardContent>
-          </Card>
+          <TabProducts
+            products={products}
+            filteredProducts={filteredProducts}
+            filterCategory={filterCategory}
+            filterSearch={filterSearch}
+            filterStatus={filterStatus}
+            filterStok={filterStok}
+            setFilterCategory={setFilterCategory}
+            setFilterSearch={setFilterSearch}
+            setFilterStatus={setFilterStatus}
+            setFilterStok={setFilterStok}
+            handleExportExcel={handleExportExcel}
+            handleExportReport={handleExportReport}
+            refreshData={refreshData}
+          />
         </TabsContent>
 
         <TabsContent value="analytics">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dashboard Analytics</CardTitle>
-                <CardDescription>
-                  Analisis performa bisnis dan aktivitas penggunaan platform
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AnalyticsCharts data={analyticsData} />
-              </CardContent>
-            </Card>
-          </div>
+          <TabAnalytics analyticsData={analyticsData} />
         </TabsContent>
 
         <TabsContent value="ai">
-          <EnhancedAIAssistant products={products} onGenerationComplete={refreshData} />
+          <TabAI products={products} onGenerationComplete={refreshData} />
         </TabsContent>
 
         <TabsContent value="sales">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Catat Transaksi Penjualan</CardTitle>
-                <CardDescription>Catat penjualan manual produk yang sudah terjual.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SalesTransactionsForm
-                  products={products}
-                  onFinished={() => setSalesKey((v) => v + 1)}
-                />
-              </CardContent>
-            </Card>
-            <div>
-              <SalesOmzetChart />
-            </div>
-          </div>
-          <div className="mt-8">
-            <SalesTransactionsHistory refreshKey={salesKey} />
-          </div>
+          <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
         </TabsContent>
       </Tabs>
     </div>

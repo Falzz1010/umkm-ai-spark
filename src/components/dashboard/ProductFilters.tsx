@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectItem, SelectValue, SelectContent } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Product } from "@/types/database";
-import { filter as lucideFilter, search as lucideSearch } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 
 type ProductFiltersProps = {
   products: Product[];
@@ -39,7 +39,7 @@ export function ProductFilters({
     <div className="flex flex-col md:flex-row gap-2 md:items-end mb-4 bg-muted/60 px-3 py-2 rounded-md">
       {/* Pencarian */}
       <div className="flex-1 flex items-center gap-2">
-        <lucideSearch className="h-4 w-4 text-muted-foreground" />
+        <Search className="h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Cari nama produk..."
           value={search}
@@ -93,4 +93,3 @@ export function ProductFilters({
     </div>
   );
 }
-
