@@ -11,7 +11,7 @@ import { EnhancedAIAssistant } from './EnhancedAIAssistant';
 import { AddProductDialog } from './AddProductDialog';
 import { AnalyticsCharts } from './AnalyticsCharts';
 import { Product } from '@/types/database';
-import { exportToExcel, generateProductReport } from '@/lib/exportUtils';
+import { exportToExcel, generateProductReport, exportToPDF } from '@/lib/exportUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useUserAnalytics } from '@/hooks/useUserAnalytics';
 import { SalesTransactionsForm } from "./SalesTransactionsForm";
@@ -152,6 +152,22 @@ export function UserDashboard() {
     });
   };
 
+  const handleExportPDF = () => {
+    if (products.length === 0) {
+      toast({
+        title: "Tidak ada data",
+        description: "Belum ada produk untuk diekspor.",
+        variant: "destructive"
+      });
+      return;
+    }
+    exportToPDF(products, profile?.full_name || "");
+    toast({
+      title: "Export PDF Berhasil",
+      description: "Laporan produk berhasil diunduh dalam format PDF!"
+    });
+  };
+
   // --- Perhitungan Omzet & Laba (hanya produk aktif)
   const { omzet, laba } = useMemo(() => {
     // Omzet = total harga produk aktif (harga*stock), Laba = (harga - HPP)*stock
@@ -278,6 +294,15 @@ export function UserDashboard() {
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   Download Laporan
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleExportPDF}
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export PDF
                 </Button>
                 <AddProductDialog onProductAdded={refreshData}>
                   <Plus className="h-4 w-4 mr-2" />

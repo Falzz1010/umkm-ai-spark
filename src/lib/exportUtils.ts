@@ -1,6 +1,7 @@
-
 import * as XLSX from 'xlsx';
 import { Product } from '@/types/database';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export const exportToExcel = (products: Product[], filename: string = 'products') => {
   const data = products.map(product => ({
@@ -36,6 +37,51 @@ export const exportToExcel = (products: Product[], filename: string = 'products'
   worksheet['!cols'] = cols;
 
   XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
+
+export const exportToPDF = (products: Product[], userName?: string) => {
+  const doc = new jsPDF();
+  // Title
+  doc.setFontSize(16);
+  doc.text("LAPORAN PRODUK UMKM", 14, 16);
+  doc.setFontSize(10);
+  doc.text(
+    `Tanggal Export: ${new Date().toLocaleDateString("id-ID")}    User: ${userName || "-"}`,
+    14,
+    22
+  );
+
+  // Table
+  autoTable(doc, {
+    head: [
+      [
+        "No",
+        "Nama Produk",
+        "Kategori",
+        "Harga Modal",
+        "Harga Jual",
+        "Stok",
+        "Status",
+        "Tanggal Ditambah",
+      ],
+    ],
+    body: products.map((p, i) => [
+      String(i + 1),
+      p.name,
+      p.category || "-",
+      "Rp " + (p.cost ?? 0).toLocaleString("id-ID"),
+      "Rp " + (p.price ?? 0).toLocaleString("id-ID"),
+      p.stock ?? 0,
+      p.is_active ? "Aktif" : "Tidak Aktif",
+      new Date(p.created_at).toLocaleDateString("id-ID"),
+    ]),
+    startY: 28,
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [22, 163, 74] }, // green 600
+    margin: { left: 10, right: 10 },
+  });
+
+  doc.save(`laporan_produk_${new Date().toISOString().split("T")[0]}.pdf`);
 };
 
 export const generateProductReport = (products: Product[]): string => {
