@@ -71,20 +71,18 @@ export function UserDashboard() {
           subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
         />
       </div>
-
       {/* Stat cards dengan animasi stagger */}
       <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6 stagger-children">
-        <div className="animate-slide-in-left" style={{'--index': 0} as any}>
+        <div className="animate-bounce-subtle animate-slide-in-left" style={{'--index': 0} as any}>
           <ProductFinanceCards omzet={omzet} laba={laba} />
         </div>
-        <div className="animate-slide-in-right" style={{'--index': 1} as any}>
+        <div className="animate-slide-in-right animate-scale-in" style={{'--index': 1} as any}>
           <DashboardStatsCards stats={stats} />
         </div>
       </div>
-
       {/* Tabs dengan animasi smooth */}
-      <div className="animate-slide-up" style={{'--index': 2} as any}>
-        <Tabs defaultValue="products" className="space-y-6">
+      <div className="animate-fade-in animate-slide-up" style={{'--index': 2} as any}>
+        <Tabs defaultValue="products" className="space-y-6 transition-all duration-300">
           <TabsList
             className="
               w-full
@@ -98,6 +96,7 @@ export function UserDashboard() {
               hover:shadow-xl
               transition-all duration-300
               min-h-[3.5rem]
+              animate-fade-in
               "
           >
             <TabsTrigger 
@@ -178,8 +177,8 @@ export function UserDashboard() {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="products" className="animate-fade-in mt-4">
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
+          <TabsContent value="products" className="animate-fade-in animate-slide-up mt-4 transition-all duration-300">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
               <TabProducts
                 products={products}
                 filteredProducts={filteredProducts}
@@ -198,20 +197,20 @@ export function UserDashboard() {
             </div>
           </TabsContent>
           
-          <TabsContent value="analytics" className="animate-fade-in mt-4">
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
+          <TabsContent value="analytics" className="animate-fade-in animate-slide-in-right mt-4 transition-all duration-300">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
               <TabAnalytics analyticsData={analyticsData} products={products} />
             </div>
           </TabsContent>
           
-          <TabsContent value="ai" className="animate-fade-in mt-4">
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
+          <TabsContent value="ai" className="animate-fade-in animate-slide-in-left mt-4 transition-all duration-300">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
               <TabAI products={products} onGenerationComplete={refreshData} />
             </div>
           </TabsContent>
           
-          <TabsContent value="sales" className="animate-fade-in mt-4">
-            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4">
+          <TabsContent value="sales" className="animate-fade-in animate-slide-up mt-4 transition-all duration-300">
+            <div className="bg-card/50 backdrop-blur-sm rounded-lg border shadow-smooth p-4 animate-scale-in">
               <TabSales products={products} salesKey={salesKey} setSalesKey={setSalesKey} />
             </div>
           </TabsContent>
