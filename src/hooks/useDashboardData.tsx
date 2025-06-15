@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,6 +95,7 @@ export function useDashboardData() {
         event: '*' as const,
         filter: `user_id=eq.${user.id}`,
         callback: () => {
+          // Setiap perubahan di products dilakukan refresh!
           fetchProducts();
           fetchStats();
           refreshAnalytics();
@@ -105,10 +105,11 @@ export function useDashboardData() {
         table: 'sales_transactions',
         event: '*' as const,
         filter: `user_id=eq.${user.id}`,
-        callback: () => {
-          // Pastikan setiap kali terjadi transaksi penjualan, produk juga di-refresh!
-          fetchProducts();
-          fetchStats();
+        callback: async () => {
+          // Setelah transaksi penjualan, ambil data products & stats terbaru.
+          // Tunggu fetchStats selesai sebelum fetchProducts agar urutan update stok produk dari trigger DB sudah benar.
+          await fetchStats();
+          await fetchProducts();
           refreshAnalytics();
           setSalesKey(prev => prev + 1);
         }
