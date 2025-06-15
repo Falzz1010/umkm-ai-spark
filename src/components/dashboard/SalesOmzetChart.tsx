@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Label } from "recharts";
 
 type ChartData = {
   sale_date: string;
@@ -47,20 +47,55 @@ export function SalesOmzetChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tren Omzet & Laba Harian</CardTitle>
+        <CardTitle>Grafik Line Omzet & Laba Harian</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={data}>
+          <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 12 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="sale_date" tickFormatter={(d) =>
-              new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })
-            } />
-            <YAxis />
+            <XAxis
+              dataKey="sale_date"
+              tickFormatter={(d) =>
+                new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })
+              }
+              angle={-15}
+              textAnchor="end"
+              height={48}
+            >
+              <Label value="Tanggal" offset={-5} position="insideBottom" />
+            </XAxis>
+            <YAxis>
+              <Label
+                value="Rp"
+                position="insideTopLeft"
+                offset={0}
+                angle={-90}
+                style={{ textAnchor: "middle" }}
+                className="fill-muted-foreground"
+              />
+            </YAxis>
             <Tooltip formatter={(value: number) => "Rp " + value.toLocaleString("id-ID")} />
-            <Legend />
-            <Line type="monotone" dataKey="total_omzet" stroke="#22c55e" name="Omzet" />
-            <Line type="monotone" dataKey="total_laba" stroke="#eab308" name="Laba" />
+            <Legend
+              verticalAlign="top"
+              align="right"
+              wrapperStyle={{ paddingBottom: 10 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="total_omzet"
+              stroke="#22c55e"
+              strokeWidth={3}
+              activeDot={{ r: 7 }}
+              name="Omzet"
+            />
+            <Line
+              type="monotone"
+              dataKey="total_laba"
+              stroke="#facc15"
+              strokeWidth={3}
+              dot={{ r: 4 }}
+              name="Laba"
+            />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
