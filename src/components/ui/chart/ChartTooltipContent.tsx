@@ -46,6 +46,7 @@ interface ChartTooltipContentProps extends Omit<React.ComponentProps<typeof Rech
   labelKey?: string
   className?: string
   labelClassName?: string
+  color?: string
 }
 
 export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContentProps>(
