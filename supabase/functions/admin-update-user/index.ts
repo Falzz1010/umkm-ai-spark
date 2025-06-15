@@ -25,6 +25,7 @@ serve(async (req: Request) => {
   }
 
   if (!(await isAdmin(req))) {
+    console.log("Unauthorized: Only admin can call this.");
     return new Response(
       JSON.stringify({ error: "Unauthorized: Only admin can call this." }),
       { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -34,13 +35,17 @@ serve(async (req: Request) => {
   try {
     const { user_id, new_email, new_password } = await req.json();
 
+    console.log("Received request. user_id:", user_id, "new_email:", new_email, "new_password:", Boolean(new_password));
+
     if (!user_id) {
+      console.log("Request error: user_id is required.");
       return new Response(
         JSON.stringify({ error: "user_id is required." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
     if (!new_email && !new_password) {
+      console.log("Request error: Harus mengisi salah satu: new_email atau new_password.");
       return new Response(
         JSON.stringify({ error: "Harus mengisi salah satu: new_email atau new_password." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -52,6 +57,8 @@ serve(async (req: Request) => {
     if (new_email) updates.email = new_email;
     if (new_password) updates.password = new_password;
 
+    console.log("PATCH request payload:", updates);
+
     const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users/${user_id}`, {
       method: "PATCH",
       headers: {
@@ -62,11 +69,19 @@ serve(async (req: Request) => {
       body: JSON.stringify(updates),
     });
 
-    const apiRes = await res.json();
+    let bodyText = await res.text();
+    console.log("PATCH response status:", res.status, "body:", bodyText);
+
+    let apiRes: any;
+    try {
+      apiRes = JSON.parse(bodyText);
+    } catch (_) {
+      apiRes = { error: "Invalid JSON response", body: bodyText };
+    }
 
     if (!res.ok) {
       return new Response(
-        JSON.stringify({ error: apiRes.error || "Failed to update user." }),
+        JSON.stringify({ error: apiRes.error || "Failed to update user.", body: apiRes.body || bodyText }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -76,6 +91,7 @@ serve(async (req: Request) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
+    console.log("Server error:", String(e));
     return new Response(
       JSON.stringify({ error: "Terjadi error server.", detail: String(e) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
