@@ -22,6 +22,7 @@ export function LandingChatbot() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sendMessage = async (e?: React.FormEvent) => {
@@ -35,6 +36,7 @@ export function LandingChatbot() {
     setMessages(newMessages);
     setInput("");
     setLoading(true);
+    setErrorMsg(null);
 
     try {
       const res = await fetch("/functions/v1/gemini-ai", {
@@ -47,24 +49,49 @@ export function LandingChatbot() {
           type: "",
         }),
       });
+
       const data = await res.json();
+      // For debugging, log response
+      console.log("[Chatbot Gemini] Response", data);
+
+      if (data?.success && data.generatedText) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            content: data.generatedText,
+          },
+        ]);
+      } else if (data?.error) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            content: `❌ ${data.error}`,
+          },
+        ]);
+        setErrorMsg(data.error);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            content:
+              "Maaf, saya belum dapat menjawab saat ini. Coba lagi nanti.",
+          },
+        ]);
+        setErrorMsg("Tidak ada respons dari Gemini.");
+      }
+    } catch (err: any) {
       setMessages((prev) => [
         ...prev,
         {
           sender: "ai",
-          content:
-            data.generatedText ||
-            "Maaf, saya belum dapat menjawab saat ini. Coba lagi nanti.",
+          content: "Terjadi kesalahan terhubung ke server. Silakan coba lagi.",
         },
       ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "ai",
-          content: "Terjadi kesalahan, coba lagi nanti.",
-        },
-      ]);
+      setErrorMsg(err?.message || "Unknown Error");
+      console.error("[Chatbot Gemini] Fetch error:", err);
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -73,7 +100,6 @@ export function LandingChatbot() {
     }
   };
 
-  // Tombol bulat fixed kanan bawah
   return (
     <>
       <Button
@@ -108,6 +134,11 @@ export function LandingChatbot() {
               <p className="text-sm text-muted-foreground">
                 Dapatkan bantuan instan untuk ide, deskripsi, dan strategi UMKM Anda.
               </p>
+              {errorMsg && (
+                <div className="mt-2 text-red-600 text-xs font-medium">
+                  {errorMsg}
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="h-64 max-h-80 overflow-y-auto rounded-md border bg-muted/20 p-3 space-y-3 transition-colors"
