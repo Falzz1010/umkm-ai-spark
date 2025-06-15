@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Filter, X, Users, Package, Bot, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SearchResult {
   id: string;
@@ -46,7 +47,7 @@ export function GlobalSearch({ onResultSelect }: GlobalSearchProps) {
   }, []);
 
   useEffect(() => {
-    if (searchTerm.length > 0) {
+    if (searchTerm.length > 1) {
       performSearch();
     } else {
       setResults([]);
@@ -55,46 +56,93 @@ export function GlobalSearch({ onResultSelect }: GlobalSearchProps) {
 
   const performSearch = async () => {
     setIsLoading(true);
-    // Simulate API call - replace with actual search logic
-    await new Promise(resolve => setTimeout(resolve, 300));
     
-    const mockResults: SearchResult[] = [
-      {
-        id: '1',
-        type: 'user' as const,
-        title: 'John Doe',
-        subtitle: 'john@example.com',
-        data: { id: '1', email: 'john@example.com' }
-      },
-      {
-        id: '2',
-        type: 'product' as const,
-        title: 'Wireless Headphones',
-        subtitle: 'Electronics • $99.99',
-        data: { id: '2', category: 'Electronics' }
-      },
-      {
-        id: '3',
-        type: 'ai' as const,
-        title: 'Product Description AI',
-        subtitle: 'Generated 2 hours ago',
-        data: { id: '3', type: 'description' }
-      },
-      {
-        id: '4',
-        type: 'analytics' as const,
-        title: 'Sales Report',
-        subtitle: 'Monthly Analytics',
-        data: { id: '4', period: 'monthly' }
-      }
-    ].filter(result => 
-      activeFilters.length === 0 || activeFilters.includes(result.type)
-    ).filter(result =>
-      result.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    try {
+      const searchResults: SearchResult[] = [];
 
-    setResults(mockResults);
+      // Search users if filter allows
+      if (activeFilters.length === 0 || activeFilters.includes('user')) {
+        const { data: users } = await supabase
+          .from('profiles')
+          .select('*')
+          .ilike('full_name', `%${searchTerm}%`)
+          .limit(5);
+
+        if (users) {
+          users.forEach(user => {
+            searchResults.push({
+              id: user.id,
+              type: 'user' as const,
+              title: user.full_name || 'Unknown User',
+              subtitle: user.business_name || 'No business',
+              data: user
+            });
+          });
+        }
+      }
+
+      // Search products if filter allows
+      if (activeFilters.length === 0 || activeFilters.includes('product')) {
+        const { data: products } = await supabase
+          .from('products')
+          .select('*')
+          .ilike('name', `%${searchTerm}%`)
+          .limit(5);
+
+        if (products) {
+          products.forEach(product => {
+            searchResults.push({
+              id: product.id,
+              type: 'product' as const,
+              title: product.name,
+              subtitle: `${product.category || 'Uncategorized'} • Rp ${product.price?.toLocaleString() || '0'}`,
+              data: product
+            });
+          });
+        }
+      }
+
+      // Search AI generations if filter allows
+      if (activeFilters.length === 0 || activeFilters.includes('ai')) {
+        const { data: aiData } = await supabase
+          .from('ai_generations')
+          .select('*')
+          .limit(5);
+
+        if (aiData) {
+          aiData.forEach(ai => {
+            if (ai.generated_content.toLowerCase().includes(searchTerm.toLowerCase())) {
+              searchResults.push({
+                id: ai.id,
+                type: 'ai' as const,
+                title: `${ai.generation_type} Generation`,
+                subtitle: `Generated ${new Date(ai.created_at).toLocaleDateString()}`,
+                data: ai
+              });
+            }
+          });
+        }
+      }
+
+      // Add analytics if filter allows
+      if (activeFilters.length === 0 || activeFilters.includes('analytics')) {
+        if (searchTerm.toLowerCase().includes('sales') || searchTerm.toLowerCase().includes('revenue')) {
+          searchResults.push({
+            id: 'analytics-1',
+            type: 'analytics' as const,
+            title: 'Sales Analytics',
+            subtitle: 'Revenue and sales data',
+            data: { type: 'sales' }
+          });
+        }
+      }
+
+      setResults(searchResults);
+    } catch (error) {
+      console.error('Search error:', error);
+      setResults([]);
+    }
+    
     setIsLoading(false);
   };
 

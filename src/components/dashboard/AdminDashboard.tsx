@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, Package, Users, Bot, TrendingUp } from 'lucide-react';
@@ -11,9 +10,13 @@ import { AdminAITab } from './admin/AdminAITab';
 import { GlobalSearch } from './admin/GlobalSearch';
 import { SystemHealthMonitor } from './admin/SystemHealthMonitor';
 import { QuickActionButtons } from './admin/QuickActionButtons';
+import { FilterPresetManager } from './admin/FilterPresetManager';
+import { BulkActions } from './admin/BulkActions';
+import { WidgetCustomizer } from './admin/WidgetCustomizer';
 import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -31,6 +34,10 @@ export function AdminDashboard() {
 
   const { toast } = useToast();
   const [widgetLayout, setWidgetLayout] = useState(['stats', 'health', 'analytics']);
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [currentFilters, setCurrentFilters] = useState({});
+  const [activeTab, setActiveTab] = useState('analytics');
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -54,7 +61,22 @@ export function AdminDashboard() {
       title: "Search Result Selected",
       description: `Selected ${result.type}: ${result.title}`,
     });
-    // Here you would navigate to the specific item or show details
+    
+    // Navigate to specific tab based on result type
+    switch (result.type) {
+      case 'user':
+        setActiveTab('users');
+        break;
+      case 'product':
+        setActiveTab('products');
+        break;
+      case 'ai':
+        setActiveTab('ai');
+        break;
+      case 'analytics':
+        setActiveTab('analytics');
+        break;
+    }
   };
 
   const handleQuickActions = {
@@ -72,16 +94,49 @@ export function AdminDashboard() {
       });
     },
     onSettings: () => {
-      toast({
-        title: "Settings",
-        description: "Opening admin settings panel...",
-      });
+      setIsCustomizing(!isCustomizing);
     },
     onNotifications: () => {
       toast({
         title: "Notifications",
         description: "Opening notification center...",
       });
+    }
+  };
+
+  const handleApplyPreset = (preset: any) => {
+    setCurrentFilters(preset.filters);
+    toast({
+      title: "Filter Preset Applied",
+      description: `Applied "${preset.name}" filters`,
+    });
+  };
+
+  const handleWidgetChange = (widgets: any[]) => {
+    const visibleWidgets = widgets.filter(w => w.visible).map(w => w.id);
+    setWidgetLayout(visibleWidgets);
+  };
+
+  const handleBulkSelection = {
+    onSelectAll: () => {
+      const allIds = getCurrentTabItems().map(item => item.id);
+      setSelectedItems(allIds);
+    },
+    onDeselectAll: () => {
+      setSelectedItems([]);
+    }
+  };
+
+  const getCurrentTabItems = () => {
+    switch (activeTab) {
+      case 'users':
+        return users;
+      case 'products':
+        return products;
+      case 'ai':
+        return aiGenerations;
+      default:
+        return [];
     }
   };
 
@@ -107,11 +162,20 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-2 sm:p-4 lg:p-6 xl:p-8 max-w-7xl mx-auto animate-fade-in page-transition">
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
         <div className="animate-slide-up">
           <DashboardHeader
             title="Dashboard Admin"
             subtitle="Kelola pengguna dan monitor aktivitas platform"
+          />
+        </div>
+
+        {/* Widget Customizer */}
+        <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 0} as any}>
+          <WidgetCustomizer
+            onWidgetChange={handleWidgetChange}
+            isCustomizing={isCustomizing}
+            onToggleCustomize={() => setIsCustomizing(!isCustomizing)}
           />
         </div>
 
@@ -127,20 +191,47 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* Enhanced Stats Cards with responsive layout */}
+        {/* Filter Presets */}
         <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 2} as any}>
-          <AdminStatsCards stats={stats} />
+          <FilterPresetManager
+            onApplyPreset={handleApplyPreset}
+            currentFilters={currentFilters}
+          />
         </div>
 
-        {/* System Health Monitor */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 3} as any}>
-          <SystemHealthMonitor />
-        </div>
+        {/* Enhanced Stats Cards with responsive layout */}
+        <SortableContext items={widgetLayout} strategy={verticalListSortingStrategy}>
+          {widgetLayout.includes('stats') && (
+            <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 3} as any}>
+              <AdminStatsCards stats={stats} />
+            </div>
+          )}
+
+          {/* System Health Monitor */}
+          {widgetLayout.includes('health') && (
+            <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 4} as any}>
+              <SystemHealthMonitor />
+            </div>
+          )}
+        </SortableContext>
+
+        {/* Bulk Actions */}
+        {selectedItems.length > 0 && (
+          <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up">
+            <BulkActions
+              selectedItems={selectedItems}
+              onSelectAll={handleBulkSelection.onSelectAll}
+              onDeselectAll={handleBulkSelection.onDeselectAll}
+              totalItems={getCurrentTabItems().length}
+              itemType={activeTab as any}
+            />
+          </div>
+        )}
 
         {/* Main Content with enhanced responsive design */}
-        <div className="animate-slide-up" style={{'--index': 4} as any}>
+        <div className="animate-slide-up" style={{'--index': 5} as any}>
           <div className="bg-card/80 backdrop-blur-sm rounded-xl lg:rounded-2xl shadow-lg border border-border/50 p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-xl">
-            <Tabs defaultValue="analytics" className="space-y-3 sm:space-y-4 lg:space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-4 lg:space-y-6">
               {/* Enhanced Responsive Tab List */}
               <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-muted/50 p-1 sm:p-2 rounded-lg lg:rounded-xl shadow-inner">
                 <TabsTrigger 
@@ -226,15 +317,28 @@ export function AdminDashboard() {
               </TabsContent>
 
               <TabsContent value="products" className="animate-fade-in">
-                <AdminProductsTab products={products} onDeleteProduct={deleteProduct} />
+                <AdminProductsTab 
+                  products={products} 
+                  onDeleteProduct={deleteProduct}
+                  selectedItems={selectedItems}
+                  onSelectionChange={setSelectedItems}
+                />
               </TabsContent>
 
               <TabsContent value="users" className="animate-fade-in">
-                <AdminUsersTab users={users} />
+                <AdminUsersTab 
+                  users={users}
+                  selectedItems={selectedItems}
+                  onSelectionChange={setSelectedItems}
+                />
               </TabsContent>
 
               <TabsContent value="ai" className="animate-fade-in">
-                <AdminAITab aiGenerations={aiGenerations} />
+                <AdminAITab 
+                  aiGenerations={aiGenerations}
+                  selectedItems={selectedItems}
+                  onSelectionChange={setSelectedItems}
+                />
               </TabsContent>
             </Tabs>
           </div>
