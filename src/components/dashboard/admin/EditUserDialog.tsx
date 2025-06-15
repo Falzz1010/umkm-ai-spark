@@ -43,7 +43,16 @@ export function EditUserDialog({ userId, currentEmail, open, onOpenChange }: Edi
           new_password: password || undefined,
         }),
       });
-      const result = await res.json();
+
+      let result: any;
+      try {
+        result = await res.json();
+      } catch (err) {
+        // If not JSON, try to get text body
+        const text = await res.text();
+        result = { error: 'Response is not JSON', body: text };
+      }
+
       if (res.ok) {
         toast({
           title: "Berhasil",
@@ -53,7 +62,7 @@ export function EditUserDialog({ userId, currentEmail, open, onOpenChange }: Edi
       } else {
         toast({
           title: "Gagal update",
-          description: result.error || "Terjadi kesalahan.",
+          description: (result.error || result.body || "Terjadi kesalahan."),
           variant: "destructive",
         });
       }
@@ -127,3 +136,4 @@ export function EditUserDialog({ userId, currentEmail, open, onOpenChange }: Edi
     </Dialog>
   );
 }
+
