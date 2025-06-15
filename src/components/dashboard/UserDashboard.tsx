@@ -1,3 +1,4 @@
+
 // Move this alongside other imports at the top
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +26,7 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
+// FIX: Move useIsMobile import to the top, here:
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
@@ -222,12 +224,12 @@ export function UserDashboard() {
         <DashboardStatsCards stats={stats} />
       </div>
 
-      {/* Tabs utama responsif, selalu tampil 5 kolom tab di semua ukuran layar */}
+      {/* Tabs utama responsif, selalu tampil 4 kolom tab di semua ukuran layar */}
       <Tabs defaultValue="products" className="space-y-3">
         <TabsList
           className="
             w-full
-            grid grid-cols-5 gap-1
+            grid grid-cols-4 gap-1
             overflow-x-auto
             !mb-1
             "
@@ -280,3 +282,4 @@ export function UserDashboard() {
   );
 }
 // File ini sudah terlalu panjang (>270 baris). Setelah dirapikan, sebaiknya difragment ke beberapa komponen modular agar maintainable.
+
