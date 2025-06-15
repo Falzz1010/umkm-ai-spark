@@ -106,6 +106,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserData = async (userId: string, retryCount = 0) => {
     try {
+      console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
+      
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -117,9 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Error fetching profile:', profileError);
       } else if (profileData) {
         setProfile(profileData);
+        console.log('fetchUserData: Profile found:', profileData);
       }
 
-      // Fetch role
+      // Fetch role with better error handling
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -129,25 +132,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (roleError) {
         console.error('Error fetching role:', roleError);
 
-        // Jika NetworkError & belum retry, ulangi 1x
-        if (
-          (roleError.message?.includes('NetworkError') || roleError.message?.includes('Failed to fetch')) &&
-          retryCount < 1
-        ) {
-          console.warn('Terjadi NetworkError saat ambil role, coba ulangi sekali lagi...');
-          await new Promise((res) => setTimeout(res, 400)); // 400ms debounce
+        // Improved NetworkError detection and retry logic
+        const isNetworkError = roleError.message?.includes('NetworkError') || 
+                              roleError.message?.includes('Failed to fetch') ||
+                              roleError.message?.includes('fetch');
+        
+        if (isNetworkError && retryCount < 2) {
+          console.warn(`Network error fetching role, retrying... (attempt ${retryCount + 1})`);
+          await new Promise((res) => setTimeout(res, 1000 * (retryCount + 1))); // Progressive delay
           return fetchUserData(userId, retryCount + 1);
+        } else {
+          console.error('Failed to fetch role after retries, setting userRole to null');
+          setUserRole(null);
         }
-      } 
-      if (roleData && roleData.role) {
+      } else if (roleData && roleData.role) {
         setUserRole(roleData.role as UserRole);
         console.log("fetchUserData: userRole found:", roleData.role);
       } else {
+        console.warn("fetchUserData: No roleData found for user", userId);
         setUserRole(null);
-        console.warn("fetchUserData: roleData not found for user", userId);
       }
     } catch (error: any) {
       console.error('Error fetching user data (exception):', error);
+      
+      // If it's a network error and we haven't exceeded retry limit, try again
+      if (retryCount < 2 && (error.message?.includes('fetch') || error.message?.includes('Network'))) {
+        console.warn(`Exception during fetch, retrying... (attempt ${retryCount + 1})`);
+        await new Promise((res) => setTimeout(res, 1000 * (retryCount + 1)));
+        return fetchUserData(userId, retryCount + 1);
+      } else {
+        setUserRole(null);
+      }
     }
   };
 
