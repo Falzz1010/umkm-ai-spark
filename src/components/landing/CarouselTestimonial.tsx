@@ -39,7 +39,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
     };
   }, [emblaApi]);
 
-  // Variants untuk animasi testimonial
+  // Variants untuk animasi testimonial (ease changes only)
   const cardVariants = {
     hidden: { opacity: 0, y: 44, scale: 0.98, filter: "blur(2px)" },
     visible: {
@@ -49,7 +49,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
       filter: "blur(0)",
       transition: {
         duration: 0.62,
-        ease: [0.24, 0.62, 0.23, 0.98]
+        ease: "easeInOut"
       }
     },
     exit: {
@@ -57,7 +57,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
       y: -28,
       scale: 0.97,
       filter: "blur(4px)",
-      transition: { duration: 0.45, ease: [0.7, 0, 0.84, 0] }
+      transition: { duration: 0.45, ease: "easeOut" }
     }
   };
 
