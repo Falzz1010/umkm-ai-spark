@@ -29,7 +29,7 @@ export function LandingFAQ() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="py-20 bg-gray-50 dark:bg-background"
+      className="py-20 bg-gray-150 dark:bg-background"
     >
       <div className="max-w-3xl mx-auto px-4">
         <motion.div

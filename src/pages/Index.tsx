@@ -79,7 +79,7 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-background text-foreground">
+    <div className="min-h-screen bg-gray-100 dark:bg-background text-foreground">
       <LandingNavbar />
       <LandingHero />
       <LandingFeatures />

@@ -39,7 +39,7 @@ export function LandingTestimonials() {
 
   return (
     <motion.section
-      className="py-12 sm:py-20 bg-white dark:bg-muted/30"
+      className="py-12 sm:py-20 bg-gray-50 dark:bg-muted/30"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
@@ -53,7 +53,7 @@ export function LandingTestimonials() {
           viewport={{ once: true }}
           transition={{ delay: 0.12 }}
         >
-          <Badge variant="outline" className="mb-2 sm:mb-4 text-xs sm:text-sm p-2 bg-gray-50 dark:bg-background">
+          <Badge variant="outline" className="mb-2 sm:mb-4 text-xs sm:text-sm p-2 bg-white dark:bg-background">
             ⭐ Testimoni
           </Badge>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-foreground mb-2 sm:mb-4">

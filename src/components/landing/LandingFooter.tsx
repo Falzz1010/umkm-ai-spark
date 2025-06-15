@@ -9,7 +9,7 @@ export function LandingFooter() {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8 }}
-      className="bg-gray-100 dark:bg-background border-t border-gray-200 dark:border-border py-12"
+      className="bg-gray-200 dark:bg-background border-t border-gray-300 dark:border-border py-12"
     >
       <div className="max-w-7xl mx-auto px-4 text-center">
         <motion.div

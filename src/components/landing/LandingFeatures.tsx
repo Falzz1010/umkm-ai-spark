@@ -38,7 +38,7 @@ export function LandingFeatures() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className="py-12 sm:py-20 bg-gray-100 dark:bg-muted/30"
+      className="py-12 sm:py-20 bg-gray-200 dark:bg-muted/30"
     >
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <motion.div
