@@ -52,29 +52,70 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
       });
   }, [user, refreshKey]);
 
-  // Fungsi hapus transaksi
+  // Fungsi hapus transaksi dengan update stok
   async function handleDelete(id: string) {
     if (!window.confirm("Yakin ingin menghapus transaksi ini?")) return;
-    const { error } = await supabase.from("sales_transactions").delete().eq("id", id);
-    if (!error) {
-      setSales((prev) => prev.filter((tx) => tx.id !== id));
-      toast({ title: "Transaksi dihapus!", description: "Data transaksi berhasil dihapus." });
+    
+    // Ambil data transaksi yang akan dihapus untuk mengembalikan stok
+    const transaction = sales.find(sale => sale.id === id);
+    if (!transaction) return;
+
+    setDeletingId(id);
+    
+    // Hapus transaksi (trigger otomatis akan handle stok, tapi kita perlu manual karena DELETE)
+    const { error: deleteError } = await supabase.from("sales_transactions").delete().eq("id", id);
+    
+    if (!deleteError) {
+      // Kembalikan stok karena transaksi dihapus
+      const { error: stockError } = await supabase
+        .from("products")
+        .update({ stock: supabase.sql`stock + ${transaction.quantity}` })
+        .eq("id", transaction.product_id);
+
+      if (!stockError) {
+        setSales((prev) => prev.filter((tx) => tx.id !== id));
+        toast({ title: "Transaksi dihapus!", description: "Data transaksi berhasil dihapus dan stok dikembalikan." });
+      } else {
+        toast({ title: "Gagal mengembalikan stok", description: stockError.message, variant: "destructive" });
+      }
     } else {
-      toast({ title: "Gagal menghapus", description: error.message, variant: "destructive" });
+      toast({ title: "Gagal menghapus", description: deleteError.message, variant: "destructive" });
     }
+    
+    setDeletingId(null);
   }
 
-  // Fungsi edit transaksi
+  // Fungsi edit transaksi dengan update stok
   async function handleEditSubmit(newValues: { quantity: number; price: number }) {
     if (!editing) return;
-    const { error } = await supabase
+    
+    const oldQuantity = editing.quantity;
+    const newQuantity = newValues.quantity;
+    const quantityDifference = newQuantity - oldQuantity;
+
+    // Update transaksi
+    const { error: updateError } = await supabase
       .from("sales_transactions")
       .update({
         quantity: newValues.quantity,
         price: newValues.price,
       })
       .eq("id", editing.id);
-    if (!error) {
+
+    if (!updateError) {
+      // Update stok berdasarkan perubahan quantity
+      if (quantityDifference !== 0) {
+        const { error: stockError } = await supabase
+          .from("products")
+          .update({ stock: supabase.sql`stock - ${quantityDifference}` })
+          .eq("id", editing.product_id);
+
+        if (stockError) {
+          toast({ title: "Gagal update stok", description: stockError.message, variant: "destructive" });
+          return;
+        }
+      }
+
       setSales((prev) =>
         prev.map((row) =>
           row.id === editing.id
@@ -87,10 +128,10 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
             : row
         )
       );
-      toast({ title: "Transaksi diperbarui!", description: "Data transaksi berhasil diupdate." });
+      toast({ title: "Transaksi diperbarui!", description: "Data transaksi berhasil diupdate dengan penyesuaian stok." });
       setEditOpen(false);
     } else {
-      toast({ title: "Gagal update", description: error.message, variant: "destructive" });
+      toast({ title: "Gagal update", description: updateError.message, variant: "destructive" });
     }
   }
 
@@ -130,6 +171,7 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
                         setEditing(sale);
                         setEditOpen(true);
                       }}
+                      disabled={deletingId === sale.id}
                       aria-label="Edit"
                     >
                       <Edit className="text-blue-600" />
@@ -138,9 +180,10 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(sale.id)}
+                      disabled={deletingId === sale.id}
                       aria-label="Delete"
                     >
-                      <Trash2 className="text-red-600" />
+                      <Trash2 className={deletingId === sale.id ? "text-gray-400" : "text-red-600"} />
                     </Button>
                   </div>
                 </TableCell>
