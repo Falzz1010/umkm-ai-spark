@@ -26,7 +26,6 @@ export function SalesOmzetChart() {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch the data
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
@@ -45,16 +44,15 @@ export function SalesOmzetChart() {
     setLoading(false);
   };
 
-  // Initial load + refresh on user change
+  // Auto fetch initial and when user id changes
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line
   }, [user?.id]);
 
-  // Realtime subscription (auto refresh chart)
+  // Real-time auto update
   useEffect(() => {
     if (!user) return;
-
     const channel = supabase
       .channel("public:daily_sales_summary")
       .on(
@@ -66,82 +64,143 @@ export function SalesOmzetChart() {
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          // On any changes, refresh chart
           fetchData();
         }
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
   if (loading) {
-    return <div className="py-6 text-sm text-muted-foreground">Memuat grafik omzet & laba...</div>;
+    return (
+      <div className="py-6 text-sm text-muted-foreground">
+        Memuat grafik omzet & laba...
+      </div>
+    );
   }
 
   if (data.length === 0) {
-    return <div className="py-6 text-sm text-muted-foreground">Belum ada transaksi untuk grafik omzet/laba.</div>;
+    return (
+      <div className="py-6 text-sm text-muted-foreground">
+        Belum ada transaksi untuk grafik omzet/laba.
+      </div>
+    );
   }
+
+  // Custom Tooltip for better UX
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || payload.length === 0) return null;
+    return (
+      <div className="rounded-md shadow-sm bg-background p-3 border border-muted">
+        <div className="mb-1 text-xs text-muted-foreground font-semibold">
+          {new Date(label).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+        </div>
+        {payload.map((entry, idx) => (
+          <div key={idx} className="flex items-center gap-2 text-sm">
+            <span
+              className="inline-block w-2 h-2 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span>
+              {entry.name}: <span className="font-medium text-foreground">Rp {Number(entry.value).toLocaleString("id-ID")}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Grafik Bar Omzet & Laba Harian</CardTitle>
+        <CardTitle className="text-base sm:text-lg">Grafik Omzet & Laba Harian</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart
-            data={data}
-            margin={{ top: 10, right: 32, left: 0, bottom: 24 }}
-            barGap={4}
-            barCategoryGap="20%"
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="sale_date"
-              tickFormatter={(d) =>
-                new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })
-              }
-              angle={-15}
-              textAnchor="end"
-              height={48}
+      <CardContent className="pb-2">
+        <div className="w-full h-[260px] sm:h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{ top: 18, right: 30, left: 2, bottom: 36 }}
+              barGap={8}
+              barCategoryGap="18%"
             >
-              <Label value="Tanggal" offset={-5} position="insideBottom" />
-            </XAxis>
-            <YAxis>
-              <Label
-                value="Rp"
-                position="insideTopLeft"
-                offset={-8}
-                angle={-90}
-                style={{ textAnchor: "middle" }}
-                className="fill-muted-foreground"
+              <CartesianGrid strokeDasharray="2 4" stroke="#e5e7eb" className="dark:stroke-[#333]" />
+              <XAxis
+                dataKey="sale_date"
+                tickFormatter={(d) =>
+                  new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })
+                }
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+                angle={-15}
+                textAnchor="end"
+                height={48}
+                interval="preserveStartEnd"
+                minTickGap={6}
+              >
+                <Label
+                  value="Tanggal"
+                  offset={-16}
+                  position="insideBottom"
+                  className="fill-muted-foreground"
+                  fontSize={13}
+                />
+              </XAxis>
+              <YAxis
+                tickFormatter={v => 'Rp ' + Number(v).toLocaleString("id-ID")}
+                tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+                width={70}
+              >
+                <Label
+                  value="Omzet & Laba (Rp)"
+                  angle={-90}
+                  offset={-8}
+                  position="insideLeft"
+                  style={{ textAnchor: "middle" }}
+                  className="fill-muted-foreground"
+                  fontSize={13}
+                />
+              </YAxis>
+              <Tooltip 
+                content={<CustomTooltip />}
+                cursor={{ fill: "var(--accent)", opacity: 0.06 }} 
               />
-            </YAxis>
-            <Tooltip formatter={(value: number) => "Rp " + value.toLocaleString("id-ID")} />
-            <Legend
-              verticalAlign="top"
-              align="right"
-              wrapperStyle={{ paddingBottom: 10 }}
-            />
-            <Bar
-              dataKey="total_omzet"
-              fill="#22c55e"
-              radius={[6, 6, 0, 0]}
-              name="Omzet"
-              maxBarSize={28}
-            />
-            <Bar
-              dataKey="total_laba"
-              fill="#facc15"
-              radius={[6, 6, 0, 0]}
-              name="Laba"
-              maxBarSize={28}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+              <Legend
+                verticalAlign="top"
+                align="center"
+                iconType="circle"
+                height={36}
+                wrapperStyle={{
+                  paddingBottom: 8,
+                  fontSize: 13,
+                  color: "var(--muted-foreground)",
+                }}
+              />
+              <Bar
+                dataKey="total_omzet"
+                fill="#34d399"
+                name="Omzet"
+                radius={[7, 7, 0, 0]}
+                maxBarSize={32}
+                className="transition-all duration-150"
+                style={{ filter: "drop-shadow(0 2px 6px #34d39933)" }}
+                // highlight on hover using recharts style prop
+                activeBar={{ fill: "#059669" }}
+              />
+              <Bar
+                dataKey="total_laba"
+                fill="#fde68a"
+                name="Laba"
+                radius={[7, 7, 0, 0]}
+                maxBarSize={32}
+                className="transition-all duration-150"
+                style={{ filter: "drop-shadow(0 2px 6px #fde68a33)" }}
+                activeBar={{ fill: "#fbbf24" }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );
