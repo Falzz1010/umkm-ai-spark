@@ -13,21 +13,30 @@ export default function Dashboard() {
 
   useEffect(() => {
     console.log("Dashboard mount: loading:", loading, "user:", user, "userRole:", userRole, "path:", window.location.pathname);
+    
+    // Only redirect to auth if not loading and no user
     if (!loading && !user) {
       navigate('/auth');
+      return;
     }
-    // Jika user login dari admin/login tapi bukan admin (Atau sebaliknya), signOut
-    if (!loading && user && window.location.pathname === '/dashboard') {
-      if (!userRole) {
-        console.log("No userRole found, signOut called!");
-        signOut();
-      } else if (
-        (userRole === 'admin' && window.location.pathname !== '/dashboard') ||
-        (userRole === 'user' && window.location.pathname !== '/dashboard')
-      ) {
-        console.log("Role mismatch, signOut called!");
-        signOut();
-      }
+
+    // Don't do anything if still loading or if user exists but role is being fetched
+    if (loading || !user) {
+      return;
+    }
+
+    // Only sign out if user is authenticated but explicitly has no role after loading is complete
+    // Give some time for the role to be fetched before considering it missing
+    if (user && userRole === null && !loading) {
+      // Add a delay to allow role fetching to complete
+      const timeoutId = setTimeout(() => {
+        if (userRole === null && user) {
+          console.log("No userRole found after timeout, signOut called!");
+          signOut();
+        }
+      }, 3000); // Wait 3 seconds for role to be fetched
+
+      return () => clearTimeout(timeoutId);
     }
   }, [user, loading, userRole, navigate, signOut]);
 
@@ -53,20 +62,43 @@ export default function Dashboard() {
     );
   }
 
-  if (!user || !userRole) {
-    // Jangan render dashboard sama sekali jika tidak ada user atau role
-    // Tambahkan pesan error jika bukan role admin/user
-    if (!loading && user && !userRole) {
-      return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-background">
-          <p className="text-red-600 text-lg font-semibold">
-            Akses ditolak! Akun Anda belum memiliki role yang benar.<br />
-            Silakan hubungi admin.
-          </p>
+  // Show loading state while role is being fetched
+  if (user && userRole === null) {
+    return (
+      <div className="min-h-screen bg-background px-4 py-8 animate-fade-in flex items-center justify-center page-transition">
+        <div className="w-full max-w-5xl space-y-8">
+          <div className="space-y-4 animate-slide-up">
+            <Skeleton className="h-12 w-64 shadow-smooth" />
+            <Skeleton className="h-6 w-40 shadow-smooth" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 stagger-children">
+            <Skeleton className="h-40 rounded-lg shadow-smooth animate-slide-in-left" style={{'--index': 0} as any} />
+            <Skeleton className="h-40 rounded-lg shadow-smooth animate-slide-up" style={{'--index': 1} as any} />
+            <Skeleton className="h-40 rounded-lg shadow-smooth animate-slide-in-right" style={{'--index': 2} as any} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 stagger-children">
+            <Skeleton className="h-96 rounded-lg shadow-smooth animate-slide-in-left" style={{'--index': 0} as any} />
+            <Skeleton className="h-96 rounded-lg shadow-smooth animate-slide-in-right" style={{'--index': 1} as any} />
+          </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+
+  if (!user) {
     return null;
+  }
+
+  // Show error message if user exists but still no role after loading
+  if (user && !userRole) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+        <p className="text-red-600 text-lg font-semibold">
+          Akses ditolak! Akun Anda belum memiliki role yang benar.<br />
+          Silakan hubungi admin.
+        </p>
+      </div>
+    );
   }
 
   // Log info sebelum render dashboard
