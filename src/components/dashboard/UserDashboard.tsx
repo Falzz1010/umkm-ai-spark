@@ -1,4 +1,3 @@
-
 // Move this alongside other imports at the top
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,7 +25,7 @@ import { TabProducts } from './TabProducts';
 import { TabAnalytics } from './TabAnalytics';
 import { TabAI } from './TabAI';
 import { TabSales } from './TabSales';
-// FIX: Move useIsMobile import to the top, here:
+import { useProductAIRecs } from '@/hooks/useProductAIRecs'; // (tidak wajib impor di sini untuk user dashboard, cukup kirim products ke TabAnalytics)
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function UserDashboard() {
@@ -264,7 +263,8 @@ export function UserDashboard() {
         </TabsContent>
         <TabsContent value="analytics">
           <div className="mt-2">
-            <TabAnalytics analyticsData={analyticsData} />
+            {/* Tambahkan prop products agar TabAnalytics dapat akses daftar produk */}
+            <TabAnalytics analyticsData={analyticsData} products={products} />
           </div>
         </TabsContent>
         <TabsContent value="ai">
@@ -282,4 +282,3 @@ export function UserDashboard() {
   );
 }
 // File ini sudah terlalu panjang (>270 baris). Setelah dirapikan, sebaiknya difragment ke beberapa komponen modular agar maintainable.
-
