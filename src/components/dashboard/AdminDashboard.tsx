@@ -1,13 +1,14 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, Package, Users, Bot, TrendingUp } from 'lucide-react';
+import { BarChart3, Package, Users, Bot, TrendingUp, Activity } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
 import { AnalyticsCharts } from './AnalyticsCharts';
 import { AdminStatsCards } from './admin/AdminStatsCards';
 import { AdminProductsTab } from './admin/AdminProductsTab';
 import { AdminUsersTab } from './admin/AdminUsersTab';
 import { AdminAITab } from './admin/AdminAITab';
+import { AdminSystemTab } from './admin/AdminSystemTab';
 import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -61,7 +62,7 @@ export function AdminDashboard() {
         <div className="bg-card/80 backdrop-blur-sm rounded-xl lg:rounded-2xl shadow-lg border border-border/50 p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-xl">
           <Tabs defaultValue="analytics" className="space-y-3 sm:space-y-4 lg:space-y-6">
             {/* Enhanced Responsive Tab List */}
-            <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-muted/50 p-1 sm:p-2 rounded-lg lg:rounded-xl shadow-inner">
+            <TabsList className="w-full grid grid-cols-2 md:grid-cols-5 gap-1 sm:gap-2 bg-muted/50 p-1 sm:p-2 rounded-lg lg:rounded-xl shadow-inner">
               <TabsTrigger 
                 value="analytics" 
                 className="
@@ -118,6 +119,20 @@ export function AdminDashboard() {
                 <span className="hidden xs:inline sm:hidden md:inline">AI</span>
                 <span className="xs:hidden sm:inline md:hidden">Bot</span>
               </TabsTrigger>
+              <TabsTrigger 
+                value="system" 
+                className="
+                  flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium 
+                  px-2 sm:px-3 lg:px-4 py-2 sm:py-3 rounded-md lg:rounded-lg
+                  data-[state=active]:bg-background data-[state=active]:shadow-md
+                  data-[state=active]:text-primary transition-all duration-200
+                  hover:bg-background/50 hover-scale
+                "
+              >
+                <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline sm:hidden md:inline">System</span>
+                <span className="xs:hidden sm:inline md:hidden">Health</span>
+              </TabsTrigger>
             </TabsList>
 
             {/* Tab Contents with enhanced responsive animations */}
@@ -154,6 +169,10 @@ export function AdminDashboard() {
 
             <TabsContent value="ai" className="animate-fade-in">
               <AdminAITab aiGenerations={aiGenerations} />
+            </TabsContent>
+
+            <TabsContent value="system" className="animate-fade-in">
+              <AdminSystemTab />
             </TabsContent>
           </Tabs>
         </div>
