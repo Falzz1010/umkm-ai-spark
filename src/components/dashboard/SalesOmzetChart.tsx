@@ -27,6 +27,22 @@ export function SalesOmzetChart() {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Theme check (prefer dark media query)
+  const [isDark, setIsDark] = useState(
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+      : false
+  );
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = (e: MediaQueryListEvent) => setIsDark(e.matches);
+      setIsDark(media.matches);
+      media.addEventListener("change", listener);
+      return () => media.removeEventListener("change", listener);
+    }
+  }, []);
+
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
@@ -88,35 +104,52 @@ export function SalesOmzetChart() {
     );
   }
 
-  // Intuisi warna modern: hijau lembut dan kuning lembut dengan efek hover
-  const OMZET_BASE = "#4ade80";    // green-400
-  const OMZET_HOVER = "#22c55e";   // green-500
-  const LABA_BASE = "#fde68a";     // yellow-200
-  const LABA_HOVER = "#fbbf24";    // yellow-400
-  // Grid dan axis pakai warna tailwind yg jelas di light/dark
-  const GRID_COLOR = "rgba(180,200,220,0.32)";
-  const GRID_COLOR_DARK = "rgba(90,100,120,0.27)";
-  const LABEL_COLOR = "var(--muted-foreground)";
-  const TOOLTIP_BG = "bg-white dark:bg-zinc-900";
-  const TOOLTIP_BORDER = "border border-zinc-200 dark:border-zinc-700";
+  // Warna chart modern adaptif ke tema
+  const OMZET_BASE = isDark ? "#22c55e" : "#4ade80";
+  const OMZET_HOVER = isDark ? "#4ade80" : "#22c55e";
+  const LABA_BASE = isDark ? "#fbbf24" : "#fde68a";
+  const LABA_HOVER = isDark ? "#fde68a" : "#fbbf24";
+  const GRID_COLOR = isDark
+    ? "rgba(90,100,120,0.22)"
+    : "rgba(180,200,220,0.19)";
+  const LABEL_COLOR = isDark
+    ? "rgba(235,238,245,0.85)" // soft white
+    : "rgba(75,85,99,0.92)"; // gray-700
+  const LEGEND_COLOR = isDark
+    ? "rgba(235,238,245,0.88)"
+    : "rgba(71,85,105,0.94)";
+  const TOOLTIP_BG = isDark ? "bg-zinc-900" : "bg-white";
+  const TOOLTIP_BORDER = isDark
+    ? "border border-zinc-700"
+    : "border border-zinc-200";
+  const TOOLTIP_TEXT = isDark ? "text-zinc-100" : "text-zinc-900";
+  const TOOLTIP_SUBTLE = isDark ? "text-zinc-400" : "text-zinc-500";
 
-  // Custom Tooltip fully styled for light/dark
-  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload, label }) => {
+  // Custom Tooltip: full dark/light support + icon and adaptive classes.
+  const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
+    active,
+    payload,
+    label,
+  }) => {
     if (!active || !payload || payload.length === 0) return null;
     return (
       <div className={`rounded-md shadow-lg px-4 py-3 ${TOOLTIP_BG} ${TOOLTIP_BORDER}`}>
-        <div className="mb-1 text-xs text-muted-foreground font-semibold">
+        <div className={`mb-1 text-xs font-semibold ${TOOLTIP_SUBTLE}`}>
           {new Date(label as string).toLocaleDateString("id-ID", {
             day: "2-digit",
             month: "short",
-            year: "numeric"
+            year: "numeric",
           })}
         </div>
         {payload.map((entry, idx) => (
-          <div key={idx} className="flex items-center gap-2 text-sm">
+          <div key={idx} className={`flex items-center gap-2 text-sm ${TOOLTIP_TEXT}`}>
             <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
             <span>
-              {entry.name}: <span className="font-medium text-foreground">Rp {Number(entry.value).toLocaleString("id-ID")}</span>
+              {entry.name}: 
+              <span className={`font-medium ${TOOLTIP_TEXT}`}>
+                {" "}
+                Rp {Number(entry.value).toLocaleString("id-ID")}
+              </span>
             </span>
           </div>
         ))}
@@ -142,9 +175,7 @@ export function SalesOmzetChart() {
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke={typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-                  ? GRID_COLOR_DARK
-                  : GRID_COLOR}
+                stroke={GRID_COLOR}
               />
               <XAxis
                 dataKey="sale_date"
@@ -197,7 +228,9 @@ export function SalesOmzetChart() {
                   top: 0,
                   paddingBottom: 4,
                   fontSize: 13,
-                  color: "var(--muted-foreground)",
+                  color: LEGEND_COLOR,
+                  fontWeight: 500,
+                  letterSpacing: ".04em",
                 }}
               />
               <Bar
@@ -208,13 +241,19 @@ export function SalesOmzetChart() {
                 maxBarSize={38}
                 className="transition-all duration-150"
                 style={{
-                  filter: "drop-shadow(0 1.5px 6px #4ade8033)",
-                  cursor: "pointer"
+                  filter: isDark
+                    ? "drop-shadow(0 1.5px 6px #22c55e28)"
+                    : "drop-shadow(0 1.5px 6px #4ade8033)",
+                  cursor: "pointer",
                 }}
                 activeBar={{
                   fill: OMZET_HOVER,
-                  opacity: 0.92,
-                  style: { filter: "drop-shadow(0 2px 8px #22c55e42)" },
+                  opacity: 0.94,
+                  style: {
+                    filter: isDark
+                      ? "drop-shadow(0 2px 8px #4ade8040)"
+                      : "drop-shadow(0 2px 8px #22c55e40)",
+                  },
                 }}
               />
               <Bar
@@ -225,13 +264,19 @@ export function SalesOmzetChart() {
                 maxBarSize={38}
                 className="transition-all duration-150"
                 style={{
-                  filter: "drop-shadow(0 1.5px 6px #fde68a63)",
-                  cursor: "pointer"
+                  filter: isDark
+                    ? "drop-shadow(0 1.5px 6px #fbbf243c)"
+                    : "drop-shadow(0 1.5px 6px #fde68a59)",
+                  cursor: "pointer",
                 }}
                 activeBar={{
                   fill: LABA_HOVER,
-                  opacity: 0.92,
-                  style: { filter: "drop-shadow(0 2px 8px #fbbf2442)" },
+                  opacity: 0.93,
+                  style: {
+                    filter: isDark
+                      ? "drop-shadow(0 2px 8px #fde68a60)"
+                      : "drop-shadow(0 2px 8px #fbbf2460)",
+                  },
                 }}
               />
             </BarChart>
@@ -243,3 +288,4 @@ export function SalesOmzetChart() {
 }
 
 // File ini sudah cukup panjang (>200 baris). Silakan pertimbangkan untuk refaktor agar lebih mudah dirawat jika diperlukan.
+
