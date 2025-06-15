@@ -8,12 +8,13 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, userRole } = useAuth();
+  const { signIn, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -34,38 +35,52 @@ export default function AdminLogin() {
         return;
       }
 
-      // Setelah login, polling userRole sampai menjadi "admin" atau timeout
-      let waitTime = 0;
-      const pollingInterval = 250; // ms
-      const timeout = 3000; // ms
-      let roleChecked = false;
+      // Setelah signIn sukses, fetch role langsung dari supabase
+      const { data: user } = await supabase.auth.getUser();
+      if (!user || !user.user) {
+        toast({
+          title: "Error",
+          description: "User tidak ditemukan setelah login.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
 
-      const pollRole = () => {
-        if (userRole === 'admin') {
-          toast({
-            title: "Berhasil",
-            description: "Login admin berhasil!"
-          });
-          setLoading(false);
-          navigate('/dashboard');
-          roleChecked = true;
-          return;
-        }
-        waitTime += pollingInterval;
-        if (waitTime >= timeout) {
-          toast({
-            title: "Akses Ditolak",
-            description: "Akun Anda bukan admin.",
-            variant: "destructive"
-          });
-          setLoading(false);
-          roleChecked = true;
-          return;
-        }
-        setTimeout(pollRole, pollingInterval);
-      };
+      // Cek role di tabel user_roles
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.user.id)
+        .single();
 
-      pollRole();
+      if (roleError || !roleData) {
+        toast({
+          title: "Akses Ditolak",
+          description: "Tidak dapat menemukan role user.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        await signOut();
+        return;
+      }
+
+      if (roleData.role === 'admin') {
+        toast({
+          title: "Berhasil",
+          description: "Login admin berhasil!"
+        });
+        setLoading(false);
+        navigate('/dashboard');
+      } else {
+        toast({
+          title: "Akses Ditolak",
+          description: "Akun Anda bukan admin.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        await signOut(); // Langsung logoutkan user bukan admin
+      }
     } catch (error) {
       toast({
         title: "Error",
