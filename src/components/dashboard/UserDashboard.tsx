@@ -37,6 +37,7 @@ export function UserDashboard() {
     filteredProducts
   } = useProductFilters(products);
 
+  const { omzet, laba } = useProductFinancials(products);
   const { handleExportExcel, handleExportReport } = useProductExport();
 
   if (loading) {
@@ -73,7 +74,7 @@ export function UserDashboard() {
       {/* Stat cards dengan animasi stagger */}
       <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6 stagger-children">
         <div className="animate-bounce-subtle animate-slide-in-left" style={{'--index': 0} as any}>
-          <ProductFinanceCards />
+          <ProductFinanceCards omzet={omzet} laba={laba} />
         </div>
         <div className="animate-slide-in-right animate-scale-in" style={{'--index': 1} as any}>
           <DashboardStatsCards stats={stats} />
