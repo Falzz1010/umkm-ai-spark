@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
@@ -11,6 +12,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { SettingsDialog } from './SettingsDialog';
 import { ProfileDialog } from './ProfileDialog';
 import { NotificationsDrawer } from './NotificationsDrawer';
@@ -24,6 +26,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
   const { signOut } = useAuth();
+  const { showConfirm, showLoading, closeLoading } = useSweetAlert();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -31,6 +34,23 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
   // Use the notifications context (single provider)
   const { notifications, loading } = useNotificationsCtx();
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleLogout = async () => {
+    const result = await showConfirm(
+      'Konfirmasi Logout',
+      'Apakah Anda yakin ingin keluar dari akun ini?'
+    );
+
+    if (result.isConfirmed) {
+      try {
+        showLoading('Sedang logout...');
+        await signOut();
+      } catch (error) {
+        closeLoading();
+        console.error('Error during logout:', error);
+      }
+    }
+  };
 
   return (
     <>
@@ -97,7 +117,7 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={signOut} 
+                onClick={handleLogout} 
                 className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <LogOut className="h-4 w-4 mr-2" />
