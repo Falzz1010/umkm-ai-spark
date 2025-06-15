@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -78,7 +79,7 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-gray-50 dark:bg-background text-foreground">
       <LandingNavbar />
       <LandingHero />
       <LandingFeatures />

@@ -29,7 +29,7 @@ export function LandingFAQ() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="py-20 bg-background"
+      className="py-20 bg-gray-50 dark:bg-background"
     >
       <div className="max-w-3xl mx-auto px-4">
         <motion.div
@@ -39,11 +39,11 @@ export function LandingFAQ() {
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
         >
-          <Badge variant="secondary" className="mb-3">❓ ASK / FAQ</Badge>
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          <Badge variant="secondary" className="mb-3 bg-white dark:bg-muted">❓ ASK / FAQ</Badge>
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 dark:text-foreground mb-4">
             Pertanyaan yang Sering Ditanyakan
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-gray-600 dark:text-muted-foreground">
             Temukan jawaban atas pertanyaan umum mengenai platform AI UMKM!
           </p>
         </motion.div>
@@ -56,9 +56,9 @@ export function LandingFAQ() {
               viewport={{ once: true }}
               transition={{ delay: 0.16 + idx * 0.08 }}
             >
-              <AccordionItem value={`faq-${idx}`} className="mb-2 border-muted">
-                <AccordionTrigger className="text-lg font-medium">{faq.question}</AccordionTrigger>
-                <AccordionContent className="text-md text-muted-foreground">
+              <AccordionItem value={`faq-${idx}`} className="mb-2 border-gray-200 dark:border-muted bg-white dark:bg-muted/20 rounded-lg px-4">
+                <AccordionTrigger className="text-lg font-medium text-gray-800 dark:text-foreground">{faq.question}</AccordionTrigger>
+                <AccordionContent className="text-md text-gray-600 dark:text-muted-foreground">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -69,4 +69,3 @@ export function LandingFAQ() {
     </motion.section>
   );
 }
-
