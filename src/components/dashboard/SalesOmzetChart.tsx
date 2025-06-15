@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +32,7 @@ export function SalesOmzetChart() {
       ? window.matchMedia("(prefers-color-scheme: dark)").matches
       : false
   );
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -46,61 +46,101 @@ export function SalesOmzetChart() {
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase
+    
+    console.log('Fetching sales chart data for user:', user.id);
+    
+    const { data, error } = await supabase
       .from("daily_sales_summary")
       .select("sale_date,total_omzet,total_laba")
       .eq("user_id", user.id)
       .order("sale_date", { ascending: true });
-    setData(
-      (data || []).map((row) => ({
-        ...row,
-        total_omzet: Number(row.total_omzet || 0),
-        total_laba: Number(row.total_laba || 0),
-      }))
-    );
+    
+    if (error) {
+      console.error('Error fetching chart data:', error);
+    } else {
+      console.log('Chart data fetched:', data?.length || 0, 'records');
+      setData(
+        (data || []).map((row) => ({
+          ...row,
+          total_omzet: Number(row.total_omzet || 0),
+          total_laba: Number(row.total_laba || 0),
+        }))
+      );
+    }
+    
     setLoading(false);
   };
 
+  // Initial fetch
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line
   }, [user?.id]);
 
+  // Real-time subscription
   useEffect(() => {
     if (!user) return;
+    
+    console.log('Setting up sales chart real-time subscription');
+    
     const channel = supabase
-      .channel("public:daily_sales_summary")
+      .channel(`sales-chart-${user.id}-${Date.now()}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
-          table: "daily_sales_summary",
+          table: "sales_transactions",
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
-          fetchData();
+        (payload) => {
+          console.log('Real-time sales change detected for chart:', payload);
+          // Add small delay to allow view to update
+          setTimeout(() => {
+            fetchData();
+          }, 500);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Sales chart subscription status:', status);
+      });
+      
     return () => {
+      console.log('Cleaning up sales chart subscription');
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
   if (loading) {
     return (
-      <div className="py-6 text-sm text-muted-foreground">
-        Memuat grafik omzet & laba...
-      </div>
+      <Card className="shadow-lg border bg-white dark:bg-card transition-colors">
+        <CardHeader>
+          <CardTitle className="text-base sm:text-lg font-semibold text-primary">
+            Grafik Omzet & Laba Harian
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-6 text-sm text-muted-foreground">
+            Memuat grafik omzet & laba...
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (data.length === 0) {
     return (
-      <div className="py-6 text-sm text-muted-foreground">
-        Belum ada transaksi untuk grafik omzet/laba.
-      </div>
+      <Card className="shadow-lg border bg-white dark:bg-card transition-colors">
+        <CardHeader>
+          <CardTitle className="text-base sm:text-lg font-semibold text-primary">
+            Grafik Omzet & Laba Harian
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-6 text-sm text-muted-foreground">
+            Belum ada transaksi untuk grafik omzet/laba.
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -113,8 +153,8 @@ export function SalesOmzetChart() {
     ? "rgba(90,100,120,0.22)"
     : "rgba(180,200,220,0.19)";
   const LABEL_COLOR = isDark
-    ? "rgba(235,238,245,0.85)" // soft white
-    : "rgba(75,85,99,0.92)"; // gray-700
+    ? "rgba(235,238,245,0.85)"
+    : "rgba(75,85,99,0.92)";
   const LEGEND_COLOR = isDark
     ? "rgba(235,238,245,0.88)"
     : "rgba(71,85,105,0.94)";
@@ -286,6 +326,3 @@ export function SalesOmzetChart() {
     </Card>
   );
 }
-
-// File ini sudah cukup panjang (>200 baris). Silakan pertimbangkan untuk refaktor agar lebih mudah dirawat jika diperlukan.
-

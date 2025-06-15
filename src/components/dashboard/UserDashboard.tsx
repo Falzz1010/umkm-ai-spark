@@ -12,6 +12,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { useProductFilters } from '@/hooks/useProductFilters';
 import { useProductFinancials } from '@/hooks/useProductFinancials';
 import { useProductExport } from '@/hooks/useProductExport';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function UserDashboard() {
   const { profile } = useAuth();
@@ -21,7 +22,8 @@ export function UserDashboard() {
     salesKey, 
     setSalesKey, 
     analyticsData, 
-    refreshData 
+    refreshData,
+    loading
   } = useDashboardData();
   
   const {
@@ -38,6 +40,29 @@ export function UserDashboard() {
 
   const { omzet, laba } = useProductFinancials(products);
   const { handleExportExcel, handleExportReport } = useProductExport();
+
+  if (loading) {
+    return (
+      <div className="px-1 py-2 sm:px-4 lg:p-6 max-w-7xl mx-auto">
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-64" />
+          <Skeleton className="h-6 w-40" />
+        </div>
+        <div className="flex flex-col gap-2 sm:gap-4 mb-2 sm:mb-4 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+          </div>
+        </div>
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="px-1 py-2 sm:px-4 lg:p-6 max-w-7xl mx-auto">

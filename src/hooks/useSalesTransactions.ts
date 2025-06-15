@@ -26,30 +26,41 @@ export function useSalesTransactions(refreshKey: number) {
     if (!user) return;
     setLoading(true);
     
-    const { data } = await supabase
+    console.log('Fetching sales transactions for user:', user.id);
+    
+    const { data, error } = await supabase
       .from("sales_transactions")
       .select("id,created_at,product_id,quantity,price,total,products(name)")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    setSales(
-      (data || []).map((row) => ({
-        ...row,
-        product_name: row.products?.name || "-",
-        total: row.total ?? row.price * row.quantity,
-      }))
-    );
+    if (error) {
+      console.error('Error fetching sales:', error);
+    } else {
+      console.log('Sales transactions fetched:', data?.length || 0);
+      setSales(
+        (data || []).map((row: any) => ({
+          ...row,
+          product_name: row.products?.name || "-",
+          total: row.total ?? row.price * row.quantity,
+        }))
+      );
+    }
+    
     setLoading(false);
   };
 
+  // Initial fetch and real-time subscription
   useEffect(() => {
     if (!user) return;
     
     fetchSales();
 
+    console.log('Setting up sales transactions real-time subscription');
+
     // Real-time subscription untuk sales_transactions
     const salesChannel = supabase
-      .channel(`sales_transactions:user:${user.id}`)
+      .channel(`sales-transactions-${user.id}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -58,13 +69,17 @@ export function useSalesTransactions(refreshKey: number) {
           table: 'sales_transactions',
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
+        (payload) => {
+          console.log('Real-time sales transaction change:', payload);
           fetchSales();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Sales transactions subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up sales transactions subscription');
       supabase.removeChannel(salesChannel);
     };
   }, [user, refreshKey]);
@@ -76,10 +91,12 @@ export function useSalesTransactions(refreshKey: number) {
     if (!transaction) return;
 
     setDeletingId(id);
+    console.log('Deleting transaction:', id);
     
     const { error: deleteError } = await supabase.from("sales_transactions").delete().eq("id", id);
     
     if (!deleteError) {
+      console.log('Transaction deleted, restoring stock');
       const { data: currentProduct } = await supabase
         .from("products")
         .select("stock")
@@ -94,12 +111,15 @@ export function useSalesTransactions(refreshKey: number) {
           .eq("id", transaction.product_id);
 
         if (!stockError) {
+          console.log('Stock restored successfully');
           toast({ title: "Transaksi dihapus!", description: "Data transaksi berhasil dihapus dan stok dikembalikan." });
         } else {
+          console.error('Error restoring stock:', stockError);
           toast({ title: "Gagal mengembalikan stok", description: stockError.message, variant: "destructive" });
         }
       }
     } else {
+      console.error('Error deleting transaction:', deleteError);
       toast({ title: "Gagal menghapus", description: deleteError.message, variant: "destructive" });
     }
     
@@ -111,6 +131,8 @@ export function useSalesTransactions(refreshKey: number) {
     const newQuantity = newValues.quantity;
     const quantityDifference = newQuantity - oldQuantity;
 
+    console.log('Updating transaction:', editing.id, newValues);
+
     const { error: updateError } = await supabase
       .from("sales_transactions")
       .update({
@@ -121,6 +143,7 @@ export function useSalesTransactions(refreshKey: number) {
 
     if (!updateError) {
       if (quantityDifference !== 0) {
+        console.log('Adjusting stock by:', quantityDifference);
         const { data: currentProduct } = await supabase
           .from("products")
           .select("stock")
@@ -135,15 +158,18 @@ export function useSalesTransactions(refreshKey: number) {
             .eq("id", editing.product_id);
 
           if (stockError) {
+            console.error('Error adjusting stock:', stockError);
             toast({ title: "Gagal update stok", description: stockError.message, variant: "destructive" });
             return false;
           }
         }
       }
 
+      console.log('Transaction updated successfully');
       toast({ title: "Transaksi diperbarui!", description: "Data transaksi berhasil diupdate dengan penyesuaian stok." });
       return true;
     } else {
+      console.error('Error updating transaction:', updateError);
       toast({ title: "Gagal update", description: updateError.message, variant: "destructive" });
       return false;
     }
