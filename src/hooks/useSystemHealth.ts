@@ -52,6 +52,8 @@ export function useSystemHealth() {
   });
   const [loading, setLoading] = useState(true);
   const channelsRef = useRef<any[]>([]);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isSubscribedRef = useRef(false);
 
   // Real-time API response time measurement
   const measureApiResponseTime = useCallback(async () => {
@@ -171,35 +173,31 @@ export function useSystemHealth() {
     }
   }, [getRealSystemMetrics]);
 
-  useEffect(() => {
-    // Initial fetch
-    fetchHealthData();
-    
-    // Real-time updates every 10 seconds for more responsive monitoring
-    const interval = setInterval(() => {
-      console.log('⏰ Auto-refresh health data...');
-      fetchHealthData();
-    }, 10000);
-    
-    return () => {
-      console.log('🛑 Cleaning up health monitoring interval');
-      clearInterval(interval);
-    };
-  }, [fetchHealthData]);
+  const setupRealtimeSubscriptions = useCallback(() => {
+    if (isSubscribedRef.current) {
+      console.log('🔒 Subscriptions already active, skipping setup');
+      return;
+    }
 
-  // Real-time subscription to database changes for more immediate updates
-  useEffect(() => {
     console.log('🔗 Setting up real-time subscriptions for health monitoring...');
     
     // Clean up any existing channels first
     channelsRef.current.forEach(channel => {
-      supabase.removeChannel(channel);
+      try {
+        supabase.removeChannel(channel);
+      } catch (error) {
+        console.log('Channel cleanup error (safe to ignore):', error);
+      }
     });
     channelsRef.current = [];
 
+    // Create unique channel names with timestamp and random component
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(7);
+    
     // Monitor products table for API activity
     const productsChannel = supabase
-      .channel(`health-products-monitor-${Date.now()}`)
+      .channel(`health-products-${timestamp}-${random}`)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'products' },
         () => {
@@ -207,11 +205,13 @@ export function useSystemHealth() {
           fetchHealthData();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Products channel status:', status);
+      });
 
     // Monitor sales transactions for activity tracking
     const salesChannel = supabase
-      .channel(`health-sales-monitor-${Date.now()}`)
+      .channel(`health-sales-${timestamp}-${random}`)
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'sales_transactions' },
         () => {
@@ -219,19 +219,55 @@ export function useSystemHealth() {
           fetchHealthData();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Sales channel status:', status);
+      });
 
     // Store channels for cleanup
     channelsRef.current = [productsChannel, salesChannel];
+    isSubscribedRef.current = true;
+  }, [fetchHealthData]);
+
+  useEffect(() => {
+    // Initial fetch
+    fetchHealthData();
+    
+    // Real-time updates every 10 seconds for more responsive monitoring
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    intervalRef.current = setInterval(() => {
+      console.log('⏰ Auto-refresh health data...');
+      fetchHealthData();
+    }, 10000);
+    
+    return () => {
+      console.log('🛑 Cleaning up health monitoring interval');
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [fetchHealthData]);
+
+  // Separate effect for real-time subscriptions to prevent multiple subscriptions
+  useEffect(() => {
+    setupRealtimeSubscriptions();
 
     return () => {
       console.log('🧹 Cleaning up real-time health monitoring subscriptions');
       channelsRef.current.forEach(channel => {
-        supabase.removeChannel(channel);
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.log('Channel cleanup error (safe to ignore):', error);
+        }
       });
       channelsRef.current = [];
+      isSubscribedRef.current = false;
     };
-  }, [fetchHealthData]);
+  }, []); // Empty dependency array to run only once
 
   return {
     healthData,
