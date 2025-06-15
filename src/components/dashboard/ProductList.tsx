@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { EditProductDialog } from './EditProductDialog';
 
 interface ProductListProps {
   products: Product[];
@@ -16,6 +17,8 @@ interface ProductListProps {
 
 export function ProductList({ products, onRefresh }: ProductListProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
@@ -72,6 +75,11 @@ export function ProductList({ products, onRefresh }: ProductListProps) {
     }
   };
 
+  const handleEditProduct = (product: Product) => {
+    setEditProduct(product);
+    setEditDialogOpen(true);
+  };
+
   if (products.length === 0) {
     return (
       <div className="text-center py-8">
@@ -81,60 +89,74 @@ export function ProductList({ products, onRefresh }: ProductListProps) {
   }
 
   return (
-    <ScrollArea className="h-[600px] w-full rounded-md border">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-        {products.map((product) => (
-          <Card key={product.id} className="relative">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{product.name}</CardTitle>
-                <Badge variant={product.is_active ? "default" : "secondary"}>
-                  {product.is_active ? "Aktif" : "Tidak Aktif"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {product.description || 'Belum ada deskripsi'}
-                </p>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Kategori: {product.category || '-'}</span>
-                  <span className="font-medium">
-                    Rp {product.price?.toLocaleString() || '-'}
-                  </span>
+    <>
+      <ScrollArea className="h-[600px] w-full rounded-md border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+          {products.map((product) => (
+            <Card key={product.id} className="relative">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{product.name}</CardTitle>
+                  <Badge variant={product.is_active ? "default" : "secondary"}>
+                    {product.is_active ? "Aktif" : "Tidak Aktif"}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Modal: Rp {product.cost?.toLocaleString() || '-'}</span>
-                  <span>Stok: {product.stock}</span>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {product.description || 'Belum ada deskripsi'}
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Kategori: {product.category || '-'}</span>
+                    <span className="font-medium">
+                      Rp {product.price?.toLocaleString() || '-'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Modal: Rp {product.cost?.toLocaleString() || '-'}</span>
+                    <span>Stok: {product.stock}</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex gap-2 mt-4">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => toggleProductStatus(product.id, product.is_active)}
-                  disabled={loading === product.id}
-                >
-                  {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                <Button size="sm" variant="outline">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="destructive"
-                  onClick={() => deleteProduct(product.id)}
-                  disabled={loading === product.id}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </ScrollArea>
+                
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleProductStatus(product.id, product.is_active)}
+                    disabled={loading === product.id}
+                  >
+                    {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleEditProduct(product)}
+                    disabled={loading === product.id}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => deleteProduct(product.id)}
+                    disabled={loading === product.id}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+
+      <EditProductDialog
+        product={editProduct}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSuccess={onRefresh}
+      />
+    </>
   );
 }
