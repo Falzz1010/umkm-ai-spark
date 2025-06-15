@@ -4,16 +4,17 @@ import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { UserRole, Profile } from '@/types/database';
 
-export function useUserData() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
+export function useUserData(setProfile?: (profile: Profile | null) => void, setUserRole?: (role: UserRole | null) => void) {
+  const [localProfile, setLocalProfile] = useState<Profile | null>(null);
+  const [localUserRole, setLocalUserRole] = useState<UserRole | null>(null);
+
+  // Use passed setters if available, otherwise use local state
+  const profileSetter = setProfile || setLocalProfile;
+  const roleSetter = setUserRole || setLocalUserRole;
 
   const fetchUserData = async (userId: string, session: Session, retryCount = 0) => {
     try {
       console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
-      
-      // Don't check for session again - trust the session passed from auth context
-      console.log('fetchUserData: Using provided session for API calls');
       
       // Fetch profile first
       const { data: profileData, error: profileError } = await supabase
@@ -25,7 +26,7 @@ export function useUserData() {
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
       } else if (profileData) {
-        setProfile(profileData);
+        profileSetter(profileData);
         console.log('fetchUserData: Profile found:', profileData);
       } else {
         console.warn('fetchUserData: No profile found for user', userId);
@@ -58,14 +59,14 @@ export function useUserData() {
             return fetchUserData(userId, session, retryCount + 1);
           } else {
             console.error('Failed to fetch role after retries or non-network error, setting userRole to null');
-            setUserRole(null);
+            roleSetter(null);
           }
         } else if (roleData && roleData.role) {
-          setUserRole(roleData.role as UserRole);
+          roleSetter(roleData.role as UserRole);
           console.log("fetchUserData: userRole found:", roleData.role);
         } else {
           console.warn("fetchUserData: No roleData found for user", userId);
-          setUserRole(null);
+          roleSetter(null);
         }
       } catch (roleException: any) {
         console.error('Exception fetching role:', roleException);
@@ -84,7 +85,7 @@ export function useUserData() {
           return fetchUserData(userId, session, retryCount + 1);
         } else {
           console.error('Failed to fetch role due to exception, setting userRole to null');
-          setUserRole(null);
+          roleSetter(null);
         }
       }
     } catch (error: any) {
@@ -99,22 +100,22 @@ export function useUserData() {
         return fetchUserData(userId, session, retryCount + 1);
       } else {
         console.error('Failed to fetch user data after final retry');
-        setUserRole(null);
-        setProfile(null);
+        roleSetter(null);
+        profileSetter(null);
       }
     }
   };
 
   const clearUserData = () => {
-    setProfile(null);
-    setUserRole(null);
+    profileSetter(null);
+    roleSetter(null);
   };
 
   return {
-    profile,
-    userRole,
-    setProfile,
-    setUserRole,
+    profile: localProfile,
+    userRole: localUserRole,
+    setProfile: profileSetter,
+    setUserRole: roleSetter,
     fetchUserData,
     clearUserData
   };
