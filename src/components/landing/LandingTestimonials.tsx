@@ -39,39 +39,27 @@ export function LandingTestimonials() {
 
   return (
     <motion.section
-      className="py-24 lg:py-32 bg-gradient-to-b from-muted/20 to-muted/40"
+      className="py-20 bg-muted/30"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.8 }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 30 }}
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ delay: 0.12 }}
         >
-          <Badge variant="outline" className="mb-6 px-4 py-2 text-sm font-medium bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-            ⭐ Testimoni
-          </Badge>
-          <h2 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 tracking-tight">
+          <Badge variant="outline" className="mb-4">⭐ Testimoni</Badge>
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
             Dipercaya oleh Ribuan UMKM
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
-            Bergabunglah dengan komunitas UMKM yang telah merasakan transformasi digital
-          </p>
         </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        >
-          <CarouselTestimonial testimonials={testimonials} />
-        </motion.div>
+        {/* Carousel with animation */}
+        <CarouselTestimonial testimonials={testimonials} />
       </div>
     </motion.section>
   );
