@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -105,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserData = async (userId: string) => {
+  const fetchUserData = async (userId: string, retryCount = 0) => {
     try {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
@@ -127,13 +126,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('user_id', userId)
         .single();
 
-      if (roleError && roleError.code !== 'PGRST116') {
+      if (roleError) {
         console.error('Error fetching role:', roleError);
+
+        // Jika NetworkError & belum retry, ulangi 1x
+        if (
+          (roleError.message?.includes('NetworkError') || roleError.message?.includes('Failed to fetch')) &&
+          retryCount < 1
+        ) {
+          console.warn('Terjadi NetworkError saat ambil role, coba ulangi sekali lagi...');
+          await new Promise((res) => setTimeout(res, 400)); // 400ms debounce
+          return fetchUserData(userId, retryCount + 1);
+        }
       } else if (roleData) {
         setUserRole(roleData.role as UserRole);
       }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
+    } catch (error: any) {
+      console.error('Error fetching user data (exception):', error);
     }
   };
 
