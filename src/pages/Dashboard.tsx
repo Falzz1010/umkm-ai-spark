@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,14 +10,24 @@ export default function Dashboard() {
   const { user, userRole, loading, signOut } = useAuth();
   const navigate = useNavigate();
 
+  // Cek akses dashboard yang benar sesuai role
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
-    // Jika role tidak ditemukan (userRoles row sudah dihapus), paksa logout dan redirect
-    if (!loading && user && !userRole) {
-      // signOut juga sudah memaksa redirect ke /auth
-      signOut();
+
+    // Jika user login dari admin/login tapi bukan admin (Atau sebaliknya), signOut
+    if (!loading && user && window.location.pathname === '/dashboard') {
+      // Role admin: boleh akses. Role user: redirect ke user dashboard
+      // Di dalam dashboard, jadi kita bisa cek
+      if (!userRole) {
+        signOut();
+      } else if (
+        (userRole === 'admin' && window.location.pathname !== '/dashboard') ||
+        (userRole === 'user' && window.location.pathname !== '/dashboard')
+      ) {
+        signOut();
+      }
     }
   }, [user, loading, userRole, navigate, signOut]);
 

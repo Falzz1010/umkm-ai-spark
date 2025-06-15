@@ -35,7 +35,7 @@ export default function AdminLogin() {
         return;
       }
 
-      // Setelah signIn sukses, fetch role langsung dari supabase
+      // Fetch user for role check
       const { data: user } = await supabase.auth.getUser();
       if (!user || !user.user) {
         toast({
@@ -47,7 +47,7 @@ export default function AdminLogin() {
         return;
       }
 
-      // Cek role di tabel user_roles
+      // Cek role: harus admin
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -79,7 +79,7 @@ export default function AdminLogin() {
           variant: "destructive"
         });
         setLoading(false);
-        await signOut(); // Langsung logoutkan user bukan admin
+        await signOut(); // Logout jika login bukan admin
       }
     } catch (error) {
       toast({

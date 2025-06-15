@@ -19,6 +19,7 @@ export default function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Tambahkan filter role di login user (role hanya 'user', bukan 'admin')
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -33,11 +34,52 @@ export default function Auth() {
           variant: "destructive"
         });
       } else {
-        toast({
-          title: "Berhasil",
-          description: "Login berhasil!"
-        });
-        navigate('/dashboard');
+        // Ambil user role
+        const { data: user } = await supabase.auth.getUser();
+        if (!user || !user.user) {
+          toast({
+            title: "Error",
+            description: "User tidak ditemukan setelah login.",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Cek harus role: user
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.user.id)
+          .single();
+
+        if (roleError || !roleData) {
+          toast({
+            title: "Akses Ditolak",
+            description: "Tidak dapat menemukan role user.",
+            variant: "destructive"
+          });
+          setLoading(false);
+          await signOut();
+          return;
+        }
+
+        if (roleData.role === 'user') {
+          toast({
+            title: "Berhasil",
+            description: "Login berhasil!"
+          });
+          navigate('/dashboard');
+        } else {
+          toast({
+            title: "Akses Ditolak",
+            description: "Anda bukan user biasa. Silakan login lewat halaman admin.",
+            variant: "destructive"
+          });
+          setLoading(false);
+          await signOut(); // Logout bila admin coba login di sini
+          return;
+        }
       }
     } catch (error) {
       toast({
