@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bot, Package, TrendingUp, Users, ChartBar, Sparkles, ArrowRight, Check, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { LandingChatbot } from "@/components/landing/LandingChatbot";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,7 +103,7 @@ export default function Index() {
 
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-purple-950/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-purple-950/20 transition-colors"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
             <Badge variant="secondary" className="mb-4">
@@ -145,7 +146,7 @@ export default function Index() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4">
@@ -180,7 +181,7 @@ export default function Index() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20">
+      <section className="py-20 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -243,7 +244,7 @@ export default function Index() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-muted/30 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge variant="outline" className="mb-4">
@@ -278,6 +279,11 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Chatbot Gemini AI (Baru Ditambahkan Dibawah Testimoni) */}
+      <section className="py-12 transition-colors">
+        <LandingChatbot />
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600"></div>
@@ -301,7 +307,7 @@ export default function Index() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-background border-t py-12">
+      <footer className="bg-background border-t py-12 transition-colors">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
