@@ -32,7 +32,7 @@ export interface OrderByConfig {
 export type TableInsert<T extends TableName> = 
   T extends 'products' ? {
     name: string;
-    user_id: string;
+    user_id?: string;
     description?: string;
     price?: number;
     cost?: number;
@@ -43,20 +43,20 @@ export type TableInsert<T extends TableName> =
   } :
   T extends 'sales_transactions' ? {
     product_id: string;
-    user_id: string;
+    user_id?: string;
     quantity: number;
     price: number;
     total?: number;
   } :
   T extends 'ai_generations' ? {
-    user_id: string;
+    user_id?: string;
     product_id?: string;
     generation_type: string;
     input_data: any;
     generated_content: string;
   } :
   T extends 'notifications' ? {
-    user_id: string;
+    user_id?: string;
     title: string;
     message: string;
     type?: string;
