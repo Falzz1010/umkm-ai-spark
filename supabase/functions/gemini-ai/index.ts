@@ -1,5 +1,4 @@
 
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -15,8 +14,8 @@ serve(async (req) => {
   try {
     console.log('Gemini AI function called');
     
-    const { prompt, type, productData } = await req.json();
-    console.log('Request data:', { prompt, type, productData });
+    const { prompt, type, productData, businessData } = await req.json();
+    console.log('Request data:', { prompt, type, productData, businessData });
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     console.log('API key exists:', !!apiKey);
@@ -34,6 +33,28 @@ serve(async (req) => {
 
     let systemPrompt = '';
     switch (type) {
+      case 'business_insights':
+        systemPrompt = `Anda adalah AI Business Intelligence untuk UMKM Indonesia yang sangat berpengalaman. Analisis data bisnis berikut dan berikan 3-4 insight strategis yang actionable:
+
+Data Bisnis:
+- Total Produk: ${businessData?.totalProducts || 0}
+- Produk Aktif: ${businessData?.activeProducts || 0}
+- Total Stok: ${businessData?.totalStock || 0}
+- Produk Stok Rendah: ${businessData?.lowStockProducts || 0}
+- Revenue Mingguan: Rp${(businessData?.weeklyRevenue || 0).toLocaleString()}
+- Revenue Bulanan: Rp${(businessData?.monthlyRevenue || 0).toLocaleString()}
+- Transaksi Minggu ini: ${businessData?.weeklyTransactions || 0}
+- Kategori: ${businessData?.categories?.join(', ') || 'N/A'}
+- Produk Terlaris: ${businessData?.topSellingProducts?.map(p => `${p.name} (${p.quantity} terjual)`).join(', ') || 'N/A'}
+- Range Harga: Rp${(businessData?.priceRanges?.min || 0).toLocaleString()} - Rp${(businessData?.priceRanges?.max || 0).toLocaleString()}
+
+Berikan insight dalam format:
+1. [Judul Insight] - [Penjelasan detail dengan angka spesifik dan rekomendasi actionable]
+2. [Judul Insight] - [Penjelasan detail dengan angka spesifik dan rekomendasi actionable]
+3. [Judul Insight] - [Penjelasan detail dengan angka spesifik dan rekomendasi actionable]
+
+Fokus pada: prediksi trends, optimasi stok, strategi pricing, peluang growth, dan risk management. Gunakan bahasa Indonesia yang mudah dipahami UMKM.`;
+        break;
       case 'description':
         systemPrompt = `Anda adalah AI assistant untuk UMKM Indonesia. Buatkan deskripsi produk yang menarik dan profesional untuk produk: ${productData?.name || 'produk'}. Kategori: ${productData?.category || 'umum'}. Harga modal: Rp ${productData?.cost || 0}. Fokus pada manfaat, kualitas, dan nilai jual. Maksimal 150 kata.`;
         break;
@@ -53,7 +74,7 @@ serve(async (req) => {
         systemPrompt = `Anda adalah AI assistant untuk UMKM Indonesia. Bantu dengan pertanyaan: ${prompt}`;
     }
 
-    const fullPrompt = `${systemPrompt}\n\nPertanyaan: ${prompt || 'Tolong berikan saran untuk produk ini'}`;
+    const fullPrompt = `${systemPrompt}\n\nPertanyaan: ${prompt || 'Tolong berikan analisis dan saran untuk data bisnis ini'}`;
     console.log('Full prompt:', fullPrompt);
 
     const geminiBody = {
@@ -132,4 +153,3 @@ serve(async (req) => {
     });
   }
 });
-

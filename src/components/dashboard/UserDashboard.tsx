@@ -5,7 +5,7 @@ import { DashboardLayout } from './DashboardLayout';
 import { DashboardLoadingSkeleton } from './DashboardLoadingSkeleton';
 import { DashboardStatsSection } from './DashboardStatsSection';
 import { DashboardTabs } from './DashboardTabs';
-import { RealtimeInsights } from './RealtimeInsights';
+import { GeminiInsightsCard } from './GeminiInsightsCard';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 
@@ -56,9 +56,9 @@ export function UserDashboard() {
         laba={laba} 
       />
 
-      {/* Real-time Business Insights */}
+      {/* Gemini AI Business Intelligence */}
       <div className="mb-6 animate-slide-up" style={{'--index': 2} as any}>
-        <RealtimeInsights products={products} />
+        <GeminiInsightsCard products={products} />
       </div>
 
       <DashboardTabs
