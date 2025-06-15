@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,32 +44,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          // Fetch profile and role slightly deferred
-          setTimeout(async () => {
-            await fetchUserData(session.user.id);
-          }, 0);
-        } else {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (event === 'SIGNED_OUT' || !session) {
+          setSession(null);
+          setUser(null);
           setProfile(null);
           setUserRole(null);
+          setLoading(false);
+          return;
         }
+
+        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+          setSession(session);
+          setUser(session.user);
+          
+          // Fetch user data deferred to avoid blocking auth state update
+          setTimeout(async () => {
+            try {
+              await fetchUserData(session.user.id);
+            } catch (error) {
+              console.error('Error fetching user data after auth:', error);
+            }
+          }, 0);
+        }
+        
         setLoading(false);
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserData(session.user.id);
+    const initAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          // If there's an error getting session, clean up and reset state
+          cleanupAuthState();
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setUserRole(null);
+        } else if (session) {
+          setSession(session);
+          setUser(session.user);
+          await fetchUserData(session.user.id);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        cleanupAuthState();
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    };
+
+    initAuth();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -76,24 +108,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     try {
       // Fetch profile
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (profileData) {
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+      } else if (profileData) {
         setProfile(profileData);
       }
 
       // Fetch role
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .single();
 
-      if (roleData) {
+      if (roleError && roleError.code !== 'PGRST116') {
+        console.error('Error fetching role:', roleError);
+      } else if (roleData) {
         setUserRole(roleData.role as UserRole);
       }
     } catch (error) {
@@ -103,8 +139,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     cleanupAuthState();
-    // optional: try global sign out, ignore result
-    try { await supabase.auth.signOut({ scope: 'global' }); } catch (err) {}
     try {
       const redirectUrl = `${window.location.origin}/`;
       const { error } = await supabase.auth.signUp({
@@ -123,8 +157,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     cleanupAuthState();
-    // optional: try global sign out, ignore error
-    try { await supabase.auth.signOut({ scope: 'global' }); } catch (err) {}
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -138,16 +170,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      setLoading(true);
       cleanupAuthState();
-      // global sign out (try catch untuk fallback)
-      try { await supabase.auth.signOut({ scope: 'global' }); } catch (err) {}
+      await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
-      window.location.href = '/auth'; // paksa reload dan pastikan state fresh
     } catch (error) {
-      // Bahkan jika error, tetap force ke /auth
+      console.error('Error signing out:', error);
+    } finally {
+      setLoading(false);
+      // Force redirect to auth page
       window.location.href = '/auth';
     }
   };
