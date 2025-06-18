@@ -1,85 +1,24 @@
 
-import { useAuth } from '@/hooks/useAuth';
-import { DashboardHeader } from './DashboardHeader';
-import { DashboardLayout } from './DashboardLayout';
-import { DashboardLoadingSkeleton } from './DashboardLoadingSkeleton';
-import { DashboardStatsSection } from './DashboardStatsSection';
-import { DashboardTabs } from './DashboardTabs';
-import { GeminiInsightsCard } from './GeminiInsightsCard';
-import { useDashboardData } from '@/hooks/useDashboardData';
-import { useDashboardFilters } from '@/hooks/useDashboardFilters';
+import { Routes, Route } from 'react-router-dom';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import OverviewPage from '@/pages/dashboard/OverviewPage';
+import ProductsPage from '@/pages/dashboard/ProductsPage';
+import AnalyticsPage from '@/pages/dashboard/AnalyticsPage';
+import AIPage from '@/pages/dashboard/AIPage';
+import SalesPage from '@/pages/dashboard/SalesPage';
+import PricingPage from '@/pages/dashboard/PricingPage';
 
 export function UserDashboard() {
-  const { profile } = useAuth();
-  const { 
-    products, 
-    stats, 
-    salesKey, 
-    setSalesKey, 
-    analyticsData, 
-    refreshData,
-    loading
-  } = useDashboardData();
-  
-  const {
-    filterCategory,
-    setFilterCategory,
-    filterSearch,
-    setFilterSearch,
-    filterStatus,
-    setFilterStatus,
-    filterStok,
-    setFilterStok,
-    filteredProducts,
-    omzet,
-    laba,
-    handleExportExcel,
-    handleExportReport
-  } = useDashboardFilters(products);
-
-  if (loading) {
-    return <DashboardLoadingSkeleton />;
-  }
-
   return (
     <DashboardLayout>
-      <div className="animate-slide-up">
-        <DashboardHeader 
-          title={`Selamat datang, ${profile?.full_name || 'User'}`}
-          subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
-        />
-      </div>
-
-      <DashboardStatsSection 
-        stats={stats} 
-        omzet={omzet} 
-        laba={laba} 
-      />
-
-      {/* Gemini AI Business Intelligence */}
-      <div className="mb-6 animate-slide-up" style={{'--index': 2} as any}>
-        <GeminiInsightsCard products={products} />
-      </div>
-
-      <DashboardTabs
-        products={products}
-        stats={stats}
-        salesKey={salesKey}
-        setSalesKey={setSalesKey}
-        analyticsData={analyticsData}
-        filteredProducts={filteredProducts}
-        filterCategory={filterCategory}
-        filterSearch={filterSearch}
-        filterStatus={filterStatus}
-        filterStok={filterStok}
-        setFilterCategory={setFilterCategory}
-        setFilterSearch={setFilterSearch}
-        setFilterStatus={setFilterStatus}
-        setFilterStok={setFilterStok}
-        handleExportExcel={handleExportExcel}
-        handleExportReport={handleExportReport}
-        refreshData={refreshData}
-      />
+      <Routes>
+        <Route path="/" element={<OverviewPage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/ai" element={<AIPage />} />
+        <Route path="/sales" element={<SalesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+      </Routes>
     </DashboardLayout>
   );
 }
