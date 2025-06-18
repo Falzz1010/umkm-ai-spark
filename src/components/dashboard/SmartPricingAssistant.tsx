@@ -2,29 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, TrendingDown, AlertCircle, RefreshCw, Check, X } from 'lucide-react';
+import { TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
 import { Product } from '@/types/database';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
+import { PriceSuggestionCard } from './pricing/PriceSuggestionCard';
+import { PriceAlertsSection } from './pricing/PriceAlertsSection';
+import { PriceSuggestion, generateSimulatedSuggestions, parseAIPriceResponse, extractReasonFromAI } from '@/utils/pricingUtils';
 
 interface SmartPricingAssistantProps {
   products: Product[];
   onPriceUpdate: () => void;
-}
-
-interface PriceSuggestion {
-  productId: string;
-  currentPrice: number;
-  suggestedPrice: number;
-  reason: string;
-  confidence: 'high' | 'medium' | 'low';
-  trend: 'up' | 'down' | 'stable';
-  applied: boolean;
 }
 
 export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingAssistantProps) {
@@ -54,6 +44,55 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
       supabase.removeChannel(channel);
     };
   }, [user, onPriceUpdate]);
+
+  const generateAISuggestions = async (products: Product[]): Promise<PriceSuggestion[] | null> => {
+    try {
+      const aiSuggestions: PriceSuggestion[] = [];
+      
+      // Process each product with Gemini AI
+      for (const product of products.slice(0, 5)) { // Limit to 5 products to avoid rate limiting
+        const response = await supabase.functions.invoke('gemini-ai', {
+          body: {
+            prompt: `Berikan saran harga optimal untuk produk: ${product.name}, dengan harga saat ini Rp${product.price}, harga pokok Rp${product.cost || 0}. Berikan harga spesifik dan alasan singkat.`,
+            type: 'pricing',
+            productData: product
+          }
+        });
+
+        if (response.error) {
+          console.error('Gemini API error:', response.error);
+          continue;
+        }
+
+        if (response.data?.success && response.data?.generatedText) {
+          const aiResponse = response.data.generatedText;
+          const suggestedPrice = parseAIPriceResponse(aiResponse, product);
+          
+          const trend: 'up' | 'down' | 'stable' = 
+            suggestedPrice > product.price ? 'up' : 
+            suggestedPrice < product.price ? 'down' : 'stable';
+          
+          const reason = extractReasonFromAI(aiResponse);
+
+          aiSuggestions.push({
+            productId: product.id,
+            currentPrice: product.price || 0,
+            suggestedPrice,
+            reason,
+            confidence: 'high',
+            trend,
+            applied: false
+          });
+        }
+      }
+      
+      return aiSuggestions.length > 0 ? aiSuggestions : null;
+      
+    } catch (error) {
+      console.error('Error calling Gemini AI:', error);
+      return null;
+    }
+  };
 
   const generatePricingSuggestions = async () => {
     setLoading(true);
@@ -88,148 +127,6 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const generateAISuggestions = async (products: Product[]): Promise<PriceSuggestion[] | null> => {
-    try {
-      const aiSuggestions: PriceSuggestion[] = [];
-      
-      // Process each product with Gemini AI
-      for (const product of products.slice(0, 5)) { // Limit to 5 products to avoid rate limiting
-        const response = await supabase.functions.invoke('gemini-ai', {
-          body: {
-            prompt: `Berikan saran harga optimal untuk produk: ${product.name}, dengan harga saat ini Rp${product.price}, harga pokok Rp${product.cost || 0}. Berikan harga spesifik dan alasan singkat.`,
-            type: 'pricing',
-            productData: product
-          }
-        });
-
-        if (response.error) {
-          console.error('Gemini API error:', response.error);
-          continue;
-        }
-
-        if (response.data?.success && response.data?.generatedText) {
-          // Parse AI response to extract pricing information
-          const aiResponse = response.data.generatedText;
-          const suggestedPriceMatch = aiResponse.match(/Rp\s?(\d{1,3}(,\d{3})*(\.\d+)?)/i);
-          
-          // Extract numbers with regex and convert to numeric value
-          const priceNumbers = aiResponse.match(/\d{4,}/g);
-          
-          let suggestedPrice = product.price;
-          if (suggestedPriceMatch && suggestedPriceMatch[1]) {
-            const extractedPrice = suggestedPriceMatch[1].replace(/,/g, '');
-            suggestedPrice = parseFloat(extractedPrice);
-          } else if (priceNumbers && priceNumbers.length > 0) {
-            // Take the first number that looks like a price
-            suggestedPrice = parseInt(priceNumbers[0]);
-          }
-          
-          // Ensure the suggested price is reasonable
-          if (suggestedPrice < product.cost) {
-            suggestedPrice = Math.round(product.cost * 1.2); // at least 20% profit margin
-          }
-
-          const trend: 'up' | 'down' | 'stable' = 
-            suggestedPrice > product.price ? 'up' : 
-            suggestedPrice < product.price ? 'down' : 'stable';
-          
-          // Extract most reasonable part of response for reason
-          let reason = aiResponse.split('.')[0];
-          if (reason.length > 80) {
-            reason = reason.substring(0, 80) + '...';
-          }
-
-          aiSuggestions.push({
-            productId: product.id,
-            currentPrice: product.price || 0,
-            suggestedPrice,
-            reason,
-            confidence: 'high',
-            trend,
-            applied: false
-          });
-        }
-      }
-      
-      // If we have at least some AI suggestions, return them
-      return aiSuggestions.length > 0 ? aiSuggestions : null;
-      
-    } catch (error) {
-      console.error('Error calling Gemini AI:', error);
-      return null;
-    }
-  };
-
-  const generateSimulatedSuggestions = (products: Product[]): PriceSuggestion[] => {
-    return products.map(product => {
-      const currentPrice = product.price || 0;
-      const cost = product.cost || 0;
-      
-      // More intelligent algorithm for price suggestion
-      let suggestedPrice = currentPrice;
-      let reason = '';
-      let trend: 'up' | 'down' | 'stable' = 'stable';
-      
-      const currentMargin = currentPrice > 0 ? (currentPrice - cost) / cost * 100 : 0;
-      
-      if (currentMargin < 20 && cost > 0) {
-        // Margin terlalu rendah
-        suggestedPrice = Math.round(cost * 1.3 / 1000) * 1000;
-        reason = `Margin profit terlalu rendah (${currentMargin.toFixed(1)}%). Tingkatkan harga untuk profit optimal.`;
-        trend = 'up';
-      } else if (currentMargin > 70 && cost > 0) {
-        // Margin sangat tinggi, mungkin mempengaruhi daya saing
-        suggestedPrice = Math.round(cost * 1.65 / 1000) * 1000;
-        reason = `Margin sangat tinggi (${currentMargin.toFixed(1)}%). Pertimbangkan harga lebih kompetitif.`;
-        trend = 'down';
-      } else {
-        // Harga sudah cukup optimal, kenaikan kecil
-        const variation = 0.05 + Math.random() * 0.12;
-        const isIncrease = Math.random() > 0.4; // Slight bias toward price increases
-        suggestedPrice = Math.round(currentPrice * (1 + (isIncrease ? variation : -variation)) / 1000) * 1000;
-        
-        const reasons = [
-          'Analisis kompetitor menunjukkan harga lebih tinggi',
-          'Demand tinggi untuk kategori ini',
-          'Margin profit dapat dioptimalkan',
-          'Harga pasar sedang naik',
-          'Kualitas produk mendukung harga premium',
-          'Kompetitor menurunkan harga'
-        ];
-        
-        reason = reasons[Math.floor(Math.random() * reasons.length)];
-        trend = suggestedPrice > currentPrice ? 'up' : suggestedPrice < currentPrice ? 'down' : 'stable';
-      }
-
-      return {
-        productId: product.id,
-        currentPrice,
-        suggestedPrice,
-        reason,
-        confidence: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)] as 'high' | 'medium' | 'low',
-        trend,
-        applied: false
-      };
-    });
-  };
-
-  const getConfidenceColor = (confidence: string) => {
-    switch (confidence) {
-      case 'high': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'down': return <TrendingDown className="h-4 w-4 text-red-600" />;
-      default: return <AlertCircle className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -325,57 +222,14 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
                   const product = products.find(p => p.id === suggestion.productId);
                   if (!product) return null;
 
-                  const priceChange = suggestion.suggestedPrice - suggestion.currentPrice;
-                  const percentageChange = ((priceChange / suggestion.currentPrice) * 100).toFixed(1);
-
                   return (
-                    <Card key={suggestion.productId} className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{product.name}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {suggestion.reason}
-                          </p>
-                          
-                          <div className="flex items-center gap-4 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">Harga Saat Ini: </span>
-                              <span className="font-medium">Rp {suggestion.currentPrice.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {getTrendIcon(suggestion.trend)}
-                              <span className="text-muted-foreground">Saran: </span>
-                              <span className="font-medium">Rp {suggestion.suggestedPrice.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div className={`flex items-center gap-1 ${priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              ({priceChange >= 0 ? '+' : ''}{percentageChange}%)
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Badge className={getConfidenceColor(suggestion.confidence)}>
-                            {suggestion.confidence === 'high' ? 'Tinggi' : 
-                             suggestion.confidence === 'medium' ? 'Sedang' : 'Rendah'}
-                          </Badge>
-                          
-                          {suggestion.applied ? (
-                            <Button size="sm" variant="outline" disabled className="flex items-center gap-1">
-                              <Check className="h-3 w-3" /> Diterapkan
-                            </Button>
-                          ) : (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              disabled={loading}
-                              onClick={() => applyPriceSuggestion(suggestion)}
-                            >
-                              Terapkan
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
+                    <PriceSuggestionCard
+                      key={suggestion.productId}
+                      suggestion={suggestion}
+                      product={product}
+                      loading={loading}
+                      onApply={applyPriceSuggestion}
+                    />
                   );
                 })}
               </div>
@@ -384,47 +238,7 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
         </CardContent>
       </Card>
 
-      {/* Price Alerts Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Price Alerts & Monitoring</CardTitle>
-          <CardDescription>
-            Monitor perubahan harga kompetitor dan dapatkan notifikasi real-time
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="competitor-url">URL Kompetitor</Label>
-                <Input 
-                  id="competitor-url"
-                  placeholder="https://competitor.com/product"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="alert-threshold">Threshold Alert (%)</Label>
-                <Input 
-                  id="alert-threshold"
-                  type="number"
-                  placeholder="10"
-                  className="mt-1"
-                />
-              </div>
-            </div>
-            <Button variant="outline" className="w-full">
-              Tambah Monitoring Kompetitor
-            </Button>
-          </div>
-
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground text-center">
-              🔄 Monitoring aktif untuk 0 kompetitor
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <PriceAlertsSection />
     </div>
   );
 }
