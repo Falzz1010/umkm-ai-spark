@@ -124,7 +124,7 @@ export function DashboardSidebar() {
                   {profile?.full_name || 'User'}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {profile?.email || 'user@example.com'}
+                  UMKM AI User
                 </p>
               </div>
               <Button
