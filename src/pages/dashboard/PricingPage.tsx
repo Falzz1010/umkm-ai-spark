@@ -12,13 +12,13 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full max-w-none">
       <DashboardHeader 
         title="Smart Pricing Assistant"
         subtitle="Dapatkan saran harga optimal dengan AI"
       />
       
-      <div className="bg-white dark:bg-card rounded-lg border shadow-sm p-6">
+      <div className="w-full">
         <SmartPricingAssistant 
           products={products} 
           onPriceUpdate={refreshData} 

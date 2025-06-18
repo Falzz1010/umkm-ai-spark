@@ -7,35 +7,35 @@ import { Label } from '@/components/ui/label';
 
 export function PriceAlertsSection() {
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Price Alerts & Monitoring</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-lg sm:text-xl">Price Alerts & Monitoring</CardTitle>
+        <CardDescription className="text-sm sm:text-base">
           Monitor perubahan harga kompetitor dan dapatkan notifikasi real-time
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="competitor-url">URL Kompetitor</Label>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="competitor-url" className="text-sm font-medium">URL Kompetitor</Label>
               <Input 
                 id="competitor-url"
                 placeholder="https://competitor.com/product"
-                className="mt-1"
+                className="w-full"
               />
             </div>
-            <div>
-              <Label htmlFor="alert-threshold">Threshold Alert (%)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="alert-threshold" className="text-sm font-medium">Threshold Alert (%)</Label>
               <Input 
                 id="alert-threshold"
                 type="number"
                 placeholder="10"
-                className="mt-1"
+                className="w-full"
               />
             </div>
           </div>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full sm:w-auto">
             Tambah Monitoring Kompetitor
           </Button>
         </div>

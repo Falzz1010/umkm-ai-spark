@@ -2,15 +2,24 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Zap, TrendingUp, BarChart3, AlertTriangle } from 'lucide-react';
 import { Product } from '@/types/database';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { PriceSuggestionCard } from './pricing/PriceSuggestionCard';
 import { PriceAlertsSection } from './pricing/PriceAlertsSection';
-import { PriceSuggestion, generateSimulatedSuggestions, parseAIPriceResponse, extractReasonFromAI } from '@/utils/pricingUtils';
+
+interface PriceSuggestion {
+  productId: string;
+  currentPrice: number;
+  suggestedPrice: number;
+  reason: string;
+  confidence: 'high' | 'medium' | 'low';
+  trend: 'up' | 'down' | 'stable';
+  applied: boolean;
+}
 
 interface SmartPricingAssistantProps {
   products: Product[];
@@ -18,157 +27,133 @@ interface SmartPricingAssistantProps {
 }
 
 export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingAssistantProps) {
-  const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<PriceSuggestion[]>([]);
-  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [applyingId, setApplyingId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Set up real-time subscription for product updates
-  useEffect(() => {
-    if (!user) return;
+  const generateAISuggestions = async () => {
+    if (products.length === 0) {
+      toast({
+        title: "Tidak ada produk",
+        description: "Tambahkan produk terlebih dahulu untuk mendapatkan saran harga AI.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    const channel = supabase
-      .channel(`pricing-assistant-${user.id}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'products',
-        filter: `user_id=eq.${user.id}`
-      }, () => {
-        console.log('Product price updated, refreshing suggestions...');
-        onPriceUpdate();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, onPriceUpdate]);
-
-  const generateAISuggestions = async (products: Product[]): Promise<PriceSuggestion[] | null> => {
+    setLoading(true);
     try {
-      const aiSuggestions: PriceSuggestion[] = [];
-      
-      // Process each product with Gemini AI
-      for (const product of products.slice(0, 5)) { // Limit to 5 products to avoid rate limiting
-        const response = await supabase.functions.invoke('gemini-ai', {
-          body: {
-            prompt: `Berikan saran harga optimal untuk produk: ${product.name}, dengan harga saat ini Rp${product.price}, harga pokok Rp${product.cost || 0}. Berikan harga spesifik dan alasan singkat.`,
-            type: 'pricing',
-            productData: product
+      const newSuggestions: PriceSuggestion[] = [];
+
+      for (const product of products.slice(0, 5)) {
+        try {
+          const prompt = `Analisis produk berikut dan berikan saran harga optimal:
+            Nama: ${product.name}
+            Harga saat ini: Rp ${product.price?.toLocaleString('id-ID') || 0}
+            Biaya produksi: Rp ${product.cost?.toLocaleString('id-ID') || 0}
+            Kategori: ${product.category || 'Umum'}
+            
+            Berikan saran harga yang optimal dengan mempertimbangkan:
+            1. Margin keuntungan yang sehat (minimal 20-30%)
+            2. Daya saing pasar
+            3. Posisi produk di kategorinya
+            
+            Format response: "Saran harga: Rp [jumlah]. Alasan: [penjelasan singkat]"`;
+
+          const { data, error } = await supabase.functions.invoke('gemini-ai', {
+            body: { 
+              prompt,
+              model: 'gemini-1.5-flash'
+            }
+          });
+
+          if (error) throw error;
+
+          const aiResponse = data.response || '';
+          console.log('AI Response for', product.name, ':', aiResponse);
+
+          // Parse AI response
+          const suggestedPriceMatch = aiResponse.match(/Rp\s?(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?)/i);
+          let suggestedPrice = product.price || 0;
+          
+          if (suggestedPriceMatch) {
+            const extractedPrice = suggestedPriceMatch[1].replace(/[.,]/g, '');
+            suggestedPrice = parseInt(extractedPrice) || suggestedPrice;
           }
-        });
 
-        if (response.error) {
-          console.error('Gemini API error:', response.error);
-          continue;
-        }
-
-        if (response.data?.success && response.data?.generatedText) {
-          const aiResponse = response.data.generatedText;
-          const suggestedPrice = parseAIPriceResponse(aiResponse, product);
+          // Ensure reasonable price bounds
+          const minPrice = (product.cost || 0) * 1.2; // At least 20% margin
+          const maxPrice = (product.price || 0) * 2; // Max 2x current price
           
+          if (suggestedPrice < minPrice) {
+            suggestedPrice = Math.round(minPrice);
+          } else if (suggestedPrice > maxPrice) {
+            suggestedPrice = Math.round(maxPrice);
+          }
+
+          // Extract reason
+          let reason = 'Analisis AI menunjukkan optimasi harga diperlukan';
+          const reasonMatch = aiResponse.match(/Alasan:\s*(.+?)(?:\.|$)/i);
+          if (reasonMatch && reasonMatch[1]) {
+            reason = reasonMatch[1].trim();
+            if (reason.length > 100) {
+              reason = reason.substring(0, 100) + '...';
+            }
+          }
+
+          // Determine trend and confidence
+          const priceChange = suggestedPrice - (product.price || 0);
           const trend: 'up' | 'down' | 'stable' = 
-            suggestedPrice > product.price ? 'up' : 
-            suggestedPrice < product.price ? 'down' : 'stable';
-          
-          const reason = extractReasonFromAI(aiResponse);
+            priceChange > 1000 ? 'up' : 
+            priceChange < -1000 ? 'down' : 'stable';
 
-          aiSuggestions.push({
+          const confidence: 'high' | 'medium' | 'low' = 
+            Math.abs(priceChange) > 5000 ? 'high' :
+            Math.abs(priceChange) > 2000 ? 'medium' : 'low';
+
+          newSuggestions.push({
             productId: product.id,
             currentPrice: product.price || 0,
             suggestedPrice,
             reason,
-            confidence: 'high',
+            confidence,
             trend,
+            applied: false
+          });
+
+        } catch (productError) {
+          console.error('Error processing product:', product.name, productError);
+          
+          // Fallback suggestion
+          const fallbackPrice = Math.max(
+            (product.cost || 0) * 1.3,
+            (product.price || 0) * 1.05
+          );
+          
+          newSuggestions.push({
+            productId: product.id,
+            currentPrice: product.price || 0,
+            suggestedPrice: Math.round(fallbackPrice),
+            reason: 'Saran berdasarkan analisis margin optimal',
+            confidence: 'medium',
+            trend: fallbackPrice > (product.price || 0) ? 'up' : 'stable',
             applied: false
           });
         }
       }
-      
-      return aiSuggestions.length > 0 ? aiSuggestions : null;
-      
-    } catch (error) {
-      console.error('Error calling Gemini AI:', error);
-      return null;
-    }
-  };
 
-  const generatePricingSuggestions = async () => {
-    setLoading(true);
-    
-    try {
-      // First try to use Gemini AI for intelligent pricing
-      const aiSuggestions = await generateAISuggestions(products);
-      if (aiSuggestions && aiSuggestions.length > 0) {
-        setSuggestions(aiSuggestions);
-        toast({
-          title: "Analisis AI Selesai",
-          description: "Rekomendasi harga berhasil dihasilkan dengan Gemini AI",
-        });
-      } else {
-        // Fallback to simulated suggestions if AI fails
-        const fallbackSuggestions = generateSimulatedSuggestions(products);
-        setSuggestions(fallbackSuggestions);
-        toast({
-          title: "Analisis Harga Selesai",
-          description: "Rekomendasi harga berhasil dihasilkan dengan analisis algoritma",
-          variant: "default",
-        });
-      }
-    } catch (error) {
-      console.error('Error generating price suggestions:', error);
-      const fallbackSuggestions = generateSimulatedSuggestions(products);
-      setSuggestions(fallbackSuggestions);
+      setSuggestions(newSuggestions);
       toast({
-        title: "Menggunakan Analisis Lokal",
-        description: "Terjadi kesalahan saat menghubungi AI, menggunakan analisis algoritma",
-        variant: "default",
+        title: "Saran Harga Diperbarui",
+        description: `${newSuggestions.length} saran harga telah dihasilkan dengan AI Gemini.`,
       });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const applyPriceSuggestion = async (suggestion: PriceSuggestion) => {
-    try {
-      const product = products.find(p => p.id === suggestion.productId);
-      if (!product) return;
-      
-      setLoading(true);
-      
-      // Update product price in database
-      const { error } = await supabase
-        .from('products')
-        .update({ 
-          price: suggestion.suggestedPrice,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', suggestion.productId);
-        
-      if (error) throw error;
-      
-      // Update local state to mark as applied
-      setSuggestions(prev => prev.map(s => 
-        s.productId === suggestion.productId 
-          ? { ...s, applied: true, currentPrice: suggestion.suggestedPrice } 
-          : s
-      ));
-      
-      toast({
-        title: "Harga Diperbarui",
-        description: `Harga produk ${product.name} berhasil diperbarui ke Rp${suggestion.suggestedPrice.toLocaleString('id-ID')}`,
-        variant: "default",
-      });
-      
-      // Refresh product data
-      onPriceUpdate();
-      
     } catch (error) {
-      console.error('Error applying price suggestion:', error);
+      console.error('Error generating AI suggestions:', error);
       toast({
-        title: "Gagal Memperbarui Harga",
-        description: "Terjadi kesalahan saat memperbarui harga produk. Silakan coba lagi.",
+        title: "Error",
+        description: "Gagal menghasilkan saran harga. Silakan coba lagi.",
         variant: "destructive",
       });
     } finally {
@@ -176,69 +161,197 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
     }
   };
 
+  const applySuggestion = async (suggestion: PriceSuggestion) => {
+    setApplyingId(suggestion.productId);
+    
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ price: suggestion.suggestedPrice })
+        .eq('id', suggestion.productId);
+
+      if (error) throw error;
+
+      // Update local state
+      setSuggestions(prev => 
+        prev.map(s => 
+          s.productId === suggestion.productId 
+            ? { ...s, applied: true }
+            : s
+        )
+      );
+
+      // Refresh parent data
+      onPriceUpdate();
+      
+      toast({
+        title: "Harga Diperbarui",
+        description: `Harga produk berhasil diperbarui ke Rp ${suggestion.suggestedPrice.toLocaleString('id-ID')}.`,
+      });
+
+    } catch (error) {
+      console.error('Error applying suggestion:', error);
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui harga. Silakan coba lagi.",
+        variant: "destructive",
+      });
+    } finally {
+      setApplyingId(null);
+    }
+  };
+
+  // Auto-refresh suggestions when products change
+  useEffect(() => {
+    if (products.length > 0 && suggestions.length === 0) {
+      generateAISuggestions();
+    }
+  }, [products.length]);
+
+  const suggestionStats = {
+    total: suggestions.length,
+    highConfidence: suggestions.filter(s => s.confidence === 'high').length,
+    priceIncreases: suggestions.filter(s => s.trend === 'up').length,
+    applied: suggestions.filter(s => s.applied).length
+  };
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Smart Pricing Assistant
-          </CardTitle>
-          <CardDescription>
-            Dapatkan saran harga optimal berdasarkan analisis AI dan data pasar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                {products.length} produk tersedia untuk analisis
-              </p>
-            </div>
-            <Button 
-              onClick={generatePricingSuggestions}
-              disabled={loading || products.length === 0}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Menganalisis...' : 'Analisis Harga'}
-            </Button>
+    <div className="w-full max-w-none space-y-4 sm:space-y-6">
+      <Tabs defaultValue="suggestions" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+          <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Saran AI</TabsTrigger>
+          <TabsTrigger value="monitoring" className="text-xs sm:text-sm">Monitoring</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="suggestions" className="space-y-4 sm:space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Card className="p-3 sm:p-4">
+              <div className="flex items-center space-x-2">
+                <BarChart3 className="h-4 w-4 text-blue-600" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Saran</p>
+                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.total}</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-3 sm:p-4">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-4 w-4 text-green-600" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Confidence Tinggi</p>
+                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.highConfidence}</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-3 sm:p-4">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-4 w-4 text-orange-600" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Naik Harga</p>
+                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.priceIncreases}</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-3 sm:p-4">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-4 w-4 text-purple-600" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Diterapkan</p>
+                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.applied}</p>
+                </div>
+              </div>
+            </Card>
           </div>
 
-          {products.length === 0 && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Belum ada produk yang tersedia. Tambahkan produk terlebih dahulu untuk mendapatkan saran harga.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {suggestions.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Saran Harga Terbaru</h3>
-              <div className="grid gap-4">
-                {suggestions.map((suggestion) => {
-                  const product = products.find(p => p.id === suggestion.productId);
-                  if (!product) return null;
-
-                  return (
-                    <PriceSuggestionCard
-                      key={suggestion.productId}
-                      suggestion={suggestion}
-                      product={product}
-                      loading={loading}
-                      onApply={applyPriceSuggestion}
-                    />
-                  );
-                })}
+          {/* Main Content */}
+          <Card>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                    AI Pricing Suggestions
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Saran harga optimal berdasarkan analisis AI Gemini
+                  </CardDescription>
+                </div>
+                <Button 
+                  onClick={generateAISuggestions}
+                  disabled={loading || products.length === 0}
+                  className="w-full sm:w-auto"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Menganalisis...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Generate Saran AI
+                    </>
+                  )}
+                </Button>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            
+            <CardContent>
+              {suggestions.length === 0 ? (
+                <div className="text-center py-8 sm:py-12">
+                  <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Belum ada saran harga</h3>
+                  <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                    Klik tombol "Generate Saran AI" untuk mendapatkan rekomendasi harga optimal dari AI Gemini.
+                  </p>
+                  <Button 
+                    onClick={generateAISuggestions}
+                    disabled={loading || products.length === 0}
+                    variant="outline"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="h-4 w-4 mr-2" />
+                        Generate Saran Sekarang
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {suggestions.map((suggestion) => {
+                    const product = products.find(p => p.id === suggestion.productId);
+                    if (!product) return null;
 
-      <PriceAlertsSection />
+                    return (
+                      <PriceSuggestionCard
+                        key={suggestion.productId}
+                        suggestion={suggestion}
+                        product={product}
+                        loading={applyingId === suggestion.productId}
+                        onApply={applySuggestion}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="monitoring">
+          <PriceAlertsSection />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
