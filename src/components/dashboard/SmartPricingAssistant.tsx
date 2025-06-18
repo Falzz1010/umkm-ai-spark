@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -216,83 +215,93 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
   };
 
   return (
-    <div className="w-full max-w-none space-y-4 sm:space-y-6">
+    <div className="w-full max-w-none space-y-3 sm:space-y-4 lg:space-y-6 px-2 sm:px-0">
       <Tabs defaultValue="suggestions" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
-          <TabsTrigger value="suggestions" className="text-xs sm:text-sm">Saran AI</TabsTrigger>
-          <TabsTrigger value="monitoring" className="text-xs sm:text-sm">Monitoring</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-3 sm:mb-4 lg:mb-6 h-10 sm:h-12 bg-blue-50 dark:bg-gray-800">
+          <TabsTrigger 
+            value="suggestions" 
+            className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-500"
+          >
+            Saran AI
+          </TabsTrigger>
+          <TabsTrigger 
+            value="monitoring" 
+            className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-500"
+          >
+            Monitoring
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="suggestions" className="space-y-4 sm:space-y-6">
+        <TabsContent value="suggestions" className="space-y-3 sm:space-y-4 lg:space-y-6">
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <Card className="p-3 sm:p-4">
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4 text-blue-600" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Saran</p>
-                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.total}</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+            <Card className="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs text-blue-700 dark:text-blue-300 truncate">Total Saran</p>
+                  <p className="text-sm sm:text-lg lg:text-xl font-bold text-blue-800 dark:text-blue-200">{suggestionStats.total}</p>
                 </div>
               </div>
             </Card>
             
-            <Card className="p-3 sm:p-4">
-              <div className="flex items-center space-x-2">
-                <Zap className="h-4 w-4 text-green-600" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Confidence Tinggi</p>
-                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.highConfidence}</p>
+            <Card className="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 dark:text-green-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs text-green-700 dark:text-green-300 truncate">High Confidence</p>
+                  <p className="text-sm sm:text-lg lg:text-xl font-bold text-green-800 dark:text-green-200">{suggestionStats.highConfidence}</p>
                 </div>
               </div>
             </Card>
             
-            <Card className="p-3 sm:p-4">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="h-4 w-4 text-orange-600" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Naik Harga</p>
-                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.priceIncreases}</p>
+            <Card className="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 dark:text-orange-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs text-orange-700 dark:text-orange-300 truncate">Naik Harga</p>
+                  <p className="text-sm sm:text-lg lg:text-xl font-bold text-orange-800 dark:text-orange-200">{suggestionStats.priceIncreases}</p>
                 </div>
               </div>
             </Card>
             
-            <Card className="p-3 sm:p-4">
-              <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-4 w-4 text-purple-600" />
-                <div>
-                  <p className="text-xs text-muted-foreground">Diterapkan</p>
-                  <p className="text-lg sm:text-xl font-bold">{suggestionStats.applied}</p>
+            <Card className="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 dark:text-purple-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] sm:text-xs text-purple-700 dark:text-purple-300 truncate">Diterapkan</p>
+                  <p className="text-sm sm:text-lg lg:text-xl font-bold text-purple-800 dark:text-purple-200">{suggestionStats.applied}</p>
                 </div>
               </div>
             </Card>
           </div>
 
           {/* Main Content */}
-          <Card>
-            <CardHeader className="pb-4">
+          <Card className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader className="pb-3 sm:pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                    <Zap className="h-5 w-5 text-yellow-500" />
+                <div className="space-y-1 sm:space-y-2">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg lg:text-xl text-gray-800 dark:text-gray-100">
+                    <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                     AI Pricing Suggestions
                   </CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     Saran harga optimal berdasarkan analisis AI Gemini
                   </CardDescription>
                 </div>
                 <Button 
                   onClick={generateAISuggestions}
                   disabled={loading || products.length === 0}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 text-xs sm:text-sm px-3 sm:px-4 py-2"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
                       Menganalisis...
                     </>
                   ) : (
                     <>
-                      <Zap className="h-4 w-4 mr-2" />
+                      <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                       Generate Saran AI
                     </>
                   )}
@@ -302,32 +311,33 @@ export function SmartPricingAssistant({ products, onPriceUpdate }: SmartPricingA
             
             <CardContent>
               {suggestions.length === 0 ? (
-                <div className="text-center py-8 sm:py-12">
-                  <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Belum ada saran harga</h3>
-                  <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                <div className="text-center py-6 sm:py-8 lg:py-12">
+                  <Zap className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4 text-gray-400 dark:text-gray-500" />
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">Belum ada saran harga</h3>
+                  <p className="text-muted-foreground mb-3 sm:mb-4 max-w-md mx-auto text-xs sm:text-sm text-gray-600 dark:text-gray-300 px-4">
                     Klik tombol "Generate Saran AI" untuk mendapatkan rekomendasi harga optimal dari AI Gemini.
                   </p>
                   <Button 
                     onClick={generateAISuggestions}
                     disabled={loading || products.length === 0}
                     variant="outline"
+                    className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-900/20 text-xs sm:text-sm"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
                         Loading...
                       </>
                     ) : (
                       <>
-                        <Zap className="h-4 w-4 mr-2" />
+                        <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                         Generate Saran Sekarang
                       </>
                     )}
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {suggestions.map((suggestion) => {
                     const product = products.find(p => p.id === suggestion.productId);
                     if (!product) return null;
