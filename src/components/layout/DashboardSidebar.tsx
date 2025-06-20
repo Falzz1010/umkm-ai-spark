@@ -62,10 +62,14 @@ export function DashboardSidebar() {
   const { profile, signOut } = useAuth();
 
   return (
-    <aside className={cn(
-      "fixed left-0 top-0 z-40 h-full bg-white dark:bg-card border-r border-border transition-all duration-300",
-      isCollapsed ? "w-16" : "w-64"
-    )}>
+    <aside 
+      className={cn(
+        "peer fixed left-0 top-0 z-40 h-full bg-white dark:bg-card border-r border-border transition-all duration-300",
+        "max-lg:absolute max-lg:z-50", // Make it overlay on mobile
+        isCollapsed ? "w-16" : "w-64"
+      )}
+      data-state={isCollapsed ? "collapsed" : "expanded"}
+    >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
@@ -83,7 +87,7 @@ export function DashboardSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-2">
+        <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
           {sidebarItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.href;
@@ -97,12 +101,13 @@ export function DashboardSidebar() {
                   isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                   isCollapsed && "justify-center px-2"
                 )}
+                title={isCollapsed ? item.title : undefined}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
                 {!isCollapsed && (
-                  <div className="flex flex-col">
-                    <span>{item.title}</span>
-                    <span className="text-xs text-muted-foreground">
+                  <div className="flex flex-col min-w-0">
+                    <span className="truncate">{item.title}</span>
+                    <span className="text-xs text-muted-foreground truncate">
                       {item.description}
                     </span>
                   </div>
@@ -137,17 +142,36 @@ export function DashboardSidebar() {
               </Button>
             </div>
           ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={signOut}
-              className="h-8 w-8 mx-auto"
-            >
-              <User className="h-4 w-4" />
-            </Button>
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                title={profile?.full_name || 'User Profile'}
+              >
+                <User className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={signOut}
+                className="h-8 w-8"
+                title="Sign Out"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
           )}
         </div>
       </div>
+      
+      {/* Mobile overlay background */}
+      {!isCollapsed && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/20 z-30"
+          onClick={() => setIsCollapsed(true)}
+        />
+      )}
     </aside>
   );
 }
