@@ -12,13 +12,13 @@ export default function AIPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-4 lg:space-y-6">
       <DashboardHeader 
         title="AI Assistant"
         subtitle="Dapatkan bantuan AI untuk mengoptimalkan bisnis Anda"
       />
       
-      <div className="bg-white dark:bg-card rounded-lg border shadow-sm p-6">
+      <div className="w-full">
         <TabAI products={products} onGenerationComplete={refreshData} />
       </div>
     </div>

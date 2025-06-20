@@ -12,10 +12,10 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="space-y-4 lg:space-y-6 w-full">
+    <div className="w-full space-y-4 lg:space-y-6">
       <DashboardHeader 
         title="Smart Pricing Assistant"
-        subtitle="Dapatkan saran harga optimal dengan AI"
+        subtitle="Dapatkan saran harga optimal dengan AI Gemini"
       />
       
       <div className="w-full">
