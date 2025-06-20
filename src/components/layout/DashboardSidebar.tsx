@@ -10,7 +10,6 @@ import {
   Home,
   Menu,
   X,
-  Settings,
   User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -59,7 +58,7 @@ const sidebarItems = [
 export function DashboardSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
 
   return (
     <aside 
@@ -117,7 +116,7 @@ export function DashboardSidebar() {
           })}
         </nav>
 
-        {/* User Profile */}
+        {/* User Profile - Empty section */}
         <div className="border-t border-border p-4">
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
@@ -132,34 +131,12 @@ export function DashboardSidebar() {
                   UMKM AI User
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={signOut}
-                className="h-8 w-8"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                title={profile?.full_name || 'User Profile'}
-              >
+              <div className="h-8 w-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground">
                 <User className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={signOut}
-                className="h-8 w-8"
-                title="Sign Out"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
+              </div>
             </div>
           )}
         </div>
