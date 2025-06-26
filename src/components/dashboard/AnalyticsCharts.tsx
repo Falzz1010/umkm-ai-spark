@@ -21,14 +21,14 @@ export function AnalyticsCharts({ data }: AnalyticsChartsProps) {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full">
       {/* Daily Activity Chart - Full width on all screens */}
       <Card className="w-full shadow-smooth card-hover">
-        <CardHeader className="card-mobile-header">
-          <CardTitle className="text-responsive-base">Aktivitas Harian (7 Hari Terakhir)</CardTitle>
+        <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+          <CardTitle className="text-base sm:text-lg">Aktivitas Harian (7 Hari Terakhir)</CardTitle>
           <CardDescription className="text-sm">Trend pengguna, produk, dan penggunaan AI</CardDescription>
         </CardHeader>
-        <CardContent className="card-mobile">
+        <CardContent className="p-4 sm:p-6 pt-0">
           <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data.dailyStats} margin={{ top: 10, right: 15, left: 5, bottom: 10 }}>
@@ -79,15 +79,15 @@ export function AnalyticsCharts({ data }: AnalyticsChartsProps) {
         </CardContent>
       </Card>
 
-      {/* Bottom Charts - Responsive grid: 1 col on mobile, 2 cols on tablet+ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* Bottom Charts - Responsive grid: 1 col on mobile, 2 cols on desktop */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 w-full">
         {/* Category Distribution */}
         <Card className="w-full shadow-smooth card-hover">
-          <CardHeader className="card-mobile-header">
-            <CardTitle className="text-responsive-sm">Distribusi Kategori Produk</CardTitle>
+          <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+            <CardTitle className="text-sm sm:text-base">Distribusi Kategori Produk</CardTitle>
             <CardDescription className="text-xs sm:text-sm">Kategori produk paling populer</CardDescription>
           </CardHeader>
-          <CardContent className="card-mobile">
+          <CardContent className="p-4 sm:p-6 pt-0">
             <ChartContainer config={chartConfig} className="h-48 sm:h-56 lg:h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.categoryStats} margin={{ top: 10, right: 10, left: 5, bottom: 25 }}>
@@ -122,11 +122,11 @@ export function AnalyticsCharts({ data }: AnalyticsChartsProps) {
 
         {/* AI Usage by Type */}
         <Card className="w-full shadow-smooth card-hover">
-          <CardHeader className="card-mobile-header">
-            <CardTitle className="text-responsive-sm">Penggunaan AI by Tipe</CardTitle>
+          <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+            <CardTitle className="text-sm sm:text-base">Penggunaan AI by Tipe</CardTitle>
             <CardDescription className="text-xs sm:text-sm">Fitur AI yang paling sering digunakan</CardDescription>
           </CardHeader>
-          <CardContent className="card-mobile">
+          <CardContent className="p-4 sm:p-6 pt-0">
             <ChartContainer config={chartConfig} className="h-48 sm:h-56 lg:h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>

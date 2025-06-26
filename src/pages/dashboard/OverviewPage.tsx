@@ -52,7 +52,7 @@ export default function OverviewPage() {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in px-1 sm:px-0">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in w-full max-w-7xl mx-auto">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
@@ -71,13 +71,13 @@ export default function OverviewPage() {
 
       {/* Quick Actions */}
       <Card className="animate-slide-up shadow-smooth">
-        <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+        <CardHeader className="p-4 sm:p-6">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <ShoppingCart className="h-5 w-5 text-primary flex-shrink-0" />
             Aksi Cepat
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+        <CardContent className="p-4 sm:p-6 pt-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
@@ -87,15 +87,15 @@ export default function OverviewPage() {
                     <CardContent className="p-4 sm:p-5 h-full flex flex-col">
                       <div className="flex items-start justify-between mb-3">
                         <div className={`p-2.5 rounded-lg ${action.color} transition-transform group-hover:scale-110 flex-shrink-0`}>
-                          <Icon className="h-5 w-5 sm:h-5 sm:w-5" />
+                          <Icon className="h-5 w-5" />
                         </div>
-                        <ArrowRight className="h-4 w-4 sm:h-4 sm:w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-base sm:text-base group-hover:text-primary transition-colors leading-tight mb-2">
+                        <h3 className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors leading-tight mb-2">
                           {action.title}
                         </h3>
-                        <p className="text-sm sm:text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                           {action.description}
                         </p>
                       </div>

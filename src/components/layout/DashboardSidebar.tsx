@@ -77,20 +77,20 @@ export function DashboardSidebar() {
       <aside 
         className={cn(
           "peer fixed left-0 top-0 z-40 h-full bg-white dark:bg-card border-r border-border transition-all duration-300 font-sans",
-          // Mobile behavior - slide in from left, full width on small screens
+          // Mobile behavior - slide in from left
           "lg:relative lg:translate-x-0",
-          "w-full max-w-80 sm:max-w-xs lg:max-w-none",
+          "w-80 sm:w-72 lg:w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           // Desktop collapsed/expanded
-          "lg:w-64 lg:data-[state=collapsed]:w-16"
+          "lg:data-[state=collapsed]:w-16"
         )}
         data-state={isCollapsed ? "collapsed" : "expanded"}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border min-h-16 lg:min-h-16">
+          <div className="flex items-center justify-between p-4 lg:p-6 border-b border-border min-h-16 lg:min-h-16">
             {!isCollapsed && (
-              <h2 className="text-lg font-semibold text-primary tracking-tight">UMKM AI</h2>
+              <h2 className="text-lg lg:text-xl font-bold text-primary tracking-tight">UMKM AI</h2>
             )}
             <Button
               variant="ghost"
@@ -103,7 +103,7 @@ export function DashboardSidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
+          <nav className="flex-1 space-y-1 p-3 lg:p-4 overflow-y-auto">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
@@ -125,16 +125,12 @@ export function DashboardSidebar() {
                     isActive ? "text-primary" : "group-hover:text-primary"
                   )} />
                   {!isCollapsed && (
-                    <div className="flex flex-col min-w-0 lg:hidden xl:flex">
+                    <div className="flex flex-col min-w-0">
                       <span className="truncate font-medium text-base lg:text-sm">{item.title}</span>
                       <span className="text-xs text-muted-foreground truncate lg:hidden xl:block">
                         {item.description}
                       </span>
                     </div>
-                  )}
-                  {/* Show title only on desktop when not collapsed */}
-                  {!isCollapsed && (
-                    <span className="hidden lg:block xl:hidden truncate font-medium">{item.title}</span>
                   )}
                 </Link>
               );
@@ -142,24 +138,18 @@ export function DashboardSidebar() {
           </nav>
 
           {/* User Profile */}
-          <div className="border-t border-border p-4">
+          <div className="border-t border-border p-4 lg:p-6">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
                   <User className="h-5 w-5 lg:h-4 lg:w-4" />
                 </div>
-                <div className="flex-1 min-w-0 lg:hidden xl:block">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
                     {profile?.full_name || 'User'}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     UMKM AI User
-                  </p>
-                </div>
-                {/* Desktop collapsed state */}
-                <div className="hidden lg:block xl:hidden">
-                  <p className="text-sm font-medium truncate">
-                    {profile?.full_name || 'User'}
                   </p>
                 </div>
               </div>

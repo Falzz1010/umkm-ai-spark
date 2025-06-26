@@ -17,10 +17,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         "peer-data-[state=collapsed]:ml-0 lg:peer-data-[state=collapsed]:ml-16", 
         "w-full overflow-x-hidden min-h-screen"
       )}>
-        <div className="h-full p-3 sm:p-4 lg:p-6 w-full">
+        <div className="h-full w-full">
           {/* Mobile top padding for menu button */}
-          <div className="pt-12 lg:pt-0 max-w-7xl mx-auto w-full">
-            <div className="animate-fade-in">
+          <div className="pt-12 lg:pt-0 max-w-full mx-auto w-full">
+            <div className="animate-fade-in p-3 sm:p-4 lg:p-6">
               {children}
             </div>
           </div>
