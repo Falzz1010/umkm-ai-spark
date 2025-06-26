@@ -63,11 +63,11 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button - Fixed position */}
+      {/* Mobile Menu Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden fixed top-3 left-3 z-50 bg-white dark:bg-card shadow-lg border h-10 w-10"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-white dark:bg-card shadow-lg"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -77,20 +77,21 @@ export function DashboardSidebar() {
       <aside 
         className={cn(
           "peer fixed left-0 top-0 z-40 h-full bg-white dark:bg-card border-r border-border transition-all duration-300 font-sans",
+          // Desktop behavior
+          "max-lg:absolute max-lg:z-50",
           // Mobile behavior - slide in from left
-          "lg:relative lg:translate-x-0",
-          "w-80 sm:w-72 lg:w-64",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          "max-lg:transform max-lg:transition-transform",
+          isMobileOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full",
           // Desktop collapsed/expanded
-          "lg:data-[state=collapsed]:w-16"
+          isCollapsed ? "w-16" : "w-64"
         )}
         data-state={isCollapsed ? "collapsed" : "expanded"}
       >
         <div className="flex h-full flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 lg:p-6 border-b border-border min-h-16 lg:min-h-16">
+          <div className="flex items-center justify-between p-4 border-b border-border min-h-[4rem]">
             {!isCollapsed && (
-              <h2 className="text-lg lg:text-xl font-bold text-primary tracking-tight">UMKM AI</h2>
+              <h2 className="text-lg font-semibold text-primary tracking-tight">UMKM AI</h2>
             )}
             <Button
               variant="ghost"
@@ -103,7 +104,7 @@ export function DashboardSidebar() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 p-3 lg:p-4 overflow-y-auto">
+          <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
@@ -114,20 +115,20 @@ export function DashboardSidebar() {
                   to={item.href}
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-3 lg:py-2.5 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground group touch-manipulation",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground group",
                     isActive ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                    isCollapsed && "lg:justify-center lg:px-2"
+                    isCollapsed && "justify-center px-2"
                   )}
                   title={isCollapsed ? item.title : undefined}
                 >
                   <Icon className={cn(
-                    "h-5 w-5 lg:h-4 lg:w-4 flex-shrink-0 transition-colors",
+                    "h-4 w-4 flex-shrink-0 transition-colors",
                     isActive ? "text-primary" : "group-hover:text-primary"
                   )} />
                   {!isCollapsed && (
                     <div className="flex flex-col min-w-0">
-                      <span className="truncate font-medium text-base lg:text-sm">{item.title}</span>
-                      <span className="text-xs text-muted-foreground truncate lg:hidden xl:block">
+                      <span className="truncate font-medium">{item.title}</span>
+                      <span className="text-xs text-muted-foreground truncate">
                         {item.description}
                       </span>
                     </div>
@@ -138,11 +139,11 @@ export function DashboardSidebar() {
           </nav>
 
           {/* User Profile */}
-          <div className="border-t border-border p-4 lg:p-6">
+          <div className="border-t border-border p-4">
             {!isCollapsed ? (
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 lg:h-8 lg:w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  <User className="h-5 w-5 lg:h-4 lg:w-4" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                  <User className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">

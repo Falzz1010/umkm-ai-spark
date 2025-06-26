@@ -82,19 +82,19 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
 
   if (currentProducts.length === 0) {
     return (
-      <div className="w-full text-center py-6 sm:py-8">
-        <p className="text-muted-foreground text-sm sm:text-base">Belum ada produk untuk dijual.</p>
+      <div className="w-full text-center py-8">
+        <p className="text-muted-foreground">Belum ada produk untuk dijual.</p>
         <p className="text-sm text-muted-foreground mt-1">Tambahkan produk terlebih dahulu.</p>
       </div>
     );
   }
 
   return (
-    <form className="w-full flex flex-col space-y-4" onSubmit={handleSubmit}>
+    <form className="w-full flex flex-col space-y-3" onSubmit={handleSubmit}>
       <div>
-        <label className="text-sm font-semibold mb-2 block">Produk</label>
+        <label className="text-sm font-semibold">Produk</label>
         <select
-          className="w-full border rounded-lg px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors"
+          className="mt-1 border rounded w-full px-3 py-2 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={selectedProduct}
           onChange={(e) => {
             setSelectedProduct(e.target.value);
@@ -105,7 +105,7 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
             <option
               value={p.id}
               key={p.id}
-              className="text-gray-800 dark:text-zinc-100 bg-white dark:bg-zinc-900 py-1"
+              className="text-gray-800 dark:text-zinc-100 bg-white dark:bg-zinc-900"
             >
               {p.name} (Stok: {p.stock})
             </option>
@@ -113,24 +113,24 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
         </select>
       </div>
       <div>
-        <label className="text-sm font-semibold mb-2 block">Jumlah Terjual</label>
+        <label className="text-sm font-semibold">Jumlah Terjual</label>
         <input
           type="number"
-          className="w-full border rounded-lg px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-colors"
+          className="mt-1 border rounded w-full px-3 py-2 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           min={1}
           max={product?.stock ?? undefined}
           value={quantity}
           onChange={(e) => setQuantity(Number(e.target.value))}
           required
         />
-        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+        <p className="text-xs text-muted-foreground mt-1">
           Stok tersedia: {product?.stock ?? 0}
         </p>
       </div>
       <Button 
         type="submit" 
         disabled={loading === 'create-new' || !product || (product.stock ?? 0) < quantity}
-        className="relative w-full sm:w-auto h-10 touch-manipulation"
+        className="relative"
       >
         {loading === 'create-new' ? (
           <>

@@ -25,39 +25,37 @@ interface TabProductsProps {
 export function TabProducts(props: TabProductsProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-col space-y-3 sm:space-y-2 px-4 sm:px-6 pt-4 sm:pt-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div>
-            <CardTitle className="text-lg sm:text-xl">Produk Saya</CardTitle>
-            <CardDescription className="text-sm">Kelola produk bisnis Anda</CardDescription>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-            <Button 
-              variant="outline" 
-              onClick={props.handleExportExcel}
-              size="sm"
-              className="w-full sm:w-auto text-sm h-9"
-            >
-              <Download className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">Export Excel</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={props.handleExportReport}
-              size="sm"
-              className="w-full sm:w-auto text-sm h-9"
-            >
-              <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">Download Laporan</span>
-            </Button>
-            <AddProductDialog onProductAdded={props.refreshData}>
-              <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">Tambah Produk</span>
-            </AddProductDialog>
-          </div>
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+        <div>
+          <CardTitle>Produk Saya</CardTitle>
+          <CardDescription>Kelola produk bisnis Anda</CardDescription>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button 
+            variant="outline" 
+            onClick={props.handleExportExcel}
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Excel
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={props.handleExportReport}
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Download Laporan
+          </Button>
+          <AddProductDialog onProductAdded={props.refreshData}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tambah Produk
+          </AddProductDialog>
         </div>
       </CardHeader>
-      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+      <CardContent>
         <ProductFilters
           products={props.products}
           category={props.filterCategory}

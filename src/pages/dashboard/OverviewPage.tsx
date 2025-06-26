@@ -52,7 +52,7 @@ export default function OverviewPage() {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in w-full max-w-7xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
@@ -71,31 +71,31 @@ export default function OverviewPage() {
 
       {/* Quick Actions */}
       <Card className="animate-slide-up shadow-smooth">
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <ShoppingCart className="h-5 w-5 text-primary flex-shrink-0" />
+        <CardHeader className="card-mobile-header">
+          <CardTitle className="flex items-center gap-2 text-responsive-base">
+            <ShoppingCart className="h-5 w-5 text-primary" />
             Aksi Cepat
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
+        <CardContent className="card-mobile">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <Link key={action.href} to={action.href} className="group">
-                  <Card className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 card-hover border-0 bg-gray-50/50 dark:bg-muted/30 h-full">
-                    <CardContent className="p-4 sm:p-5 h-full flex flex-col">
+                  <Card className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 card-hover border-0 bg-gray-50/50 dark:bg-muted/30">
+                    <CardContent className="p-4 sm:p-5">
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`p-2.5 rounded-lg ${action.color} transition-transform group-hover:scale-110 flex-shrink-0`}>
-                          <Icon className="h-5 w-5" />
+                        <div className={`p-2.5 rounded-lg ${action.color} transition-transform group-hover:scale-110`}>
+                          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                         </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors leading-tight mb-2">
+                      <div>
+                        <h3 className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors">
                           {action.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
                           {action.description}
                         </p>
                       </div>
