@@ -9,7 +9,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-background flex w-full">
+    <div className="min-h-screen bg-gray-50 dark:bg-background flex w-full font-sans">
       <DashboardSidebar />
       <main className={cn(
         "flex-1 transition-all duration-300 ease-in-out",
@@ -18,9 +18,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         "max-lg:ml-0", // No margin on mobile (sidebar becomes overlay)
         "w-full overflow-x-hidden" // Prevent horizontal overflow
       )}>
-        <div className="h-full p-2 sm:p-4 lg:p-6 w-full">
+        <div className="h-full p-3 sm:p-4 lg:p-6 w-full">
           <div className="max-w-7xl mx-auto w-full">
-            {children}
+            <div className="animate-fade-in">
+              {children}
+            </div>
           </div>
         </div>
       </main>
