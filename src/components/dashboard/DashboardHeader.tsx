@@ -16,6 +16,7 @@ import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { SettingsDialog } from './SettingsDialog';
 import { ProfileDialog } from './ProfileDialog';
 import { NotificationsDrawer } from './NotificationsDrawer';
+import { RealTimeNotifications } from './RealTimeNotifications';
 import { DateTime } from './DateTime';
 import { useNotificationsCtx } from '@/hooks/NotificationsContext';
 
@@ -75,20 +76,8 @@ export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
             <DateTime />
           </div>
 
-          {/* Notification Button */}
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="relative hidden sm:flex"
-            onClick={() => setNotificationsOpen(true)}
-          >
-            <Bell className="h-4 w-4" />
-            {unreadCount > 0 && (
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs" variant="destructive">
-                {unreadCount}
-              </Badge>
-            )}
-          </Button>
+          {/* Real-time Notifications - New Feature */}
+          <RealTimeNotifications />
 
           {/* Theme Toggle */}
           <ThemeToggle />
