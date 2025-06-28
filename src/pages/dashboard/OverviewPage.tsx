@@ -3,17 +3,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStatsSection } from '@/components/dashboard/DashboardStatsSection';
 import { GeminiInsightsCard } from '@/components/dashboard/GeminiInsightsCard';
-import { QuickStatsWidget } from '@/components/dashboard/QuickStatsWidget';
-import { DataBackupRestore } from '@/components/dashboard/DataBackupRestore';
-import { AutoReportExporter } from '@/components/dashboard/AutoReportExporter';
-import { QuickActionFAB } from '@/components/dashboard/QuickActionFAB';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 import { DashboardLoadingSkeleton } from '@/components/dashboard/DashboardLoadingSkeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Package, BarChart3, Bot, ShoppingCart, DollarSign, ArrowRight, Zap } from 'lucide-react';
+import { Package, BarChart3, Bot, ShoppingCart, DollarSign, ArrowRight } from 'lucide-react';
 
 export default function OverviewPage() {
   const { profile } = useAuth();
@@ -62,11 +58,6 @@ export default function OverviewPage() {
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
       />
 
-      {/* Quick Stats Widget - New Feature */}
-      <div className="animate-slide-up">
-        <QuickStatsWidget />
-      </div>
-
       <DashboardStatsSection 
         stats={stats} 
         omzet={omzet} 
@@ -77,22 +68,6 @@ export default function OverviewPage() {
       <div className="animate-slide-up">
         <GeminiInsightsCard products={products} />
       </div>
-
-      {/* New Features Section */}
-      <Card className="animate-slide-up shadow-smooth border-2 border-primary/20">
-        <CardHeader className="card-mobile-header">
-          <CardTitle className="flex items-center gap-2 text-responsive-base">
-            <Zap className="h-5 w-5 text-primary" />
-            Fitur Terbaru
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="card-mobile">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-            <DataBackupRestore />
-            <AutoReportExporter />
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Quick Actions */}
       <Card className="animate-slide-up shadow-smooth">
@@ -132,9 +107,6 @@ export default function OverviewPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Floating Action Button - New Feature */}
-      <QuickActionFAB />
     </div>
   );
 }
