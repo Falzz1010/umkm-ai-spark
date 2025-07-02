@@ -12,13 +12,13 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 w-full max-w-full">
       <DashboardHeader 
         title="Analytics & Insights"
         subtitle="Analisis mendalam tentang performa bisnis Anda"
       />
       
-      <div className="bg-white dark:bg-card rounded-lg border shadow-sm p-6">
+      <div className="bg-white dark:bg-card rounded-lg border shadow-sm p-4 sm:p-6 w-full max-w-full overflow-hidden">
         <TabAnalytics analyticsData={analyticsData} products={products} />
       </div>
     </div>

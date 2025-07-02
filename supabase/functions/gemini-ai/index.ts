@@ -33,6 +33,11 @@ serve(async (req) => {
 
     let systemPrompt = '';
     switch (type) {
+      case 'general_chat':
+        systemPrompt = `Anda adalah AI Assistant untuk UMKM Indonesia. Berikan jawaban yang praktis, ramah, dan membantu untuk pertanyaan seputar bisnis UMKM. Gunakan bahasa Indonesia yang mudah dipahami. Fokus pada solusi praktis untuk usaha kecil dan menengah.
+
+Jawab dalam 2-3 paragraf singkat. Berikan tips yang actionable jika relevan.`;
+        break;
       case 'business_insights':
         systemPrompt = `Analisis data UMKM berikut dan berikan 3 insight singkat:
 

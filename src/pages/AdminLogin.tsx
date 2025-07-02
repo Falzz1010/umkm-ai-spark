@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function AdminLogin() {
@@ -77,6 +78,16 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 transition-colors duration-200">
+      {/* Back to Home Button */}
+      <Button
+        variant="ghost"
+        className="absolute top-4 left-4 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+        onClick={() => navigate('/')}
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Kembali
+      </Button>
+
       {/* Theme Toggle di kanan atas */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />

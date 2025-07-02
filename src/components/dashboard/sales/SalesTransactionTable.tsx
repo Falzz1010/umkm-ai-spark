@@ -13,16 +13,16 @@ interface SalesTransactionTableProps {
 
 export function SalesTransactionTable({ sales, deletingId, onEdit, onDelete }: SalesTransactionTableProps) {
   return (
-    <div className="w-full">
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="min-w-full">
         <TableHeader className="sticky top-0 bg-background z-10">
           <TableRow>
-            <TableHead className="w-[100px]">Tanggal</TableHead>
-            <TableHead className="min-w-[120px]">Produk</TableHead>
-            <TableHead className="w-[80px] text-center">Jumlah</TableHead>
-            <TableHead className="w-[120px] text-right">Harga Jual</TableHead>
-            <TableHead className="w-[120px] text-right">Total</TableHead>
-            <TableHead className="w-[100px] text-center">Aksi</TableHead>
+            <TableHead className="w-[80px] sm:w-[100px] text-xs sm:text-sm">Tanggal</TableHead>
+            <TableHead className="min-w-[100px] sm:min-w-[120px] text-xs sm:text-sm">Produk</TableHead>
+            <TableHead className="w-[60px] sm:w-[80px] text-center text-xs sm:text-sm">Jumlah</TableHead>
+            <TableHead className="w-[80px] sm:w-[120px] text-right text-xs sm:text-sm">Harga</TableHead>
+            <TableHead className="w-[80px] sm:w-[120px] text-right text-xs sm:text-sm">Total</TableHead>
+            <TableHead className="w-[70px] sm:w-[100px] text-center text-xs sm:text-sm">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
