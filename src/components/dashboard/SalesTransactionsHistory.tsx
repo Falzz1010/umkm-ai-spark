@@ -4,6 +4,7 @@ import { useSalesTransactions, SaleRow } from "@/hooks/useSalesTransactions";
 import { SalesTransactionTable } from "./sales/SalesTransactionTable";
 import { EditTransactionDialog } from "./EditTransactionDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number }) {
   const { sales, loading, deletingId, handleDelete, handleEditSubmit } = useSalesTransactions(refreshKey);
@@ -26,30 +27,38 @@ export function SalesTransactionsHistory({ refreshKey }: { refreshKey: number })
   };
 
   return (
-    <div className="w-full">
-      <h3 className="font-semibold mb-4">Riwayat Penjualan</h3>
-      {loading ? (
-        <div className="text-sm py-4 text-muted-foreground">Memuat...</div>
-      ) : sales.length === 0 ? (
-        <div className="text-sm py-4 text-muted-foreground">Belum ada transaksi penjualan.</div>
-      ) : (
-        <div className="border rounded-lg">
-          <ScrollArea className="h-[400px] w-full">
-            <SalesTransactionTable
-              sales={sales}
-              deletingId={deletingId}
-              onEdit={onEdit}
-              onDelete={handleDelete}
-            />
-          </ScrollArea>
-        </div>
-      )}
-      <EditTransactionDialog
-        open={editOpen}
-        onOpenChange={(open) => setEditOpen(open)}
-        transaction={editing}
-        onSave={onSave}
-      />
-    </div>
+    <Card className="w-full">
+      <CardHeader className="pb-3 sm:pb-4">
+        <CardTitle className="text-lg sm:text-xl">Riwayat Penjualan</CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 sm:p-4 lg:p-6">
+        {loading ? (
+          <div className="text-sm py-4 text-muted-foreground text-center">Memuat...</div>
+        ) : sales.length === 0 ? (
+          <div className="text-sm py-6 sm:py-8 text-muted-foreground text-center">
+            <p>Belum ada transaksi penjualan.</p>
+          </div>
+        ) : (
+          <div className="border rounded-lg w-full overflow-hidden">
+            <ScrollArea className="h-[300px] sm:h-[400px] w-full">
+              <div className="min-w-full">
+                <SalesTransactionTable
+                  sales={sales}
+                  deletingId={deletingId}
+                  onEdit={onEdit}
+                  onDelete={handleDelete}
+                />
+              </div>
+            </ScrollArea>
+          </div>
+        )}
+        <EditTransactionDialog
+          open={editOpen}
+          onOpenChange={(open) => setEditOpen(open)}
+          transaction={editing}
+          onSave={onSave}
+        />
+      </CardContent>
+    </Card>
   );
 }

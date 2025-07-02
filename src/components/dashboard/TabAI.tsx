@@ -7,5 +7,9 @@ interface TabAIProps {
 }
 
 export function TabAI({ products, onGenerationComplete }: TabAIProps) {
-  return <EnhancedAIAssistant products={products} onGenerationComplete={onGenerationComplete} />;
+  return (
+    <div className="w-full max-w-full">
+      <EnhancedAIAssistant products={products} onGenerationComplete={onGenerationComplete} />
+    </div>
+  );
 }

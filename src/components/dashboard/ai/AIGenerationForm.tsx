@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -33,17 +34,23 @@ export function AIGenerationForm({
   const canGenerate = aiUsageCount < dailyLimit && (selectedType === 'custom' || selectedProduct);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-6 w-full">
       {(selectedType !== 'custom') && (
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-blue-200">Pilih Produk</label>
+        <div className="space-y-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-900 dark:text-blue-200">
+            Pilih Produk
+          </label>
           <Select value={selectedProduct} onValueChange={onProductChange}>
-            <SelectTrigger className="bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700">
+            <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700 h-10 sm:h-11">
               <SelectValue placeholder="Pilih produk..." />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700">
+            <SelectContent className="bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700 z-50">
               {products.map((product) => (
-                <SelectItem key={product.id} value={product.id} className="hover:bg-gray-50 dark:hover:bg-blue-900">
+                <SelectItem 
+                  key={product.id} 
+                  value={product.id} 
+                  className="hover:bg-gray-50 dark:hover:bg-blue-900 text-sm sm:text-base"
+                >
                   {product.name} - {product.category}
                 </SelectItem>
               ))}
@@ -52,8 +59,8 @@ export function AIGenerationForm({
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-blue-200">
+      <div className="space-y-2">
+        <label className="block text-sm sm:text-base font-medium text-gray-900 dark:text-blue-200">
           {selectedType === 'custom' ? 'Prompt Kustom' : 'Instruksi Tambahan (Opsional)'}
         </label>
         <Textarea
@@ -65,14 +72,14 @@ export function AIGenerationForm({
               : "Contoh: Tonjolkan keunggulan kualitas dan bahan organik..."
           }
           rows={3}
-          className="resize-none bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700 text-gray-900 dark:text-blue-100"
+          className="resize-none bg-white dark:bg-slate-800 border-gray-200 dark:border-blue-700 text-gray-900 dark:text-blue-100 text-sm sm:text-base min-h-[80px] sm:min-h-[100px]"
         />
       </div>
 
       <Button 
         onClick={onGenerate}
         disabled={loading || !canGenerate}
-        className="w-full h-11 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+        className="w-full h-11 sm:h-12 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-sm sm:text-base"
         size="lg"
       >
         {loading ? (
