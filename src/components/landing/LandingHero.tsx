@@ -1,100 +1,91 @@
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Check } from 'lucide-react';
+import { Bot, TrendingUp, Sparkles, ArrowRight, Users, ChartBar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from "framer-motion";
 
 export function LandingHero() {
   const navigate = useNavigate();
+
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="relative py-14 sm:py-20 lg:py-32 overflow-hidden"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/60 via-indigo-50/40 to-purple-100/60 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-purple-950/20 transition-colors"></div>
+    <section className="relative bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 py-12 sm:py-16 lg:py-20 overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]" />
+      
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
-            <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm p-2">
-              🚀 Platform AI Terdepan untuk UMKM
+        <div className="text-center space-y-6 sm:space-y-8">
+          {/* Badge */}
+          <div className="flex justify-center">
+            <Badge variant="secondary" className="px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              Platform AI Terdepan untuk UMKM Indonesia
             </Badge>
-          </motion.div>
-          <motion.h1
-            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4 sm:mb-6 leading-tight"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
-            Transformasi
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              {" "}Digital{" "}
-            </span>
-            UMKM Anda
-          </motion.h1>
-          <motion.p
-            className="text-base sm:text-xl text-muted-foreground mb-7 max-w-[95vw] sm:max-w-3xl mx-auto leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-          >
-            Platform AI terpadu yang membantu UMKM mengembangkan bisnis dengan teknologi kecerdasan buatan.
-            Kelola produk, generate konten berkualitas, dan dapatkan insights bisnis yang actionable.
-          </motion.p>
-          <motion.div
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-7 sm:mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-          >
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Button
-                size="lg"
-                className="text-base sm:text-lg px-6 py-4 sm:px-8 sm:py-6 hover-scale shadow-lg transition-all duration-200"
-                onClick={() => navigate('/auth')}
-              >
-                Mulai Gratis Sekarang
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-base sm:text-lg px-6 py-4 sm:px-8 sm:py-6 hover:bg-indigo-50 hover:text-indigo-700 border-indigo-100 transition-all duration-200"
-                onClick={() => navigate('/auth')}
-              >
-                Lihat Demo
-              </Button>
-            </motion.div>
-          </motion.div>
-          <motion.div
-            className="flex flex-wrap justify-center items-center gap-3 sm:gap-8 text-xs sm:text-sm text-muted-foreground"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
-              <span>Gratis 14 hari</span>
+          </div>
+
+          {/* Main heading */}
+          <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight px-2">
+              <span className="block">Revolusi Digital</span>
+              <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                UMKM dengan AI
+              </span>
+            </h1>
+            
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
+              Platform all-in-one yang mengintegrasikan kekuatan AI untuk mengelola produk, menganalisis bisnis, 
+              dan mengoptimalkan strategi pemasaran UMKM Anda.
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
+            <Button 
+              size="lg" 
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => navigate('/auth')}
+            >
+              Mulai Gratis Sekarang
+              <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="w-full sm:w-auto border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold transition-all duration-200"
+              onClick={() => navigate('/auth/admin')}
+            >
+              Demo Admin
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 pt-8 sm:pt-12 max-w-4xl mx-auto px-4">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto">
+                <Bot className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">AI-Powered</div>
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Teknologi Gemini AI</div>
             </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
-              <span>Tanpa kartu kredit</span>
+            
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
+                <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Real-time</div>
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Analytics Dashboard</div>
             </div>
-            <div className="flex items-center gap-2">
-              <Check className="h-4 w-4 text-green-600" />
-              <span>Setup 5 menit</span>
+            
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto">
+                <ChartBar className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Smart</div>
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Business Insights</div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

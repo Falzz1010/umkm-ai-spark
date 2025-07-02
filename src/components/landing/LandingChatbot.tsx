@@ -84,7 +84,7 @@ export function LandingChatbot() {
         onClick={() => setOpen(true)}
         variant="secondary"
         size="icon"
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 rounded-full shadow-lg z-50 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-purple-600 hover:scale-105 transition-all duration-200"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 rounded-full shadow-lg z-40 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-purple-600 hover:scale-105 transition-all duration-200"
         aria-label="Buka AI Chatbot"
         style={{ boxShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.3)" }}
       >
@@ -95,9 +95,9 @@ export function LandingChatbot() {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xs sm:max-w-lg w-[95vw] sm:w-full p-0 overflow-hidden h-[85vh] sm:h-auto max-h-[600px]">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg w-full p-0 overflow-hidden h-[90vh] sm:h-auto max-h-[85vh] sm:max-h-[600px] fixed bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:translate-x-[-50%] sm:translate-y-[-50%] translate-x-0 translate-y-0 rounded-t-lg sm:rounded-lg">
           <Card className="bg-background/95 border-0 shadow-xl h-full flex flex-col">
-            <CardHeader className="pb-2 px-3 sm:px-6 flex-shrink-0">
+            <CardHeader className="pb-2 px-3 sm:px-6 flex-shrink-0 border-b">
               <div className="flex items-center gap-2 mb-1">
                 <span className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow">
                   <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -105,7 +105,7 @@ export function LandingChatbot() {
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-base sm:text-lg truncate">AI Assistant UMKM</CardTitle>
                 </div>
-                <Badge variant="outline" className="text-xs">Powered by Gemini</Badge>
+                <Badge variant="outline" className="text-xs hidden sm:inline-flex">Powered by Gemini</Badge>
                 <DialogClose asChild>
                   <button
                     className="p-1.5 sm:p-2 rounded hover:bg-accent focus:outline-none transition"
@@ -120,15 +120,15 @@ export function LandingChatbot() {
               </p>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col min-h-0 px-3 sm:px-6">
+            <CardContent className="flex-1 flex flex-col min-h-0 px-3 sm:px-6 pt-4">
               <div 
-                className="flex-1 overflow-y-auto rounded-md border bg-muted/20 p-2 sm:p-3 space-y-2 sm:space-y-3 transition-colors scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+                className="flex-1 overflow-y-auto rounded-md border bg-muted/20 p-3 sm:p-4 space-y-3 sm:space-y-4 transition-colors scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
                 style={{ scrollbarWidth: "thin" }}
               >
                 {messages.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl max-w-[85%] sm:max-w-[80%] text-xs sm:text-sm ${
+                      className={`px-3 py-2 sm:px-4 sm:py-3 rounded-xl max-w-[85%] sm:max-w-[80%] text-sm sm:text-base ${
                         msg.sender === "user"
                           ? "bg-indigo-600 text-white"
                           : "bg-muted text-foreground"
@@ -140,10 +140,10 @@ export function LandingChatbot() {
                 ))}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="bg-muted text-foreground px-3 py-2 sm:px-4 sm:py-2 rounded-xl rounded-bl-sm shadow-sm">
+                    <div className="bg-muted text-foreground px-3 py-2 sm:px-4 sm:py-3 rounded-xl rounded-bl-sm shadow-sm">
                       <div className="flex items-center gap-2">
-                        <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                        <span className="text-xs sm:text-sm">AI sedang berpikir...</span>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">AI sedang berpikir...</span>
                       </div>
                     </div>
                   </div>
@@ -151,26 +151,26 @@ export function LandingChatbot() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={sendMessage} className="mt-3 sm:mt-4 flex gap-2 flex-shrink-0">
+              <form onSubmit={sendMessage} className="mt-4 flex gap-2 flex-shrink-0 pb-2">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Tanyakan tentang bisnis UMKM..."
                   disabled={loading}
-                  className="flex-1 bg-background rounded-full px-3 py-2 sm:px-4 sm:py-2 border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm transition-all"
+                  className="flex-1 bg-background rounded-full px-4 py-3 border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all"
                   autoFocus={open}
                 />
                 <Button
                   type="submit"
                   size="icon"
                   disabled={loading || !input.trim()}
-                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full"
+                  className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full"
                   aria-label="Kirim"
                 >
                   {loading ? (
-                    <Loader2 className="animate-spin w-3 h-3 sm:w-5 sm:h-5" />
+                    <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <SendHorizontal className="w-3 h-3 sm:w-5 sm:h-5" />
+                    <SendHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
                 </Button>
               </form>
