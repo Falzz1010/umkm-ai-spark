@@ -24,13 +24,13 @@ export function LandingNavbar() {
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+      <div className="max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 xs:h-16">
+          <div className="flex items-center space-x-1 xs:space-x-2">
+            <div className="w-6 h-6 xs:w-8 xs:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-md xs:rounded-lg flex items-center justify-center">
+              <Sparkles className="w-3 h-3 xs:w-5 xs:h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">AI UMKM</span>
+            <span className="text-base xs:text-xl font-bold text-foreground">AI UMKM</span>
           </div>
 
           {!isMobile && (
@@ -53,37 +53,37 @@ export function LandingNavbar() {
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   aria-label="Menu"
-                  className="ml-2"
+                  className="p-1 xs:p-2"
                 >
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-5 h-5 xs:w-6 xs:h-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 sm:w-96">
+              <SheetContent side="right" className="w-[280px] xs:w-80 sm:w-96">
                 <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center justify-between mb-6 xs:mb-8">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-white" />
+                      <div className="w-6 h-6 xs:w-8 xs:h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-md xs:rounded-lg flex items-center justify-center">
+                        <Sparkles className="w-3 h-3 xs:w-5 xs:h-5 text-white" />
                       </div>
-                      <span className="text-xl font-bold text-foreground">AI UMKM</span>
+                      <span className="text-lg xs:text-xl font-bold text-foreground">AI UMKM</span>
                     </div>
                     <SheetClose asChild>
-                      <Button variant="ghost" size="icon">
-                        <X className="w-5 h-5" />
+                      <Button variant="ghost" size="sm" className="p-1">
+                        <X className="w-4 h-4 xs:w-5 xs:h-5" />
                       </Button>
                     </SheetClose>
                   </div>
 
-                  <div className="flex flex-col space-y-4 flex-1">
-                    <div className="mb-6">
+                  <div className="flex flex-col space-y-3 xs:space-y-4 flex-1">
+                    <div className="mb-4 xs:mb-6">
                       <ThemeToggle />
                     </div>
                     
                     <Button
                       variant="ghost"
-                      className="justify-start w-full h-12 text-left"
+                      className="justify-start w-full h-10 xs:h-12 text-left text-sm xs:text-base"
                       onClick={() => handleNavigation('/auth')}
                     >
                       Login
@@ -91,14 +91,14 @@ export function LandingNavbar() {
                     
                     <Button
                       variant="outline"
-                      className="justify-start w-full h-12 text-left text-indigo-600 border-indigo-600"
+                      className="justify-start w-full h-10 xs:h-12 text-left text-indigo-600 border-indigo-600 text-sm xs:text-base"
                       onClick={() => handleNavigation('/auth/admin')}
                     >
                       Login Admin
                     </Button>
                     
                     <Button
-                      className="justify-start w-full h-12 text-left"
+                      className="justify-start w-full h-10 xs:h-12 text-left text-sm xs:text-base"
                       onClick={() => handleNavigation('/auth')}
                     >
                       Daftar Gratis
