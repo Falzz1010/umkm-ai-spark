@@ -7,7 +7,6 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardFilters } from '@/hooks/useDashboardFilters';
 import { DashboardLoadingSkeleton } from '@/components/dashboard/DashboardLoadingSkeleton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Package, BarChart3, Bot, ShoppingCart, DollarSign, ArrowRight } from 'lucide-react';
 
@@ -52,7 +51,7 @@ export default function OverviewPage() {
   ];
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in w-full max-w-full">
       <DashboardHeader 
         title={`Selamat datang, ${profile?.full_name || 'User'}`}
         subtitle="Kelola produk dan dapatkan bantuan AI untuk bisnis Anda"
@@ -71,19 +70,19 @@ export default function OverviewPage() {
 
       {/* Quick Actions */}
       <Card className="animate-slide-up shadow-smooth">
-        <CardHeader className="card-mobile-header">
-          <CardTitle className="flex items-center gap-2 text-responsive-base">
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <ShoppingCart className="h-5 w-5 text-primary" />
             Aksi Cepat
           </CardTitle>
         </CardHeader>
-        <CardContent className="card-mobile">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <Link key={action.href} to={action.href} className="group">
-                  <Card className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 card-hover border-0 bg-gray-50/50 dark:bg-muted/30">
+                  <Card className="hover:shadow-md transition-all duration-300 hover:-translate-y-1 card-hover border-0 bg-gray-50/50 dark:bg-muted/30 h-full">
                     <CardContent className="p-4 sm:p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className={`p-2.5 rounded-lg ${action.color} transition-transform group-hover:scale-110`}>
@@ -92,10 +91,10 @@ export default function OverviewPage() {
                         <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors mb-1">
                           {action.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                           {action.description}
                         </p>
                       </div>

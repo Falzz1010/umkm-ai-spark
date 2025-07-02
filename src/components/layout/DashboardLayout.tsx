@@ -13,12 +13,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <DashboardSidebar />
       <main className={cn(
         "flex-1 transition-all duration-300 ease-in-out",
-        "ml-64", // Default margin for expanded sidebar
-        "peer-data-[state=collapsed]:ml-16", // Reduced margin when sidebar collapsed
-        "max-lg:ml-0", // No margin on mobile (sidebar becomes overlay)
-        "w-full overflow-x-hidden" // Prevent horizontal overflow
+        // Desktop: Default margin for expanded sidebar
+        "lg:ml-64", 
+        // Desktop: Reduced margin when sidebar collapsed
+        "peer-data-[state=collapsed]:lg:ml-16",
+        // Mobile: No margin (sidebar becomes overlay)
+        "ml-0",
+        "w-full overflow-x-hidden min-h-screen"
       )}>
-        <div className="h-full p-3 sm:p-4 lg:p-6 w-full">
+        <div className="h-full p-3 sm:p-4 lg:p-6 w-full max-w-full">
           <div className="max-w-7xl mx-auto w-full">
             <div className="animate-fade-in">
               {children}
