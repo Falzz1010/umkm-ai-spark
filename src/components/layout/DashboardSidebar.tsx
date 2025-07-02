@@ -63,35 +63,27 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button - Fixed position */}
+      {/* Mobile Menu Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden fixed top-3 left-3 z-50 bg-white dark:bg-card shadow-lg border"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-white dark:bg-card shadow-lg"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
-
-      {/* Mobile Backdrop */}
-      {isMobileOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
 
       {/* Sidebar */}
       <aside 
         className={cn(
-          "peer fixed left-0 top-0 z-40 h-full bg-white dark:bg-card border-r border-border transition-all duration-300 font-sans shadow-lg lg:shadow-none",
+          "peer fixed left-0 top-0 z-40 h-full bg-white dark:bg-card border-r border-border transition-all duration-300 font-sans",
+          // Desktop behavior
+          "max-lg:absolute max-lg:z-50",
           // Mobile behavior - slide in from left
-          "lg:translate-x-0",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          "max-lg:transform max-lg:transition-transform",
+          isMobileOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full",
           // Desktop collapsed/expanded
-          isCollapsed ? "lg:w-16" : "lg:w-64",
-          // Mobile always full width when open
-          "w-72 lg:w-auto"
+          isCollapsed ? "w-16" : "w-64"
         )}
         data-state={isCollapsed ? "collapsed" : "expanded"}
       >
@@ -123,17 +115,17 @@ export function DashboardSidebar() {
                   to={item.href}
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground group",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground group",
                     isActive ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                    isCollapsed && "lg:justify-center lg:px-2"
+                    isCollapsed && "justify-center px-2"
                   )}
                   title={isCollapsed ? item.title : undefined}
                 >
                   <Icon className={cn(
-                    "h-5 w-5 flex-shrink-0 transition-colors",
+                    "h-4 w-4 flex-shrink-0 transition-colors",
                     isActive ? "text-primary" : "group-hover:text-primary"
                   )} />
-                  {(!isCollapsed || isMobileOpen) && (
+                  {!isCollapsed && (
                     <div className="flex flex-col min-w-0">
                       <span className="truncate font-medium">{item.title}</span>
                       <span className="text-xs text-muted-foreground truncate">
@@ -148,10 +140,10 @@ export function DashboardSidebar() {
 
           {/* User Profile */}
           <div className="border-t border-border p-4">
-            {(!isCollapsed || isMobileOpen) ? (
+            {!isCollapsed ? (
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  <User className="h-5 w-5" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                  <User className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
@@ -164,14 +156,22 @@ export function DashboardSidebar() {
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <User className="h-5 w-5" />
+                <div className="h-8 w-8 flex items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <User className="h-4 w-4" />
                 </div>
               </div>
             )}
           </div>
         </div>
       </aside>
+      
+      {/* Mobile overlay background */}
+      {isMobileOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/20 z-30 backdrop-blur-sm"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
     </>
   );
 }

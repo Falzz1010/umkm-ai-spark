@@ -52,6 +52,7 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
     
     console.log('Creating sales transaction:', { product_id: product.id, quantity, price: product.price });
     
+    // Remove total from the data since it's a generated column
     const result = await createItem(
       'sales_transactions',
       {
@@ -81,19 +82,19 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
 
   if (currentProducts.length === 0) {
     return (
-      <div className="w-full text-center py-6 sm:py-8">
-        <p className="text-muted-foreground text-sm sm:text-base">Belum ada produk untuk dijual.</p>
-        <p className="text-xs sm:text-sm text-muted-foreground mt-1">Tambahkan produk terlebih dahulu.</p>
+      <div className="w-full text-center py-8">
+        <p className="text-muted-foreground">Belum ada produk untuk dijual.</p>
+        <p className="text-sm text-muted-foreground mt-1">Tambahkan produk terlebih dahulu.</p>
       </div>
     );
   }
 
   return (
-    <form className="w-full flex flex-col space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
-      <div className="space-y-2">
-        <label className="text-sm sm:text-base font-semibold">Produk</label>
+    <form className="w-full flex flex-col space-y-3" onSubmit={handleSubmit}>
+      <div>
+        <label className="text-sm font-semibold">Produk</label>
         <select
-          className="w-full border rounded px-3 py-2 sm:py-3 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+          className="mt-1 border rounded w-full px-3 py-2 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={selectedProduct}
           onChange={(e) => {
             setSelectedProduct(e.target.value);
@@ -111,28 +112,25 @@ export function SalesTransactionsForm({ products, onFinished }: Props) {
           ))}
         </select>
       </div>
-      
-      <div className="space-y-2">
-        <label className="text-sm sm:text-base font-semibold">Jumlah Terjual</label>
+      <div>
+        <label className="text-sm font-semibold">Jumlah Terjual</label>
         <input
           type="number"
-          className="w-full border rounded px-3 py-2 sm:py-3 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+          className="mt-1 border rounded w-full px-3 py-2 bg-white dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           min={1}
           max={product?.stock ?? undefined}
           value={quantity}
           onChange={(e) => setQuantity(Number(e.target.value))}
           required
         />
-        <p className="text-xs sm:text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground mt-1">
           Stok tersedia: {product?.stock ?? 0}
         </p>
       </div>
-      
       <Button 
         type="submit" 
         disabled={loading === 'create-new' || !product || (product.stock ?? 0) < quantity}
-        className="relative w-full h-11 sm:h-12 text-sm sm:text-base"
-        size="lg"
+        className="relative"
       >
         {loading === 'create-new' ? (
           <>

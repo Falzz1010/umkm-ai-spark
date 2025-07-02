@@ -15,44 +15,24 @@ interface SalesTransactionRowProps {
 export function SalesTransactionRow({ sale, deletingId, onEdit, onDelete }: SalesTransactionRowProps) {
   return (
     <TableRow className="hover:bg-muted/50">
-      <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-3">
-        <div className="flex flex-col">
-          <span className="font-medium">
-            {new Date(sale.created_at).toLocaleDateString("id-ID", { 
-              day: "2-digit", 
-              month: "short"
-            })}
-          </span>
-          <span className="text-xs text-muted-foreground sm:hidden">
-            {new Date(sale.created_at).toLocaleDateString("id-ID", { year: "2-digit" })}
-          </span>
-        </div>
+      <TableCell className="font-medium">
+        {new Date(sale.created_at).toLocaleDateString("id-ID", { 
+          day: "2-digit", 
+          month: "short", 
+          year: "2-digit" 
+        })}
       </TableCell>
-      <TableCell className="p-2 sm:p-3">
-        <div className="max-w-[80px] sm:max-w-[150px] truncate">
-          <span title={sale.product_name} className="text-xs sm:text-sm font-medium">
-            {sale.product_name}
-          </span>
-        </div>
+      <TableCell className="max-w-[150px] truncate">
+        <span title={sale.product_name}>{sale.product_name}</span>
       </TableCell>
-      <TableCell className="text-center font-medium text-xs sm:text-sm p-2 sm:p-3">
-        {sale.quantity}
+      <TableCell className="text-center font-medium">{sale.quantity}</TableCell>
+      <TableCell className="text-right font-medium">
+        Rp {Number(sale.price).toLocaleString("id-ID")}
       </TableCell>
-      <TableCell className="text-right font-medium text-xs sm:text-sm p-2 sm:p-3">
-        <div className="flex flex-col sm:flex-row sm:justify-end">
-          <span className="text-xs sm:text-sm">
-            Rp {Number(sale.price).toLocaleString("id-ID")}
-          </span>
-        </div>
+      <TableCell className="text-right font-semibold">
+        Rp {Number(sale.total).toLocaleString("id-ID")}
       </TableCell>
-      <TableCell className="text-right font-semibold text-xs sm:text-sm p-2 sm:p-3">
-        <div className="flex flex-col sm:flex-row sm:justify-end">
-          <span className="text-xs sm:text-sm text-green-600 dark:text-green-400">
-            Rp {Number(sale.total).toLocaleString("id-ID")}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell className="p-1 sm:p-3">
+      <TableCell>
         <div className="flex gap-1 justify-center">
           <Button
             variant="ghost"
@@ -60,9 +40,9 @@ export function SalesTransactionRow({ sale, deletingId, onEdit, onDelete }: Sale
             onClick={() => onEdit(sale)}
             disabled={deletingId === sale.id}
             aria-label="Edit"
-            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+            className="h-8 w-8 p-0"
           >
-            <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+            <Edit className="h-4 w-4 text-blue-600" />
           </Button>
           <Button
             variant="ghost"
@@ -70,9 +50,9 @@ export function SalesTransactionRow({ sale, deletingId, onEdit, onDelete }: Sale
             onClick={() => onDelete(sale.id)}
             disabled={deletingId === sale.id}
             aria-label="Delete"
-            className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+            className="h-8 w-8 p-0"
           >
-            <Trash2 className={`h-3 w-3 sm:h-4 sm:w-4 ${deletingId === sale.id ? "text-gray-400" : "text-red-600"}`} />
+            <Trash2 className={`h-4 w-4 ${deletingId === sale.id ? "text-gray-400" : "text-red-600"}`} />
           </Button>
         </div>
       </TableCell>

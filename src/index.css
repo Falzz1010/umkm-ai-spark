@@ -107,10 +107,9 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
   }
 
-  /* Enhanced typography with mobile-first approach */
+  /* Enhanced typography */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     line-height: 1.3;
@@ -119,15 +118,8 @@
 
   /* Enhanced scrollbar styling */
   ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-
-  @media (min-width: 768px) {
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -330,87 +322,20 @@
   /* Enhanced mobile optimization */
   @media (max-width: 640px) {
     .mobile-padding {
-      @apply px-3 py-2;
+      @apply px-4 py-3;
     }
     
     .mobile-text {
       @apply text-sm leading-relaxed;
     }
-
-    /* Ensure full width on mobile */
-    body {
-      width: 100vw;
-      max-width: 100vw;
-    }
   }
 
   /* Better spacing for mobile cards */
   .card-mobile {
-    @apply p-3 sm:p-4 lg:p-6;
+    @apply p-4 sm:p-6;
   }
 
   .card-mobile-header {
-    @apply pb-2 sm:pb-3 lg:pb-4;
-  }
-
-  /* Enhanced mobile touch targets */
-  @media (max-width: 768px) {
-    button, a, [role="button"] {
-      min-height: 44px;
-      min-width: 44px;
-    }
-  }
-
-  /* Prevent horizontal scroll on mobile */
-  .prevent-mobile-scroll {
-    overflow-x: hidden;
-    max-width: 100vw;
-  }
-
-  /* Line clamp utilities */
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-  }
-
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-}
-
-/* Additional mobile-specific improvements */
-@media (max-width: 768px) {
-  /* Improve button spacing */
-  .btn-mobile {
-    @apply px-4 py-3 text-sm font-medium;
-  }
-
-  /* Better form spacing */
-  .form-mobile {
-    @apply space-y-4;
-  }
-
-  /* Improved card layout */
-  .card-stack-mobile {
-    @apply space-y-3;
-  }
-}
-
-/* Tablet specific optimizations */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .tablet-grid {
-    @apply grid-cols-2 gap-4;
+    @apply pb-3 sm:pb-4;
   }
 }
