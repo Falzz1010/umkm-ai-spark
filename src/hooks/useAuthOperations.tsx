@@ -22,7 +22,7 @@ export function useAuthOperations() {
     }
   };
 
-  const signIn = async (email: string, password: string, retryCount = 0) => {
+  const signIn = async (email: string, password: string) => {
     cleanupAuthState();
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -30,22 +30,7 @@ export function useAuthOperations() {
         password
       });
       return { error };
-    } catch (error: any) {
-      // Check if it's a network error and retry
-      const isNetworkError = 
-        error.message?.includes('NetworkError') || 
-        error.message?.includes('Failed to fetch') ||
-        error.message?.includes('fetch') ||
-        error.name === 'TypeError';
-      
-      if (isNetworkError && retryCount < 2) {
-        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s
-        console.warn(`Network error during sign in, retrying in ${delay}ms... (attempt ${retryCount + 1})`);
-        
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        return signIn(email, password, retryCount + 1);
-      }
-      
+    } catch (error) {
       return { error };
     }
   };

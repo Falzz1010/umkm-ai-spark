@@ -1,22 +1,41 @@
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
-import { Bot, SendHorizontal, Loader2, X, Sparkles } from "lucide-react";
-import { supabase } from '@/integrations/supabase/client';
+import { Bot, SendHorizontal, Loader2, X } from "lucide-react";
 
 interface ChatMessage {
   sender: "user" | "ai";
   content: string;
 }
 
+const DUMMY_RESPONSES: { [key: string]: string } = {
+  "hai": "Halo! 👋 Saya chatbot demo UMKM. Silakan ajukan pertanyaan seputar bisnis, promosi, atau produk Anda.",
+  "siapa kamu": "Saya chatbot manual dummy tanpa AI. Jawaban saya tidak otomatis, hanya berdasarkan data statis.",
+  "produk": "Produk UMKM sebaiknya punya keunikan (unique selling point) dan promosi kreatif.",
+  "promosi": "Promosi efektif bisa dilakukan lewat media sosial, diskon khusus, dan testimoni pelanggan.",
+  "harga": "Tentukan harga jual dengan memperhitungkan modal, markup, dan harga pasar.",
+  "default": "Terima kasih atas pertanyaannya! (Ini jawaban dummy, chatbot AI telah diganti dengan manual response.)"
+};
+
+function getDummyResponse(input: string): string {
+  const cleaned = input.trim().toLowerCase();
+  for (const key in DUMMY_RESPONSES) {
+    if (cleaned.includes(key) && key !== "default") {
+      return DUMMY_RESPONSES[key];
+    }
+  }
+  return DUMMY_RESPONSES["default"];
+}
+
 export function LandingChatbot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: "ai",
-      content: "Hai! 👋 Saya AI Assistant untuk UMKM. Tanyakan apapun tentang bisnis, produk, atau strategi pemasaran Anda!",
+      content:
+        "Hai! 👋 Saya chatbot demo UMKM, tanpa AI. Tanyakan apapun tentang bisnis UMKM, promosi, atau produk Anda di sini.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -24,58 +43,30 @@ export function LandingChatbot() {
   const [open, setOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const sendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim()) return;
 
-    const userMessage = input.trim();
     const newMessages: ChatMessage[] = [
       ...messages,
-      { sender: "user", content: userMessage },
+      { sender: "user", content: input },
     ];
     setMessages(newMessages);
     setInput("");
     setLoading(true);
 
-    try {
-      // Call Gemini AI function
-      const response = await supabase.functions.invoke('gemini-ai', {
-        body: {
-          prompt: userMessage,
-          type: 'general_chat',
-          businessData: null
-        }
-      });
-
-      if (response.data?.success && response.data?.generatedText) {
-        setMessages(prev => [
-          ...prev,
-          { sender: "ai", content: response.data.generatedText }
-        ]);
-      } else {
-        console.error('Gemini AI error:', response.error);
-        setMessages(prev => [
-          ...prev,
-          { sender: "ai", content: "Maaf, saya mengalami gangguan sementara. Silakan coba lagi dalam beberapa saat." }
-        ]);
-      }
-    } catch (error) {
-      console.error('Error calling Gemini AI:', error);
-      setMessages(prev => [
+    // Simulasi delay agar terasa seperti loading ke server/AI.
+    setTimeout(() => {
+      const response = getDummyResponse(input);
+      setMessages((prev) => [
         ...prev,
-        { sender: "ai", content: "Terjadi kesalahan dalam menghubungi AI. Silakan coba lagi nanti." }
+        { sender: "ai", content: response }
       ]);
-    } finally {
       setLoading(false);
-    }
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 200);
+    }, 700);
   };
 
   return (
@@ -84,94 +75,71 @@ export function LandingChatbot() {
         onClick={() => setOpen(true)}
         variant="secondary"
         size="icon"
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 rounded-full shadow-lg z-50 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-purple-600 hover:scale-105 transition-all duration-200"
-        aria-label="Buka AI Chatbot"
-        style={{ boxShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.3)" }}
+        className="fixed bottom-6 right-6 rounded-full shadow-lg z-50 w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 hover:scale-105 transition"
+        aria-label="Buka Chatbot Dummy"
+        style={{ boxShadow: "0 2px 12px 0 rgba(80,0,220,.14)" }}
       >
-        <div className="relative">
-          <Bot className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
-          <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-300 animate-pulse" />
-        </div>
+        <Bot className="w-7 h-7 text-white" />
       </Button>
-
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xs sm:max-w-lg w-[95vw] sm:w-full p-0 overflow-hidden h-[85vh] sm:h-auto max-h-[600px]">
-          <Card className="bg-background/95 border-0 shadow-xl h-full flex flex-col">
-            <CardHeader className="pb-2 px-3 sm:px-6 flex-shrink-0">
+        <DialogContent className="max-w-lg w-full p-0 overflow-hidden">
+          <Card className="bg-background/80 border-0 shadow-xl">
+            <CardHeader className="pb-2">
               <div className="flex items-center gap-2 mb-1">
-                <span className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow">
-                  <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow">
+                  <Bot className="w-5 h-5 text-white" />
                 </span>
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base sm:text-lg truncate">AI Assistant UMKM</CardTitle>
-                </div>
-                <Badge variant="outline" className="text-xs">Powered by Gemini</Badge>
+                <CardTitle className="text-lg">ChatBot Demo Manual</CardTitle>
+                <Badge variant="outline" className="ml-auto text-xs">Demo</Badge>
                 <DialogClose asChild>
                   <button
-                    className="p-1.5 sm:p-2 rounded hover:bg-accent focus:outline-none transition"
+                    className="ml-3 p-2 rounded hover:bg-accent focus:outline-none transition"
                     aria-label="Tutup Chatbot"
                   >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <X className="w-5 h-5" />
                   </button>
                 </DialogClose>
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Dapatkan bantuan AI untuk mengembangkan bisnis UMKM Anda
+              <p className="text-sm text-muted-foreground">
+                Chatbot ini hanya menggunakan data manual statis untuk keperluan demo.
               </p>
             </CardHeader>
-
-            <CardContent className="flex-1 flex flex-col min-h-0 px-3 sm:px-6">
-              <div 
-                className="flex-1 overflow-y-auto rounded-md border bg-muted/20 p-2 sm:p-3 space-y-2 sm:space-y-3 transition-colors scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+            <CardContent>
+              <div className="h-64 max-h-80 overflow-y-auto rounded-md border bg-muted/20 p-3 space-y-3 transition-colors"
                 style={{ scrollbarWidth: "thin" }}
               >
                 {messages.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl max-w-[85%] sm:max-w-[80%] text-xs sm:text-sm ${
+                      className={`px-4 py-2 rounded-xl max-w-[80%] text-sm ${
                         msg.sender === "user"
                           ? "bg-indigo-600 text-white"
                           : "bg-muted text-foreground"
-                      } ${msg.sender === "ai" ? "rounded-bl-sm" : "rounded-br-sm"} shadow-sm`}
+                      } ${msg.sender === "ai" ? "rounded-bl-sm" : "rounded-br-sm"} shadow`}
                     >
                       {msg.content}
                     </div>
                   </div>
                 ))}
-                {loading && (
-                  <div className="flex justify-start">
-                    <div className="bg-muted text-foreground px-3 py-2 sm:px-4 sm:py-2 rounded-xl rounded-bl-sm shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                        <span className="text-xs sm:text-sm">AI sedang berpikir...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <div ref={messagesEndRef} />
               </div>
-
-              <form onSubmit={sendMessage} className="mt-3 sm:mt-4 flex gap-2 flex-shrink-0">
+              <form onSubmit={sendMessage} className="mt-4 flex gap-2">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Tanyakan tentang bisnis UMKM..."
+                  placeholder="Tulis pesan atau pertanyaan..."
                   disabled={loading}
-                  className="flex-1 bg-background rounded-full px-3 py-2 sm:px-4 sm:py-2 border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm transition-all"
+                  className="flex-1 bg-background rounded-full px-4 py-2 border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition"
                   autoFocus={open}
                 />
                 <Button
                   type="submit"
                   size="icon"
                   disabled={loading || !input.trim()}
-                  className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full"
+                  className="flex-shrink-0"
                   aria-label="Kirim"
                 >
-                  {loading ? (
-                    <Loader2 className="animate-spin w-3 h-3 sm:w-5 sm:h-5" />
-                  ) : (
-                    <SendHorizontal className="w-3 h-3 sm:w-5 sm:h-5" />
-                  )}
+                  {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <SendHorizontal className="w-5 h-5" />}
                 </Button>
               </form>
             </CardContent>
@@ -183,3 +151,4 @@ export function LandingChatbot() {
 }
 
 export default LandingChatbot;
+

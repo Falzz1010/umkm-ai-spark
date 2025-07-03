@@ -24,61 +24,51 @@ interface TabProductsProps {
 
 export function TabProducts(props: TabProductsProps) {
   return (
-    <div className="w-full max-w-full space-y-4 sm:space-y-6">
-      <Card className="w-full">
-        <CardHeader className="flex flex-col space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-            <div className="space-y-1">
-              <CardTitle className="text-lg sm:text-xl">Produk Saya</CardTitle>
-              <CardDescription className="text-sm sm:text-base">
-                Kelola produk bisnis Anda
-              </CardDescription>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Button 
-                variant="outline" 
-                onClick={props.handleExportExcel}
-                size="sm"
-                className="w-full sm:w-auto h-10 text-sm"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export Excel
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={props.handleExportReport}
-                size="sm"
-                className="w-full sm:w-auto h-10 text-sm"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Download Laporan
-              </Button>
-              <AddProductDialog onProductAdded={props.refreshData}>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Produk
-              </AddProductDialog>
-            </div>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="p-3 sm:p-4 lg:p-6">
-          <div className="space-y-4 sm:space-y-6">
-            <ProductFilters
-              products={props.products}
-              category={props.filterCategory}
-              onCategoryChange={props.setFilterCategory}
-              search={props.filterSearch}
-              onSearchChange={props.setFilterSearch}
-              showActive={props.filterStatus}
-              onShowActiveChange={props.setFilterStatus}
-              stokStatus={props.filterStok}
-              onStokStatusChange={props.setFilterStok}
-            />
-            <ProductList products={props.filteredProducts} onRefresh={props.refreshData} />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+        <div>
+          <CardTitle>Produk Saya</CardTitle>
+          <CardDescription>Kelola produk bisnis Anda</CardDescription>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button 
+            variant="outline" 
+            onClick={props.handleExportExcel}
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Excel
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={props.handleExportReport}
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Download Laporan
+          </Button>
+          <AddProductDialog onProductAdded={props.refreshData}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tambah Produk
+          </AddProductDialog>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ProductFilters
+          products={props.products}
+          category={props.filterCategory}
+          onCategoryChange={props.setFilterCategory}
+          search={props.filterSearch}
+          onSearchChange={props.setFilterSearch}
+          showActive={props.filterStatus}
+          onShowActiveChange={props.setFilterStatus}
+          stokStatus={props.filterStok}
+          onStokStatusChange={props.setFilterStok}
+        />
+        <ProductList products={props.filteredProducts} onRefresh={props.refreshData} />
+      </CardContent>
+    </Card>
   );
 }

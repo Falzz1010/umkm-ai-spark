@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useSweetAlert } from '@/hooks/useSweetAlert';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
@@ -21,6 +20,7 @@ export default function Auth() {
   const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
   const navigate = useNavigate();
 
+  // Tambahkan filter role di login user (role hanya 'user', bukan 'admin')
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -33,9 +33,41 @@ export default function Auth() {
         closeLoading();
         showError("Login Gagal", error.message);
       } else {
-        closeLoading();
-        showSuccess("Login Berhasil", "Selamat datang kembali!");
-        navigate('/dashboard');
+        // Ambil user role
+        const { data: user } = await supabase.auth.getUser();
+        if (!user || !user.user) {
+          closeLoading();
+          showError("Login Gagal", "User tidak ditemukan setelah login.");
+          setLoading(false);
+          return;
+        }
+
+        // Cek harus role: user
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.user.id)
+          .single();
+
+        if (roleError || !roleData) {
+          closeLoading();
+          showError("Akses Ditolak", "Tidak dapat menemukan role user.");
+          setLoading(false);
+          await signOut();
+          return;
+        }
+
+        if (roleData.role === 'user') {
+          closeLoading();
+          showSuccess("Login Berhasil", "Selamat datang kembali!");
+          navigate('/dashboard');
+        } else {
+          closeLoading();
+          showError("Akses Ditolak", "Anda bukan user biasa. Silakan login lewat halaman admin.");
+          setLoading(false);
+          await signOut(); // Logout bila admin coba login di sini
+          return;
+        }
       }
     } catch (error) {
       closeLoading();
@@ -70,16 +102,6 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 transition-colors duration-200">
-      {/* Back to Home Button */}
-      <Button
-        variant="ghost"
-        className="absolute top-4 left-4 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Kembali
-      </Button>
-
       {/* Theme Toggle in top right corner */}
       <div className="absolute top-4 right-4">
         <ThemeToggle />
