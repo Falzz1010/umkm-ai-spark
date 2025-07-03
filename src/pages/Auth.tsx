@@ -21,7 +21,6 @@ export default function Auth() {
   const { showSuccess, showError, showLoading, closeLoading } = useSweetAlert();
   const navigate = useNavigate();
 
-  // Tambahkan filter role di login user (role hanya 'user', bukan 'admin')
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -34,41 +33,9 @@ export default function Auth() {
         closeLoading();
         showError("Login Gagal", error.message);
       } else {
-        // Ambil user role
-        const { data: user } = await supabase.auth.getUser();
-        if (!user || !user.user) {
-          closeLoading();
-          showError("Login Gagal", "User tidak ditemukan setelah login.");
-          setLoading(false);
-          return;
-        }
-
-        // Cek harus role: user
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.user.id)
-          .single();
-
-        if (roleError || !roleData) {
-          closeLoading();
-          showError("Akses Ditolak", "Tidak dapat menemukan role user.");
-          setLoading(false);
-          await signOut();
-          return;
-        }
-
-        if (roleData.role === 'user') {
-          closeLoading();
-          showSuccess("Login Berhasil", "Selamat datang kembali!");
-          navigate('/dashboard');
-        } else {
-          closeLoading();
-          showError("Akses Ditolak", "Anda bukan user biasa. Silakan login lewat halaman admin.");
-          setLoading(false);
-          await signOut(); // Logout bila admin coba login di sini
-          return;
-        }
+        closeLoading();
+        showSuccess("Login Berhasil", "Selamat datang kembali!");
+        navigate('/dashboard');
       }
     } catch (error) {
       closeLoading();
