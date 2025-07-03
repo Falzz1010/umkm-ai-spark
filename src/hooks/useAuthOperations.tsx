@@ -16,8 +16,15 @@ export function useAuthOperations() {
           data: { full_name: fullName }
         }
       });
-      return { error };
+      
+      if (error) {
+        console.error('SignUp error:', error);
+        return { error };
+      }
+      
+      return { error: null };
     } catch (error) {
+      console.error('SignUp exception:', error);
       return { error };
     }
   };
@@ -29,8 +36,15 @@ export function useAuthOperations() {
         email,
         password
       });
-      return { error };
+      
+      if (error) {
+        console.error('SignIn error:', error);
+        return { error };
+      }
+      
+      return { error: null };
     } catch (error) {
+      console.error('SignIn exception:', error);
       return { error };
     }
   };
@@ -38,9 +52,12 @@ export function useAuthOperations() {
   const signOut = async () => {
     try {
       cleanupAuthState();
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('SignOut error:', error);
+      }
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('SignOut exception:', error);
     } finally {
       // Force redirect to auth page
       window.location.href = '/auth';
@@ -56,12 +73,18 @@ export function useAuthOperations() {
         .update(data)
         .eq('id', user.id);
 
-      if (!error && profile) {
+      if (error) {
+        console.error('Update profile error:', error);
+        return { error };
+      }
+
+      if (profile) {
         setProfile({ ...profile, ...data });
       }
 
-      return { error };
+      return { error: null };
     } catch (error) {
+      console.error('Update profile exception:', error);
       return { error };
     }
   };

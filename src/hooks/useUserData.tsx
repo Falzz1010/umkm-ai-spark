@@ -16,23 +16,31 @@ export function useUserData(setProfile?: (profile: Profile | null) => void, setU
     try {
       console.log(`fetchUserData: Starting fetch for user ${userId}, retry count: ${retryCount}`);
       
-      // Fetch profile first
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+      // Fetch profile first with better error handling
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
-      } else if (profileData) {
-        profileSetter(profileData);
-        console.log('fetchUserData: Profile found:', profileData);
-      } else {
-        console.warn('fetchUserData: No profile found for user', userId);
+        if (profileError) {
+          if (profileError.code === 'PGRST116') {
+            console.log('fetchUserData: No profile found, this is normal for new users');
+          } else {
+            console.error('Error fetching profile:', profileError);
+          }
+        } else if (profileData) {
+          profileSetter(profileData);
+          console.log('fetchUserData: Profile found:', profileData);
+        } else {
+          console.log('fetchUserData: No profile data for user', userId);
+        }
+      } catch (profileException) {
+        console.error('Exception fetching profile:', profileException);
       }
 
-      // Fetch role with better error handling
+      // Fetch role with enhanced error handling
       try {
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
@@ -41,6 +49,13 @@ export function useUserData(setProfile?: (profile: Profile | null) => void, setU
           .maybeSingle();
 
         if (roleError) {
+          // Handle 403 errors specifically
+          if (roleError.code === '42501' || roleError.message?.includes('403')) {
+            console.warn('Access denied fetching role - user may not have role assigned yet');
+            roleSetter(null);
+            return;
+          }
+          
           console.error('Error fetching role:', roleError);
           
           // Only retry on network-related errors and limit retries to 2
@@ -65,11 +80,18 @@ export function useUserData(setProfile?: (profile: Profile | null) => void, setU
           roleSetter(roleData.role as UserRole);
           console.log("fetchUserData: userRole found:", roleData.role);
         } else {
-          console.warn("fetchUserData: No roleData found for user", userId);
+          console.log("fetchUserData: No roleData found for user", userId);
           roleSetter(null);
         }
       } catch (roleException: any) {
         console.error('Exception fetching role:', roleException);
+        
+        // Handle 403 specifically in exceptions too
+        if (roleException.code === 403 || roleException.message?.includes('403')) {
+          console.warn('403 error - user may not have proper permissions');
+          roleSetter(null);
+          return;
+        }
         
         // Only retry on network-related exceptions
         const isNetworkException = 
@@ -90,6 +112,14 @@ export function useUserData(setProfile?: (profile: Profile | null) => void, setU
       }
     } catch (error: any) {
       console.error('Error fetching user data (general exception):', error);
+      
+      // Handle 403 at the top level too
+      if (error.code === 403 || error.message?.includes('403')) {
+        console.warn('403 error at top level - access denied');
+        roleSetter(null);
+        profileSetter(null);
+        return;
+      }
       
       // Final fallback - only retry once for general errors
       if (retryCount < 1) {
