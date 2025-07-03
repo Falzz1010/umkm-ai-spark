@@ -33,15 +33,17 @@ export function useAuthInitialization({
         setSession(null);
         setUser(null);
         clearUserData();
-      } else if (session && session.user) {
+      } else if (session && session.user && session.access_token) {
         console.log('Initial session found:', session.user.id);
         setSession(session);
         setUser(session.user);
         
+        // Only fetch user data if we have a valid session with access token
         try {
           await fetchUserData(session.user.id, session);
         } catch (error) {
           console.error('Error fetching user data during init:', error);
+          // Don't clear session on data fetch error
         }
       } else {
         console.log('No initial session found');

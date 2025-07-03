@@ -37,16 +37,19 @@ export function useAuthStateListener({
           setSession(session);
           setUser(session.user);
           
-          // Fetch user data with delay to prevent blocking
-          setTimeout(async () => {
-            if (mounted.current && session) {
-              try {
-                await fetchUserData(session.user.id, session);
-              } catch (error) {
-                console.error('Error fetching user data after auth:', error);
+          // Fetch user data with delay to prevent blocking and only if session is valid
+          if (session.access_token) {
+            setTimeout(async () => {
+              if (mounted.current && session) {
+                try {
+                  await fetchUserData(session.user.id, session);
+                } catch (error) {
+                  console.error('Error fetching user data after auth:', error);
+                  // Don't clear user data on fetch error, just log it
+                }
               }
-            }
-          }, 100);
+            }, 500); // Increased delay to 500ms
+          }
         }
         
         // Ignore INITIAL_SESSION events since we handle those separately
