@@ -1,5 +1,5 @@
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStatsSection } from '@/components/dashboard/DashboardStatsSection';
 import { GeminiInsightsCard } from '@/components/dashboard/GeminiInsightsCard';

@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3, Package, Users, Bot, TrendingUp } from 'lucide-react';
@@ -11,10 +12,11 @@ import { AdminAITab } from './admin/AdminAITab';
 import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import { RoleGuard } from '@/components/common/RoleGuard';
 import { LoadingStateCard } from '@/components/common/LoadingStateCard';
-import { useRoleValidation } from '@/hooks/common/useRoleValidation';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
+const tabTriggerClassName = "flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium px-4 py-3 rounded-lg lg:rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-white/95 data-[state=active]:to-gray-50/90 data-[state=active]:shadow-sm data-[state=active]:shadow-primary/5 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-primary/15 transition-all duration-300 ease-out hover:bg-white/70 hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] min-h-[48px]";
 
 export function AdminDashboard() {
-  const { isAdmin } = useRoleValidation();
   const {
     stats,
     products,
@@ -24,17 +26,6 @@ export function AdminDashboard() {
     deleteProduct,
     loading
   } = useAdminDashboard();
-
-  // Extra security check - redirect non-admin users
-  if (!isAdmin() && !loading) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-200/60 dark:bg-background">
-        <p className="text-red-600 text-lg font-semibold">
-          Akses ditolak! Halaman ini hanya untuk admin.
-        </p>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -65,49 +56,35 @@ export function AdminDashboard() {
         </div>
 
         {/* Enhanced Stats Cards with responsive layout */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 1} as any}>
+        <div className="mb-4 sm:mb-6 lg:mb-8 animate-slide-up" style={{'--index': 1} as React.CSSProperties}>
           <AdminStatsCards stats={stats} />
         </div>
 
         {/* Main Content with enhanced responsive design */}
-        <div className="animate-slide-up" style={{'--index': 2} as any}>
+        <div className="animate-slide-up" style={{'--index': 2} as React.CSSProperties}>
           <div className="bg-white/90 dark:bg-card/80 backdrop-blur-sm rounded-xl lg:rounded-2xl shadow-sm border border-gray-200/60 dark:border-border/50 p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:shadow-md">
             <Tabs defaultValue="analytics" className="space-y-3 sm:space-y-4 lg:space-y-6">
-              {/* Enhanced Responsive Tab List */}
-              <TabsList className="w-full h-auto grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-2 bg-gradient-to-r from-gray-100/60 via-gray-150/40 to-gray-100/60 dark:bg-gradient-to-r dark:from-muted/40 dark:via-muted/60 dark:to-muted/40 p-1.5 sm:p-2 lg:p-3 rounded-xl shadow-inner backdrop-blur-sm border border-gray-200/40 dark:border-border/30">
-                <TabsTrigger 
-                  value="analytics" 
-                  className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5 rounded-lg lg:rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-white/95 data-[state=active]:to-gray-50/90 data-[state=active]:shadow-sm data-[state=active]:shadow-primary/5 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-primary/15 transition-all duration-300 ease-out hover:bg-white/70 hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] min-h-[44px] sm:min-h-[48px]"
-                >
-                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">Analytics</span>
-                  <span className="xs:hidden sm:inline lg:hidden">Chart</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="products" 
-                  className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5 rounded-lg lg:rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-white/95 data-[state=active]:to-gray-50/90 data-[state=active]:shadow-sm data-[state=active]:shadow-primary/5 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-primary/15 transition-all duration-300 ease-out hover:bg-white/70 hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] min-h-[44px] sm:min-h-[48px]"
-                >
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">Produk</span>
-                  <span className="xs:hidden sm:inline lg:hidden">Item</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="users" 
-                  className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5 rounded-lg lg:rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-white/95 data-[state=active]:to-gray-50/90 data-[state=active]:shadow-sm data-[state=active]:shadow-primary/5 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-primary/15 transition-all duration-300 ease-out hover:bg-white/70 hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] min-h-[44px] sm:min-h-[48px]"
-                >
-                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">Users</span>
-                  <span className="xs:hidden sm:inline lg:hidden">User</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="ai" 
-                  className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium px-2 sm:px-3 lg:px-4 py-2.5 sm:py-3 lg:py-3.5 rounded-lg lg:rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-white/95 data-[state=active]:to-gray-50/90 data-[state=active]:shadow-sm data-[state=active]:shadow-primary/5 data-[state=active]:text-primary data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-primary/15 transition-all duration-300 ease-out hover:bg-white/70 hover:shadow-sm hover:scale-[1.02] active:scale-[0.98] min-h-[44px] sm:min-h-[48px]"
-                >
-                  <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-200 group-hover:scale-110" />
-                  <span className="hidden xs:inline sm:hidden lg:inline whitespace-nowrap">AI</span>
-                  <span className="xs:hidden sm:inline lg:hidden">Bot</span>
-                </TabsTrigger>
-              </TabsList>
+              <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+                <TabsList className="inline-flex w-max h-auto gap-1 sm:gap-2 bg-gradient-to-r from-gray-100/60 via-gray-150/40 to-gray-100/60 dark:bg-gradient-to-r dark:from-muted/40 dark:via-muted/60 dark:to-muted/40 p-1.5 sm:p-2 rounded-xl shadow-inner backdrop-blur-sm border border-gray-200/40 dark:border-border/30">
+                  <TabsTrigger value="analytics" className={tabTriggerClassName}>
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Analytics</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="products" className={tabTriggerClassName}>
+                    <Package className="h-4 w-4" />
+                    <span>Produk</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="users" className={tabTriggerClassName}>
+                    <Users className="h-4 w-4" />
+                    <span>Users</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ai" className={tabTriggerClassName}>
+                    <Bot className="h-4 w-4" />
+                    <span>AI</span>
+                  </TabsTrigger>
+                </TabsList>
+                <ScrollBar orientation="horizontal" className="h-2" />
+              </ScrollArea>
 
               {/* Tab Contents with enhanced responsive animations */}
               <TabsContent value="analytics" className="animate-fade-in">

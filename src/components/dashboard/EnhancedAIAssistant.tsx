@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Product } from '@/types/database';
 import { useToast } from '@/hooks/use-toast';
 import { AIUsageCard } from './ai/AIUsageCard';
@@ -27,11 +27,7 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
   const [aiUsageCount, setAiUsageCount] = useState(0);
   const [dailyLimit] = useState(10);
 
-  useEffect(() => {
-    fetchAIUsage();
-  }, [user]);
-
-  const fetchAIUsage = async () => {
+  const fetchAIUsage = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -46,7 +42,11 @@ export function EnhancedAIAssistant({ products, onGenerationComplete }: Enhanced
     } catch (error) {
       console.error('Error fetching AI usage:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    fetchAIUsage();
+  }, [fetchAIUsage]);
 
   const generateContent = async () => {
     if (aiUsageCount >= dailyLimit) {
