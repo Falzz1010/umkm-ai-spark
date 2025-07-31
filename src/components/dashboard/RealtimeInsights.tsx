@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/types/database';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { TrendingUp, TrendingDown, AlertTriangle, Lightbulb, ShoppingCart, DollarSign } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export function RealtimeInsights({ products }: RealtimeInsightsProps) {
   const [loading, setLoading] = useState(false);
 
   // Generate insights based on current data
-  const generateInsights = async () => {
+  const generateInsights = useCallback(async () => {
     if (!user || products.length === 0) return;
 
     setLoading(true);
@@ -158,7 +158,7 @@ export function RealtimeInsights({ products }: RealtimeInsightsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, products]);
 
   // Real-time updates
   useEffect(() => {
@@ -190,7 +190,7 @@ export function RealtimeInsights({ products }: RealtimeInsightsProps) {
         supabase.removeChannel(channel);
       };
     }
-  }, [user, products]);
+  }, [user, products, generateInsights]);
 
   const getInsightIcon = (type: BusinessInsight['type']) => {
     switch (type) {

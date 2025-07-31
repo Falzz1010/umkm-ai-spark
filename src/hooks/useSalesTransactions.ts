@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { SalesTransaction } from "@/types/sales";
 import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";

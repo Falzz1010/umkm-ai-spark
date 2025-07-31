@@ -50,7 +50,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
         type="button"
         onClick={scrollPrev}
         aria-label="Testimoni sebelumnya"
-        className={`absolute left-[-2.2rem] top-1/2 z-20 -translate-y-1/2 bg-white/80 dark:bg-zinc-900/80 shadow-lg rounded-full border border-zinc-200 dark:border-zinc-700 p-2 transition hover:scale-110 active:scale-95 hover:bg-blue-500 hover:text-white`}
+        className="absolute top-1/2 z-20 -translate-y-1/2 bg-white/80 dark:bg-zinc-900/80 shadow-lg rounded-full border border-zinc-200 dark:border-zinc-700 p-2 transition hover:scale-110 active:scale-95 hover:bg-blue-500 hover:text-white left-2 sm:left-[-2.2rem]"
         tabIndex={0}
         style={{ display: testimonials.length < 2 ? 'none' : undefined }}
       >
@@ -108,7 +108,7 @@ export const CarouselTestimonial: React.FC<CarouselTestimonialProps> = ({ testim
         type="button"
         onClick={scrollNext}
         aria-label="Testimoni berikutnya"
-        className={`absolute right-[-2.2rem] top-1/2 z-20 -translate-y-1/2 bg-white/80 dark:bg-zinc-900/80 shadow-lg rounded-full border border-zinc-200 dark:border-zinc-700 p-2 transition hover:scale-110 active:scale-95 hover:bg-blue-500 hover:text-white`}
+        className="absolute top-1/2 z-20 -translate-y-1/2 bg-white/80 dark:bg-zinc-900/80 shadow-lg rounded-full border border-zinc-200 dark:border-zinc-700 p-2 transition hover:scale-110 active:scale-95 hover:bg-blue-500 hover:text-white right-2 sm:right-[-2.2rem]"
         tabIndex={0}
         style={{ display: testimonials.length < 2 ? 'none' : undefined }}
       >

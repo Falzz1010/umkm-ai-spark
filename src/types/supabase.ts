@@ -17,10 +17,12 @@ export type FilterOperator =
   | 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' 
   | 'like' | 'ilike' | 'is' | 'in' | 'cs' | 'cd';
 
+import { Json } from "@/integrations/supabase/types";
+
 export interface DatabaseFilter {
   column: string;
   operator: FilterOperator;
-  value: any;
+  value: Json;
 }
 
 export interface OrderByConfig {
@@ -55,7 +57,7 @@ export interface SalesTransactionInsert extends BaseTableInsert {
 export interface AIGenerationInsert extends BaseTableInsert {
   product_id?: string;
   generation_type: string;
-  input_data: any;
+  input_data: Json;
   generated_content: string;
 }
 
@@ -81,4 +83,4 @@ export type TableInsert<T extends TableName> =
   T extends 'ai_generations' ? AIGenerationInsert :
   T extends 'notifications' ? NotificationInsert :
   T extends 'profiles' ? ProfileInsert :
-  Record<string, any>;
+  Record<string, unknown>;

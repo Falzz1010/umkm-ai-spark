@@ -1,5 +1,5 @@
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/types/database';
 import { exportToExcel, generateProductReport } from '@/lib/exportUtils';

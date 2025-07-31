@@ -1,5 +1,6 @@
 
 import { useEffect, useRef, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useUserData } from '@/hooks/useUserData';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
@@ -12,6 +13,7 @@ import { Profile } from '@/types/database';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const mounted = useRef(true);
+  const navigate = useNavigate();
   const {
     user,
     session,
@@ -63,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted.current = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initAuth, setupAuthListener]);
 
   const signOut = async () => {
     try {
@@ -72,11 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
       clearAuthState();
       clearUserData();
+      navigate('/auth');
     } catch (error) {
       console.error('Error signing out:', error);
-    } finally {
       setLoading(false);
-      window.location.href = '/auth';
     }
   };
 
@@ -100,5 +101,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
-export { useAuth } from '@/contexts/AuthContext';

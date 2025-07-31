@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DailySalesData } from "@/types/sales";

@@ -32,12 +32,14 @@ export interface Product {
   updated_at: string;
 }
 
+import { Json } from "@/integrations/supabase/types";
+
 export interface AIGeneration {
   id: string;
   user_id: string;
   product_id?: string;
   generation_type: string; // Changed from union type to string to match database
-  input_data: any;
+  input_data: Json;
   generated_content: string;
   created_at: string;
 }
